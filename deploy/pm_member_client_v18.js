@@ -1,6 +1,6 @@
 // CSRF handshake. Prefer the live v17 client if it already defined pmMemberFetch.
-if (typeof pmMemberFetch !== 'function') {
-  async function pmMemberFetch(url, options = {}) {
+if (typeof window.pmMemberFetch !== 'function') {
+  window.pmMemberFetch = async function pmMemberFetch(url, options = {}) {
     const api = window.PM_MEMBER_API || 'pm_member_api_v17.php';
     const endpoint = new URL(api, location.href);
     const bootstrap = await fetch(endpoint, { credentials: 'same-origin', cache: 'no-store' });
@@ -11,5 +11,5 @@ if (typeof pmMemberFetch !== 'function') {
     const headers = new Headers(options.headers || {});
     headers.set('X-PM-CSRF', state.csrf_token);
     return fetch(url, { ...options, headers, credentials: 'same-origin', cache: 'no-store' });
-  }
+  };
 }

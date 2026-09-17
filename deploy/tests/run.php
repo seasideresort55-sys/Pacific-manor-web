@@ -85,6 +85,8 @@ expect(str_contains($host, 'qlo_pm_member') || str_contains($host, "pm_member"),
 expect(!preg_match('/if\s*\(\s*\$code\s*===\s*[\'"]123456[\'"]/', $host), 'no hardcoded 123456 verify shortcut in host');
 $lib = file_get_contents(dirname(__DIR__) . '/pm_phone_lib_v18.php');
 expect(!preg_match('/MOCK_OTP|EMAIL_PREVIEW_OTP/', $lib), 'lib has no mock OTP constant');
+$client = file_get_contents(dirname(__DIR__) . '/pm_member_client_v18.js');
+expect(str_contains($client, 'window.pmMemberFetch'), 'CSRF helper is assigned on window');
 
 echo "\n$passed passed, $failed failed\n";
 exit($failed === 0 ? 0 : 1);

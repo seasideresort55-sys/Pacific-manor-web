@@ -288,7 +288,9 @@ button{margin-top:14px;padding:12px 16px;border:0;border-radius:10px;background:
 window.PM_MEMBER_API = document.body.getAttribute('data-member-api') || 'pm_member_api_v17.php';
 window.PM_MEMBER_PORTAL = document.body.getAttribute('data-portal') || 'pm_member_portal_v17.php';
 </script>
+<?php if (is_file(__DIR__ . '/pm_member_client.js')): ?>
 <script src="pm_member_client.js"></script>
+<?php endif; ?>
 <script src="pm_member_client_v18.js"></script>
 <script src="pm_member_entry_v18.js"></script>
 <script>
