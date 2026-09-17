@@ -308,9 +308,17 @@ document.addEventListener('DOMContentLoaded', () => {
           Object.entries(attempt.body).forEach(([key, value]) => body.set(key, value));
           r = await pmMemberFetch(attempt.url, { method: 'POST', body });
         }
-        const j = await r.json();
+        const text = await r.text();
+        let j;
+        try {
+          j = JSON.parse(text);
+        } catch (_) {
+          continue;
+        }
         if (!r.ok || !j.ok) {
           lastError = j.error || lastError;
+          const retryable = /尚未啟用|尚未開放|未開|不支援|unknown/i.test(lastError);
+          if (!retryable && lastError) throw new Error(lastError);
           continue;
         }
         if (j.mode === 'page' && j.url) {
