@@ -1,17 +1,9 @@
 import type { Metadata } from "next";
-import { Noto_Sans_TC } from "next/font/google";
 import { PreviewTools } from "@/components/PreviewTools";
 import { SessionProvider } from "@/components/SessionProvider";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import "./globals.css";
-
-const noto = Noto_Sans_TC({
-  subsets: ["latin"],
-  weight: ["400", "500", "700"],
-  variable: "--font-noto",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: "太平洋莊園｜800+ 生活家",
@@ -22,7 +14,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="zh-Hant">
-      <body className={`${noto.variable} font-sans text-lg antialiased`}>
+      <body className="font-sans text-lg antialiased">
         <SessionProvider>
           <SiteHeader />
           <main className="min-h-screen">{children}</main>

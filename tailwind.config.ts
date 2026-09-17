@@ -15,7 +15,14 @@ const config: Config = {
         mist: "#8AA4B0",
       },
       fontFamily: {
-        sans: ["var(--font-noto)", "Noto Sans TC", "sans-serif"],
+        sans: [
+          "PingFang TC",
+          "Microsoft JhengHei",
+          "Noto Sans CJK TC",
+          "WenQuanYi Micro Hei",
+          "Noto Sans TC",
+          "sans-serif",
+        ],
       },
       boxShadow: {
         card: "0 12px 40px rgba(28, 61, 76, 0.08)",
