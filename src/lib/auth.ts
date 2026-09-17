@@ -1,3 +1,4 @@
+import { hashOtp, newOtpSalt, otpHashMatches } from "./otp-hash";
 import type { AuthProvider, PendingOtp } from "./types";
 
 export const EMAIL_PREVIEW_OTP = process.env.EMAIL_PREVIEW_OTP || "123456";
@@ -62,10 +63,13 @@ export function issueEmailOtp(destination: string): PendingOtp {
   };
 }
 
-export function issueSmsGoPending(destination: string, serial: string): PendingOtp {
+export function issueSmsGoPending(destination: string, code: string, serial?: string): PendingOtp {
+  const salt = newOtpSalt();
   return {
     channel: "sms",
     destination,
+    codeHash: hashOtp(code, salt),
+    salt,
     serial,
     gateway: "smsgo",
     expiresAt: new Date(Date.now() + OTP_TTL_MS).toISOString(),
@@ -84,8 +88,10 @@ export function otpMatches(pending: PendingOtp | null, channel: "sms" | "email",
   if (!pending) return false;
   if (pending.channel !== channel) return false;
   if (pending.destination !== destination) return false;
-  if (channel === "sms" || pending.gateway === "smsgo") return false;
   if (Date.now() > new Date(pending.expiresAt).getTime()) return false;
+  if (channel === "sms" || pending.gateway === "smsgo") {
+    return Boolean(pending.salt && pending.codeHash && otpHashMatches(code, pending.salt, pending.codeHash));
+  }
   return Boolean(pending.code) && pending.code === code.trim();
 }
 

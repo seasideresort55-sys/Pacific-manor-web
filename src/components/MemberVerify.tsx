@@ -14,8 +14,11 @@ type AuthStatus = {
   smsGo: {
     wired: boolean;
     configured: boolean;
+    enabled: boolean;
+    authorizedToSend: boolean;
     otpLength: 4 | 6;
     missing: string[];
+    blockedGates: string[];
   };
   memberPortal: {
     tokenConfigured: boolean;
@@ -42,7 +45,8 @@ export function MemberVerify() {
   const [status, setStatus] = useState<AuthStatus | null>(null);
 
   const applyHref = plan ? `/membership/apply?plan=${plan}` : "/membership/apply";
-  const smsReady = status?.smsGo.configured === true;
+  const smsReady = status?.smsGo.authorizedToSend === true;
+  const smsHasKeys = status?.smsGo.configured === true;
 
   useEffect(() => {
     let cancelled = false;
@@ -163,8 +167,10 @@ export function MemberVerify() {
       <p className="login-lead">用手機簡訊最快；也可 Google、LINE 或 Email。不用記密碼，選一種方式即可。</p>
       <p className="mt-4 rounded-2xl bg-cream px-4 py-3 text-base leading-7 text-[#3d5a66]" data-testid="sms-gateway-status">
         {smsReady
-          ? "簡訊：SMS Go 已接真閘道，驗證後進入預約系統同一會員。"
-          : `簡訊：SMS Go 已接真閘道，仍缺金鑰 ${status?.smsGo.missing.join("、") || "SMSGO_USERNAME、SMSGO_API_KEY"}。`}
+          ? "簡訊：已對齊正式 SMS Go adapter，可發送真實簡訊；驗證後進入預約系統同一會員識別。"
+          : smsHasKeys
+            ? `簡訊：金鑰已接上呼叫介面，但啟用旗標仍關（${status?.smsGo.blockedGates.join("、") || "SMSGO_ENABLED"}）。`
+            : `簡訊：已接正式 SMS Go adapter，仍缺主機金鑰 ${status?.smsGo.missing.join("、") || "SMSGO_USERNAME、SMSGO_API_KEY"}。`}
       </p>
 
       {!sentTo ? (

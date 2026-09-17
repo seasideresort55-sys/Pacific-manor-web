@@ -1,29 +1,45 @@
-export const SMSGO_SEND_URL = "https://www.smsgo.com.tw/sms_gw/verify.aspx";
-export const SMSGO_ACK_URL = "https://www.smsgo.com.tw/sms_gw/verifyAck.aspx";
+import { randomInt } from "node:crypto";
+
+/** 對齊正式站 pm_smsgo_adapter.php：POST /sms_gw/sendsms.aspx */
+export const SMSGO_SEND_URL = "https://www.smsgo.com.tw/sms_gw/sendsms.aspx";
+export const SMSGO_QUERY_URL = "https://www.smsgo.com.tw/sms_gw/query.aspx";
 
 export const SMSGO_REQUIRED_ENV = ["SMSGO_USERNAME", "SMSGO_API_KEY"] as const;
 export const SMSGO_OPTIONAL_ENV = [
   "SMSGO_PASSWORD",
-  "SMSGO_OTP_LENGTH",
-  "SMSGO_SENDER_NAME",
-  "SMSGO_SIGNATURE",
+  "SMSGO_ENABLED",
+  "SMSGO_CONTROLLED_TEST",
+  "SMSGO_ALLOWED_PHONES",
+  "SMSGO_APPROVED_TEMPLATE",
+  "SMSGO_ACCOUNT_VERIFIED",
+  "SMSGO_CONTRACT_VERIFIED",
 ] as const;
 
-export type SmsGoResult = {
-  msgid: string;
+/** 正式 runtime.php 已核可的 OTP 文案（不是密鑰） */
+export const SMSGO_OFFICIAL_TEMPLATE = "太平洋莊園手機驗證碼：{code}，10分鐘內有效，請勿提供他人。";
+
+export type SmsGoSendState = "accepted" | "rejected" | "unknown";
+
+export type SmsGoParseResult = {
+  state: SmsGoSendState;
+  message_id: string | null;
   statuscode: number;
   statusstr: string;
-  point: number;
 };
 
 export type SmsGoConfig = {
   username: string;
   apiKey: string;
-  otpLength: 4 | 6;
-  senderName: string;
-  signature: string;
+  enabled: boolean;
+  accountVerified: boolean;
+  contractVerified: boolean;
+  controlledTest: boolean;
+  allowedPhones: string[];
+  template: string;
   configured: boolean;
+  authorizedToSend: boolean;
   missing: string[];
+  blockedGates: string[];
 };
 
 type SmsGoFetch = typeof fetch;
@@ -37,24 +53,68 @@ export class SmsGoError extends Error {
   }
 }
 
+function envFlag(name: string, fallback: boolean) {
+  const raw = process.env[name]?.trim().toLowerCase();
+  if (!raw) return fallback;
+  return raw === "1" || raw === "true" || raw === "yes";
+}
+
+export function toE164TwMobile(input: string): string | null {
+  const digits = input.replace(/\D/g, "");
+  if (digits.startsWith("886") && /^8869\d{8}$/.test(digits)) return `+${digits}`;
+  if (/^09\d{8}$/.test(digits)) return `+886${digits.slice(1)}`;
+  if (/^\+8869\d{8}$/.test(input.trim())) return input.trim();
+  return null;
+}
+
+export function toSmsGoDstaddr(e164: string) {
+  return `0${e164.slice(4)}`;
+}
+
+export function generateSmsGoOtp() {
+  return String(randomInt(0, 1_000_000)).padStart(6, "0");
+}
+
 export function smsGoConfig(): SmsGoConfig {
   const username = process.env.SMSGO_USERNAME?.trim() || "";
   const apiKey = process.env.SMSGO_API_KEY?.trim() || process.env.SMSGO_PASSWORD?.trim() || "";
-  const rawLength = process.env.SMSGO_OTP_LENGTH?.trim();
-  const otpLength: 4 | 6 = rawLength === "4" ? 4 : 6;
+  const template = process.env.SMSGO_APPROVED_TEMPLATE?.trim() || SMSGO_OFFICIAL_TEMPLATE;
+  const allowedPhones = (process.env.SMSGO_ALLOWED_PHONES || "")
+    .split(",")
+    .map((item) => toE164TwMobile(item.trim()))
+    .filter((item): item is string => Boolean(item));
   const missing: string[] = [];
   if (!username) missing.push("SMSGO_USERNAME");
-  if (!process.env.SMSGO_API_KEY?.trim() && !process.env.SMSGO_PASSWORD?.trim()) {
-    missing.push("SMSGO_API_KEY");
-  }
+  if (!process.env.SMSGO_API_KEY?.trim() && !process.env.SMSGO_PASSWORD?.trim()) missing.push("SMSGO_API_KEY");
+
+  const enabled = envFlag("SMSGO_ENABLED", false);
+  const accountVerified = envFlag("SMSGO_ACCOUNT_VERIFIED", true);
+  const contractVerified = envFlag("SMSGO_CONTRACT_VERIFIED", true);
+  const controlledTest = envFlag("SMSGO_CONTROLLED_TEST", false);
+  const blockedGates: string[] = [];
+  if (!enabled) blockedGates.push("SMSGO_ENABLED");
+  if (!accountVerified) blockedGates.push("SMSGO_ACCOUNT_VERIFIED");
+  if (!contractVerified) blockedGates.push("SMSGO_CONTRACT_VERIFIED");
+  if (!controlledTest) blockedGates.push("SMSGO_CONTROLLED_TEST");
+  if (allowedPhones.length === 0) blockedGates.push("SMSGO_ALLOWED_PHONES");
+
+  const configured = Boolean(username && apiKey);
+  const templateOk = (template.match(/\{code\}/g) || []).length === 1;
+  if (!templateOk) blockedGates.push("SMSGO_APPROVED_TEMPLATE");
+
   return {
     username,
     apiKey,
-    otpLength,
-    senderName: process.env.SMSGO_SENDER_NAME?.trim() || "",
-    signature: process.env.SMSGO_SIGNATURE?.trim() || "",
-    configured: Boolean(username && apiKey),
+    enabled,
+    accountVerified,
+    contractVerified,
+    controlledTest,
+    allowedPhones,
+    template,
+    configured,
+    authorizedToSend: configured && blockedGates.length === 0 && templateOk,
     missing,
+    blockedGates,
   };
 }
 
@@ -63,60 +123,54 @@ export function smsGoPublicStatus() {
   return {
     wired: true,
     provider: "smsgo" as const,
+    protocol: "sendsms.aspx",
+    alignedWith: "pm_smsgo_adapter.php",
     configured: config.configured,
-    otpLength: config.otpLength,
+    enabled: config.enabled,
+    authorizedToSend: config.authorizedToSend,
+    otpLength: 6 as const,
     missing: config.missing,
+    blockedGates: config.blockedGates,
     requiredEnv: [...SMSGO_REQUIRED_ENV],
     optionalEnv: [...SMSGO_OPTIONAL_ENV],
   };
 }
 
-export function parseSmsGoResponse(body: string): SmsGoResult {
+export function parseSmsGoSendResponse(http: number, body: string): SmsGoParseResult {
+  const unknown: SmsGoParseResult = { state: "unknown", message_id: null, statuscode: -10, statusstr: "" };
+  if (http !== 200 || body.length > 32768) return unknown;
+  let node: Record<string, unknown> | null = null;
   const text = body.trim();
-  if (!text) {
-    return { msgid: "", statuscode: -10, statusstr: "empty response", point: 0 };
-  }
-
-  if (text.startsWith("{") || text.startsWith("[")) {
+  if (text.startsWith("{")) {
     try {
-      const parsed = JSON.parse(text) as {
-        result?: Record<string, unknown>;
-        msgid?: unknown;
-        statuscode?: unknown;
-        statusstr?: unknown;
-        point?: unknown;
-      };
-      const node = parsed.result && typeof parsed.result === "object" ? parsed.result : parsed;
-      return normalizeSmsGoFields(node);
+      const parsed = JSON.parse(text) as { result?: Record<string, unknown> };
+      node = parsed.result && typeof parsed.result === "object" ? parsed.result : (parsed as Record<string, unknown>);
     } catch {
-      // fall through to key=value
+      node = null;
     }
   }
-
-  const fields: Record<string, string> = {};
-  for (const line of text.split(/[\r\n&]+/)) {
-    const index = line.indexOf("=");
-    if (index < 1) continue;
-    fields[line.slice(0, index).trim().toLowerCase()] = line.slice(index + 1).trim();
+  if (!node) {
+    const fields: Record<string, string> = {};
+    for (const line of text.split(/[\r\n&]+/)) {
+      const index = line.indexOf("=");
+      if (index < 1) continue;
+      fields[line.slice(0, index).trim().toLowerCase()] = line.slice(index + 1).trim();
+    }
+    if (Object.keys(fields).length) node = fields;
   }
-  if (Object.keys(fields).length > 0) {
-    return normalizeSmsGoFields(fields);
-  }
-
-  return { msgid: "", statuscode: -10, statusstr: text.slice(0, 160), point: 0 };
-}
-
-function normalizeSmsGoFields(node: Record<string, unknown>): SmsGoResult {
-  const msgid = String(node.msgid ?? node.serial_number ?? "").trim();
-  const statuscode = Number(node.statuscode ?? node.code ?? NaN);
-  const statusstr = String(node.statusstr ?? node.text ?? node.message ?? "").trim();
-  const point = Number(node.point ?? 0);
-  return {
-    msgid,
-    statuscode: Number.isFinite(statuscode) ? statuscode : -10,
-    statusstr,
-    point: Number.isFinite(point) ? point : 0,
-  };
+  if (!node) return { ...unknown, statusstr: text.slice(0, 160) };
+  const code = String(node.statuscode ?? "");
+  const id = String(node.msgid ?? "").trim();
+  const messageId = /^[0-9]{1,96}$/.test(id) ? id : null;
+  const statuscode = Number(code);
+  const statusstr = String(node.statusstr ?? "").trim();
+  if (code === "0" && messageId) return { state: "accepted", message_id: messageId, statuscode: 0, statusstr };
+  const rejected = new Set([
+    "-1", "-2", "-3", "-5", "-8", "-9", "-10", "-11", "-12", "-13", "-14",
+    "-15", "-16", "-17", "-18", "-19", "-20", "-21", "-22", "-23", "-24", "-25", "-30",
+  ]);
+  if (rejected.has(code)) return { state: "rejected", message_id: null, statuscode: Number.isFinite(statuscode) ? statuscode : -10, statusstr };
+  return { state: "unknown", message_id: messageId, statuscode: Number.isFinite(statuscode) ? statuscode : -10, statusstr };
 }
 
 export function smsGoUserMessage(statuscode: number, fallback = "簡訊閘道暫時無法完成，請稍後再試。") {
@@ -128,95 +182,70 @@ export function smsGoUserMessage(statuscode: number, fallback = "簡訊閘道暫
     [-5]: "手機號碼格式不被簡訊閘道接受。",
     [-8]: "SMS Go 點數不足，請先加值。",
     [-10]: "簡訊發送失敗。",
-    [-11]: "簡訊閘道資料庫錯誤。",
     [-15]: "此伺服器 IP 尚未加入 SMS Go 允許清單。",
     [-16]: "SMS Go 尚未開通 API。",
-    [-18]: "此門號不在服務範圍。",
-    [-19]: "此號碼已被封鎖。",
     [-21]: "已達發送上限，請稍後再試。",
-    [-23]: "簡訊缺少 NCC 署名。請在 SMS Go 後台 OTP 範本補上署名，或設定 SMSGO_SIGNATURE。",
-    [-24]: "驗證碼不正確。",
-    [-25]: "驗證碼已過期，請重新發送。",
+    [-23]: "簡訊缺少 NCC 署名。請在後台或 SMSGO_APPROVED_TEMPLATE 補上署名。",
   };
   return messages[statuscode] || fallback;
 }
 
-export function assertSmsGoSuccess(result: SmsGoResult, fallback: string) {
-  if (result.statuscode === 0 && result.msgid && !result.msgid.startsWith("-")) {
-    return result;
-  }
-  throw new SmsGoError(smsGoUserMessage(result.statuscode, fallback), result.statuscode);
+function authorizedPhone(config: SmsGoConfig, e164: string) {
+  return (
+    config.authorizedToSend &&
+    config.allowedPhones.includes(e164) &&
+    Boolean(config.username && config.apiKey)
+  );
 }
 
-async function postSmsGo(
-  url: string,
-  fields: Record<string, string>,
-  fetchImpl: SmsGoFetch,
-): Promise<SmsGoResult> {
-  const body = new URLSearchParams(fields);
-  const response = await fetchImpl(url, {
+export async function sendSmsGoOtp(
+  localPhone: string,
+  code: string,
+  fetchImpl: SmsGoFetch = fetch,
+): Promise<{ messageId: string; state: SmsGoSendState }> {
+  const config = smsGoConfig();
+  if (!config.configured) {
+    throw new SmsGoError(
+      `SMS Go 已接正式 adapter（sendsms.aspx），但尚未設定金鑰。請提供 ${config.missing.join("、")}。主機金鑰在 /home/tdwhhyfe/pm_member_private/smsgo-api-key.txt，勿寫進 git。`,
+      -3,
+    );
+  }
+  if (!config.authorizedToSend) {
+    throw new SmsGoError(
+      `SMS Go 呼叫介面已接上，但啟用旗標尚未打開：${config.blockedGates.join("、")}。正式 runtime.php 預設 enabled=false、controlled_test_authorized=false。`,
+      -16,
+    );
+  }
+  const e164 = toE164TwMobile(localPhone);
+  if (!e164) throw new SmsGoError("請輸入台灣手機號碼，例如 09 開頭的十位數字。", -5);
+  if (!authorizedPhone(config, e164)) {
+    throw new SmsGoError("此手機不在 SMS Go 受控測試允許清單（SMSGO_ALLOWED_PHONES）。", -5);
+  }
+  if (!/^\d{6}$/.test(code)) throw new SmsGoError("驗證碼格式不正確。", -1);
+  if ((config.template.match(/\{code\}/g) || []).length !== 1) {
+    throw new SmsGoError("SMSGO_APPROVED_TEMPLATE 必須恰好包含一個 {code}。", -1);
+  }
+  const smbody = config.template.replace("{code}", code);
+  if ([...smbody].length > 70) throw new SmsGoError("簡訊內容超過 70 字。", -1);
+
+  const body = new URLSearchParams({
+    username: config.username,
+    password: config.apiKey,
+    dstaddr: toSmsGoDstaddr(e164),
+    smbody,
+    encoding: "BIG5",
+    rtype: "JSON",
+  });
+  const response = await fetchImpl(SMSGO_SEND_URL, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body,
     cache: "no-store",
   });
   const text = await response.text();
-  const result = parseSmsGoResponse(text);
-  if (!response.ok && result.statuscode === 0) {
-    throw new SmsGoError("簡訊閘道連線失敗。", -10);
+  const parsed = parseSmsGoSendResponse(response.status, text);
+  if (parsed.state === "accepted" && parsed.message_id) {
+    return { messageId: parsed.message_id, state: "accepted" };
   }
-  return result;
-}
-
-function authFields(config: SmsGoConfig) {
-  return {
-    username: config.username,
-    password: config.apiKey,
-    rtype: "JSON",
-  };
-}
-
-export async function sendSmsGoOtp(phone: string, fetchImpl: SmsGoFetch = fetch) {
-  const config = smsGoConfig();
-  if (!config.configured) {
-    throw new SmsGoError(
-      `SMS Go 已接線，但尚未設定金鑰，無法發送真實簡訊。請設定環境變數 ${config.missing.join("、")}。`,
-      -3,
-    );
-  }
-  const fields: Record<string, string> = {
-    ...authFields(config),
-    dstaddr: phone,
-    codelength: String(config.otpLength),
-  };
-  const signature = config.signature || config.senderName;
-  if (signature) fields.smsheader = signature;
-  const result = await postSmsGo(SMSGO_SEND_URL, fields, fetchImpl);
-  return assertSmsGoSuccess(result, "簡訊驗證碼發送失敗。");
-}
-
-export async function ackSmsGoOtp(
-  phone: string,
-  code: string,
-  serial: string,
-  fetchImpl: SmsGoFetch = fetch,
-) {
-  const config = smsGoConfig();
-  if (!config.configured) {
-    throw new SmsGoError(
-      `SMS Go 已接線，但尚未設定金鑰。請設定環境變數 ${config.missing.join("、")}。`,
-      -3,
-    );
-  }
-  const result = await postSmsGo(
-    SMSGO_ACK_URL,
-    {
-      ...authFields(config),
-      dstaddr: phone,
-      OtpCode: code.trim(),
-      serial_number: serial,
-    },
-    fetchImpl,
-  );
-  return assertSmsGoSuccess(result, "驗證碼不正確或已過期。");
+  throw new SmsGoError(smsGoUserMessage(parsed.statuscode, "簡訊服務未接受請求，請稍後再試。"), parsed.statuscode);
 }

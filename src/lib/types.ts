@@ -64,6 +64,8 @@ export type PendingOtp = {
   channel: "sms" | "email";
   destination: string;
   code?: string;
+  codeHash?: string;
+  salt?: string;
   serial?: string;
   gateway: OtpGateway;
   expiresAt: string;

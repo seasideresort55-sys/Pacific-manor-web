@@ -29,21 +29,15 @@ describe("OTP", () => {
     );
   });
 
-  it("正式簡訊不發本地假碼，須走 SMS Go serial", () => {
+  it("正式簡訊不發本地假碼，只核對雜湊", () => {
     expect(() => issueOtp("sms", "0912345678")).toThrow(/SMS Go/);
-    const pending = issueSmsGoPending("0912345678", "2601270523943266");
+    const pending = issueSmsGoPending("0912345678", "654321", "2601270523943266");
     expect(pending.code).toBeUndefined();
+    expect(pending.codeHash).toBeTruthy();
     expect(pending.serial).toBe("2601270523943266");
     expect(otpMatches(pending, "sms", "0912345678", "123456")).toBe(false);
     expect(otpMatches(pending, "sms", "0912345678", EMAIL_PREVIEW_OTP)).toBe(false);
-    expect(
-      otpMatches(
-        { channel: "sms", destination: "0912345678", code: EMAIL_PREVIEW_OTP, gateway: "preview", expiresAt: pending.expiresAt },
-        "sms",
-        "0912345678",
-        EMAIL_PREVIEW_OTP,
-      ),
-    ).toBe(false);
+    expect(otpMatches(pending, "sms", "0912345678", "654321")).toBe(true);
   });
 
   it("電子郵件格式", () => {

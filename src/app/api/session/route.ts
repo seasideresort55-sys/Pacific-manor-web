@@ -2,9 +2,9 @@ import { NextResponse } from "next/server";
 import { emptySession, readSession, resetSession, writeSession } from "@/lib/session";
 import type { AuthProvider, MemberPlanId, QuizOutcome, SessionState } from "@/lib/types";
 
-function publicSession<T extends { pendingOtp: { code?: string } | null }>(session: T) {
+function publicSession<T extends { pendingOtp: { code?: string; codeHash?: string; salt?: string } | null }>(session: T) {
   if (!session.pendingOtp) return session;
-  const { code: _code, ...pending } = session.pendingOtp;
+  const { code: _code, codeHash: _hash, salt: _salt, ...pending } = session.pendingOtp;
   return { ...session, pendingOtp: pending };
 }
 

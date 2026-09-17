@@ -72,18 +72,18 @@ npm start
 
 ### 正式簡訊與會員對齊（環境變數，勿提交真實值）
 
-必填才能真正發簡訊：
+必填才能呼叫 SMS Go：
 
 - `SMSGO_USERNAME`：SMS Go 會員帳號
-- `SMSGO_API_KEY`：SMS Go API Key（也可用 `SMSGO_PASSWORD`）
+- `SMSGO_API_KEY`：SMS Go API Key（主機檔 `smsgo-api-key.txt`；也可用 `SMSGO_PASSWORD`）
 
-選填：
+正式發送還要打開交付包同一組旗標：
 
-- `SMSGO_OTP_LENGTH`：`4` 或 `6`，預設 `6`
-- `SMSGO_SENDER_NAME`／`SMSGO_SIGNATURE`：NCC 簡訊署名（若後台 OTP 範本未設，可能回 `-23`）
-- `MEMBER_API_BASE_URL`：預設 `https://seasideresort.com.tw/booking/pm_roomboard`
-- `MEMBER_API_TOKEN`：伺服器對伺服器寫回官網會員表
-- `MEMBER_API_SMS_ACTION`：預設 `sms_verified_upsert`
+- `SMSGO_ENABLED=true`
+- `SMSGO_CONTROLLED_TEST=true`
+- `SMSGO_ALLOWED_PHONES=+8869xxxxxxxx`（受控測試允許清單）
+
+選填：`SMSGO_APPROVED_TEMPLATE`（預設正式核准文案，須恰好一個 `{code}`）、`MEMBER_API_BASE_URL`、`MEMBER_API_TOKEN`。
 
 SMS Go 後台需開通 API，並把本站出站 IP 加入允許清單（否則 `-15`）。範本見 `.env.example`。
 
@@ -96,8 +96,8 @@ SMS Go 後台需開通 API，並把本站出站 IP 加入允許清單（否則 `
 3. 山邊田園、城市便利視為與海岸本場未完全對齊，先待人工。
 4. 月租申請通過後，可用「模擬完成簽約」把狀態標成月租會員。簽約前必須完成驗證；不能只靠手填。
 4a. Google／LINE／Apple 為 mock OAuth，點選後帶入示範姓名、信箱、手機。正式金鑰可接 `GOOGLE_*`、`LINE_LOGIN_*`、`APPLE_*`。
-4b. **手機簡訊已接 SMS Go 正式 OTP**（`/sms_gw/verify.aspx` 發送、`/sms_gw/verifyAck.aspx` 核對 `msgid`）。金鑰只讀環境變數，不寫進 repo。目前預覽環境尚未放入金鑰，因此畫面會標「已接真閘道、仍缺金鑰」，送碼會回 503，**不再接受 `123456` 當正式簡訊碼**。
-4c. 簡訊驗證後以手機號碼作為與 [pm_member_portal](https://seasideresort.com.tw/booking/pm_roomboard/pm_member_portal_v17.php#socialLogin)／QloApps 同一套會員識別（官網密碼登入也是「電話號碼或 Email」）。若要寫回官網會員表，另需 `MEMBER_API_TOKEN`。
+4b. **手機簡訊對齊正式 `pm_smsgo_adapter.php`**：`POST https://www.smsgo.com.tw/sms_gw/sendsms.aspx`（username + API Key、核准模板 `{code}`）。金鑰只讀環境變數，不寫進 repo。預覽站碰不到主機 `/home/tdwhhyfe/pm_member_private/smsgo-api-key.txt`，也沿用交付包 `enabled=false`，因此畫面會標「已接正式 adapter、仍缺主機金鑰／啟用旗標」，送碼回 503，**不再接受 `123456` 當正式簡訊碼**。
+4c. 不另造會員庫。驗證後以手機號碼作為與 [pm_member_portal](https://seasideresort.com.tw/booking/pm_roomboard/pm_member_portal_v17.php#socialLogin)／`qlo_pm_member` 同一識別。官網電話 OTP 是「已登入會員綁定手機」（`phone_request`／`phone_verify`）。
 4d. 電子郵件仍為預覽 OTP（`EMAIL_PREVIEW_OTP`，預設 `123456`）。Google／LINE／Apple 仍為 mock OAuth。
 5. 體驗表單收集日期區間、入住人、電話、備註；文案提到三天兩夜只作為生活節奏說明，不是免費住房促銷。
 6. 咖啡兩週節奏預設連續 6 次、按月預設 3 次。

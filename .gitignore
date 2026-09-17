@@ -8,6 +8,5 @@ dist
 .env.*
 !.env.example
 data/store.json
-data/members.json
 coverage
 tsconfig.tsbuildinfo
