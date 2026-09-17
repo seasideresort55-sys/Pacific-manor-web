@@ -37,7 +37,7 @@ export function PreviewTools() {
           <button
             className="btn-secondary !min-h-11 !text-base"
             disabled={busy}
-            onClick={() => apply({ quizOutcome: "pass", isMember: false })}
+            onClick={() => apply({ quizOutcome: "pass", isMember: false, authVerified: false })}
           >
             模擬已通過
           </button>
@@ -58,7 +58,15 @@ export function PreviewTools() {
           <button
             className="btn-secondary !min-h-11 !text-base"
             disabled={busy}
-            onClick={() => apply({ quizOutcome: "pass", isMember: true, memberPlan: "seascape_list" })}
+            onClick={() =>
+              apply({
+                quizOutcome: "pass",
+                isMember: true,
+                memberPlan: "seascape_list",
+                authVerified: true,
+                authProvider: "sms",
+              })
+            }
           >
             模擬月租會員
           </button>

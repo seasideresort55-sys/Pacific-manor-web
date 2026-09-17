@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { emptySession, readSession, resetSession, writeSession } from "@/lib/session";
-import type { MemberPlanId, QuizOutcome, SessionState } from "@/lib/types";
+import type { AuthProvider, MemberPlanId, QuizOutcome, SessionState } from "@/lib/types";
 
 export async function GET() {
   const session = await readSession();
@@ -15,6 +15,8 @@ type PatchBody = {
   quizOutcome?: QuizOutcome | null;
   isMember?: boolean;
   memberPlan?: MemberPlanId | null;
+  authVerified?: boolean;
+  authProvider?: AuthProvider | null;
 };
 
 export async function POST(request: Request) {
@@ -33,6 +35,8 @@ export async function POST(request: Request) {
     quizOutcome: body.quizOutcome === undefined ? current.quizOutcome : body.quizOutcome,
     isMember: body.isMember ?? current.isMember,
     memberPlan: body.memberPlan === undefined ? current.memberPlan : body.memberPlan,
+    authVerified: body.authVerified ?? current.authVerified,
+    authProvider: body.authProvider === undefined ? current.authProvider : body.authProvider,
   };
   await writeSession(next);
   return NextResponse.json(next);

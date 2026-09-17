@@ -102,7 +102,7 @@ export function canViewMembershipInvite(outcome: QuizOutcome | null) {
   return outcome === "pass";
 }
 
-export function canApplyMembership(outcome: QuizOutcome | null) {
+export function canStartMembershipVerify(outcome: QuizOutcome | null) {
   return outcome === "pass";
 }
 

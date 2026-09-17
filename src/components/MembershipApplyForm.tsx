@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { memberPlans } from "@/data/plans";
+import { AUTH_PROVIDER_LABEL } from "@/lib/auth";
 import type { MemberPlanId } from "@/lib/types";
 import { useSession } from "./SessionProvider";
 
@@ -71,6 +72,20 @@ export function MembershipApplyForm() {
     );
   }
 
+  if (!session?.authVerified) {
+    return (
+      <div className="rounded-[2rem] bg-white p-6 shadow-card">
+        <h2 className="text-2xl font-bold">請先驗證會員資料</h2>
+        <p className="mt-3 leading-8">
+          簽約前必須用 Google、LINE、Apple、電子郵件或手機簡訊完成驗證，不能只靠手填。
+        </p>
+        <a href={`/membership/verify${planId ? `?plan=${planId}` : ""}`} className="btn-primary mt-6">
+          前往第 8 步驗證
+        </a>
+      </div>
+    );
+  }
+
   return (
     <form
       className="grid gap-5 rounded-[2rem] bg-white p-6 shadow-card"
@@ -90,6 +105,9 @@ export function MembershipApplyForm() {
         </select>
       </label>
       {plan ? <p className="rounded-2xl bg-cream px-4 py-3 leading-8">{plan.monthlyLabel}。須簽約，不做分期。</p> : null}
+      <p className="rounded-2xl bg-[#e7f0f3] px-4 py-3 leading-8">
+        已用{session.authProvider ? AUTH_PROVIDER_LABEL[session.authProvider] : "已驗證方式"}帶入資料，送出前仍可微調電話。
+      </p>
       <label className="grid gap-2">
         <span>姓名</span>
         <input className="field" required value={name} onChange={(event) => setName(event.target.value)} />

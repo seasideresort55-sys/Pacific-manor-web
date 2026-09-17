@@ -23,6 +23,9 @@ export async function POST(request: Request) {
     session.isMember = false;
     session.memberPlan = null;
     session.membershipApplicationId = null;
+    session.authVerified = false;
+    session.authProvider = null;
+    session.pendingOtp = null;
   }
   await writeSession(session);
 

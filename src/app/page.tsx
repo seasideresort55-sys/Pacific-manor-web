@@ -45,7 +45,7 @@ export default function HomePage() {
         <ol className="mt-6 grid gap-4 md:grid-cols-3">
           {[
             ["01 了解", "約 6 題問卷，第 1 題會說明生活概念。結果為通過、待人工或未通過。"],
-            ["02 月租", "通過後才邀請加入。人生海景清單／季租／年租，須簽約、不做分期。"],
+            ["02 月租", "通過後先驗證（Google／LINE／Apple／電子郵件／簡訊），再選方案簽約。不做分期。"],
             ["03 體驗或咖啡", "會員可安排體驗；任何人都能選購萬歲咖啡。"],
           ].map(([title, body]) => (
             <li key={title} className="rounded-3xl bg-white p-6 shadow-card">

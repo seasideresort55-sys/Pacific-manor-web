@@ -22,7 +22,7 @@ const steps = [
   { key: "budget", title: "每月預算大概多少", hint: "先對齊方案門檻，不是現場議價。" },
   { key: "priority", title: "你最在意什麼", hint: "可選 1 到 3 項。" },
   { key: "when", title: "希望何時開始", hint: "有窗口較容易進入方案說明。" },
-  { key: "contact", title: "若需聯繫，怎麼找到你", hint: "待人工結果會用這組資料聯絡。通過者也方便簽約。" },
+  { key: "contact", title: "若需聯繫，怎麼找到你", hint: "待人工結果會用這組資料聯絡。若通過，下一步會用 Google／LINE／Apple／電子郵件或簡訊驗證，不把這裡當唯一入口。" },
 ] as const;
 
 export function QuizForm() {

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getPlan } from "@/data/plans";
-import { canApplyMembership } from "@/lib/quiz";
+import { canApplyMembership } from "@/lib/auth";
 import { newId } from "@/lib/format";
 import { readSession, writeSession } from "@/lib/session";
 import { appendRecord, updateRecord } from "@/lib/store";
@@ -8,9 +8,9 @@ import type { MemberPlanId, MembershipApplication } from "@/lib/types";
 
 export async function POST(request: Request) {
   const session = await readSession();
-  if (!canApplyMembership(session.quizOutcome)) {
+  if (!canApplyMembership(session.quizOutcome, session.authVerified)) {
     return NextResponse.json(
-      { error: "需先通過了解問卷，才能送出月租簽約申請。" },
+      { error: "需先通過了解問卷，並用 Google、LINE、Apple、電子郵件或手機簡訊完成驗證。" },
       { status: 403 },
     );
   }

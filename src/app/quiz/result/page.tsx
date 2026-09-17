@@ -60,8 +60,8 @@ export default function QuizResultPage() {
 
       <div className="mt-8 flex flex-col gap-3 sm:flex-row">
         {outcome === "pass" ? (
-          <Link href="/membership/apply" className="btn-primary">
-            查看方案並申請簽約
+          <Link href="/membership/verify" className="btn-primary">
+            下一步：驗證並填入會員資料
           </Link>
         ) : null}
         {outcome === "review" ? (

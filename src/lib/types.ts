@@ -56,6 +56,15 @@ export type QuizResult = {
 
 export type MemberPlanId = "seascape_list" | "quarter" | "year";
 
+export type AuthProvider = "google" | "line" | "apple" | "email" | "sms";
+
+export type PendingOtp = {
+  channel: "sms" | "email";
+  destination: string;
+  code: string;
+  expiresAt: string;
+};
+
 export type SessionState = {
   id: string;
   name: string;
@@ -64,6 +73,9 @@ export type SessionState = {
   quizOutcome: QuizOutcome | null;
   quizReasons: string[];
   quizAnswers: QuizAnswers | null;
+  authVerified: boolean;
+  authProvider: AuthProvider | null;
+  pendingOtp: PendingOtp | null;
   isMember: boolean;
   memberPlan: MemberPlanId | null;
   membershipApplicationId: string | null;

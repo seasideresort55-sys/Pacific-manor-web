@@ -13,6 +13,9 @@ export function emptySession(): SessionState {
     quizOutcome: null,
     quizReasons: [],
     quizAnswers: null,
+    authVerified: false,
+    authProvider: null,
+    pendingOtp: null,
     isMember: false,
     memberPlan: null,
     membershipApplicationId: null,
@@ -46,7 +49,13 @@ export function decodeSession(value: string | undefined | null): SessionState | 
   try {
     const parsed = JSON.parse(fromBase64Url(value));
     if (!parsed || typeof parsed.id !== "string") return null;
-    return parsed as SessionState;
+    return {
+      ...emptySession(),
+      ...parsed,
+      authVerified: parsed.authVerified === true,
+      authProvider: parsed.authProvider ?? null,
+      pendingOtp: parsed.pendingOtp ?? null,
+    } as SessionState;
   } catch {
     return null;
   }

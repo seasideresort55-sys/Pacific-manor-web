@@ -7,7 +7,7 @@ export default function MembershipPage() {
       <p className="text-sm tracking-[0.2em] text-ocean">主商品</p>
       <h1 className="mt-2 text-4xl font-bold text-deep">月租會員方案</h1>
       <p className="mt-4 max-w-2xl text-xl leading-8 text-[#3d5a66]">
-        月租必須簽約，依合約收款，不做分期。網站第一版先完成簽約申請；通過了解問卷後才能送出。
+        月租必須簽約，依合約收款，不做分期。通過了解問卷後，先用 Google／LINE／Apple／電子郵件／簡訊驗證，再送出簽約申請。
       </p>
 
       <div className="mt-8 grid gap-4 md:grid-cols-3">
@@ -21,8 +21,8 @@ export default function MembershipPage() {
                 <li key={note}>· {note}</li>
               ))}
             </ul>
-            <Link href={`/membership/apply?plan=${plan.id}`} className="btn-primary mt-auto">
-              申請此方案
+            <Link href={`/membership/verify?plan=${plan.id}`} className="btn-primary mt-auto">
+              驗證後申請此方案
             </Link>
           </article>
         ))}
