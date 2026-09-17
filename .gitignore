@@ -5,7 +5,9 @@ dist
 .DS_Store
 *.log
 .env
-.env.local
+.env.*
+!.env.example
 data/store.json
+data/members.json
 coverage
 tsconfig.tsbuildinfo

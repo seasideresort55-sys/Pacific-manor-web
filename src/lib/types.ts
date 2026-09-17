@@ -58,10 +58,14 @@ export type MemberPlanId = "seascape_list" | "quarter" | "year";
 
 export type AuthProvider = "google" | "line" | "apple" | "email" | "sms";
 
+export type OtpGateway = "smsgo" | "preview";
+
 export type PendingOtp = {
   channel: "sms" | "email";
   destination: string;
-  code: string;
+  code?: string;
+  serial?: string;
+  gateway: OtpGateway;
   expiresAt: string;
 };
 
@@ -76,6 +80,9 @@ export type SessionState = {
   authVerified: boolean;
   authProvider: AuthProvider | null;
   pendingOtp: PendingOtp | null;
+  portalMemberId: string | null;
+  memberIdentifier: string | null;
+  portalHandoff: "linked" | "pending" | "unavailable" | null;
   isMember: boolean;
   memberPlan: MemberPlanId | null;
   membershipApplicationId: string | null;

@@ -16,6 +16,9 @@ export function emptySession(): SessionState {
     authVerified: false,
     authProvider: null,
     pendingOtp: null,
+    portalMemberId: null,
+    memberIdentifier: null,
+    portalHandoff: null,
     isMember: false,
     memberPlan: null,
     membershipApplicationId: null,
@@ -55,6 +58,9 @@ export function decodeSession(value: string | undefined | null): SessionState | 
       authVerified: parsed.authVerified === true,
       authProvider: parsed.authProvider ?? null,
       pendingOtp: parsed.pendingOtp ?? null,
+      portalMemberId: parsed.portalMemberId ?? null,
+      memberIdentifier: parsed.memberIdentifier ?? null,
+      portalHandoff: parsed.portalHandoff ?? null,
     } as SessionState;
   } catch {
     return null;

@@ -38,7 +38,7 @@ npm start
 建議用手機寬度走一遍：
 
 1. 首頁主 CTA → 了解問卷（第 1 題生活概念有說明）
-2. 選「海邊慢生活／想先體驗但接受會員前提／合理預算」→ **通過** → `/membership/verify`（對齊官網社群登入：手機簡訊或 Email 驗證碼，再加 Google／LINE／Apple；預覽碼 `123456`）→ 簽約申請 → 體驗安排
+2. 選「海邊慢生活／想先體驗但接受會員前提／合理預算」→ **通過** → `/membership/verify`（對齊官網社群登入：手機簡訊走 SMS Go 真閘道，再加 Email／Google／LINE／Apple）→ 簽約申請 → 體驗安排
 3. 另開無痕或按「重設為訪客」，選「只要幾天觀光」→ **未通過** → 直接開 `/member/experience` 應被擋下
 4. 萬歲咖啡：放入未滿 NT$1,200 的商品，運費應為 NT$100；放入「一日店長聯名禮袋」應免運
 
@@ -68,7 +68,24 @@ npm start
 - `experience_request`
 - `coffee_order`
 
-後端預留註解式 handoff：正式電子簽約、QloApps、LINE Pay／Apple Pay 金鑰皆未接入。相關環境變數以後可加 `LINE_PAY_*`、`APPLE_PAY_*`，本版用 mock 成功頁。
+後端預留註解式 handoff：正式電子簽約、LINE Pay／Apple Pay 金鑰皆未接入。相關環境變數以後可加 `LINE_PAY_*`、`APPLE_PAY_*`，本版用 mock 成功頁。
+
+### 正式簡訊與會員對齊（環境變數，勿提交真實值）
+
+必填才能真正發簡訊：
+
+- `SMSGO_USERNAME`：SMS Go 會員帳號
+- `SMSGO_API_KEY`：SMS Go API Key（也可用 `SMSGO_PASSWORD`）
+
+選填：
+
+- `SMSGO_OTP_LENGTH`：`4` 或 `6`，預設 `6`
+- `SMSGO_SENDER_NAME`／`SMSGO_SIGNATURE`：NCC 簡訊署名（若後台 OTP 範本未設，可能回 `-23`）
+- `MEMBER_API_BASE_URL`：預設 `https://seasideresort.com.tw/booking/pm_roomboard`
+- `MEMBER_API_TOKEN`：伺服器對伺服器寫回官網會員表
+- `MEMBER_API_SMS_ACTION`：預設 `sms_verified_upsert`
+
+SMS Go 後台需開通 API，並把本站出站 IP 加入允許清單（否則 `-15`）。範本見 `.env.example`。
 
 ## 假設清單
 
@@ -79,7 +96,9 @@ npm start
 3. 山邊田園、城市便利視為與海岸本場未完全對齊，先待人工。
 4. 月租申請通過後，可用「模擬完成簽約」把狀態標成月租會員。簽約前必須完成驗證；不能只靠手填。
 4a. Google／LINE／Apple 為 mock OAuth，點選後帶入示範姓名、信箱、手機。正式金鑰可接 `GOOGLE_*`、`LINE_LOGIN_*`、`APPLE_*`。
-4b. 電子郵件與手機簡訊為 mock OTP，預覽固定驗證碼 `123456`（可用 `SMS_MOCK_CODE` 覆寫）。正式簡訊／郵件閘道未接入。
+4b. **手機簡訊已接 SMS Go 正式 OTP**（`/sms_gw/verify.aspx` 發送、`/sms_gw/verifyAck.aspx` 核對 `msgid`）。金鑰只讀環境變數，不寫進 repo。目前預覽環境尚未放入金鑰，因此畫面會標「已接真閘道、仍缺金鑰」，送碼會回 503，**不再接受 `123456` 當正式簡訊碼**。
+4c. 簡訊驗證後以手機號碼作為與 [pm_member_portal](https://seasideresort.com.tw/booking/pm_roomboard/pm_member_portal_v17.php#socialLogin)／QloApps 同一套會員識別（官網密碼登入也是「電話號碼或 Email」）。若要寫回官網會員表，另需 `MEMBER_API_TOKEN`。
+4d. 電子郵件仍為預覽 OTP（`EMAIL_PREVIEW_OTP`，預設 `123456`）。Google／LINE／Apple 仍為 mock OAuth。
 5. 體驗表單收集日期區間、入住人、電話、備註；文案提到三天兩夜只作為生活節奏說明，不是免費住房促銷。
 6. 咖啡兩週節奏預設連續 6 次、按月預設 3 次。
 7. **每次貨到付款**：本次只收第一箱商品＋該箱運費。

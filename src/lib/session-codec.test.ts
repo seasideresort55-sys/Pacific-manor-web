@@ -9,12 +9,17 @@ describe("session codec", () => {
       quizOutcome: "pass" as const,
       authVerified: true,
       authProvider: "sms" as const,
+      portalMemberId: "pm:0912345678",
+      memberIdentifier: "0912345678",
+      portalHandoff: "pending" as const,
     };
     const again = decodeSession(encodeSession(session));
     expect(again?.isMember).toBe(true);
     expect(again?.quizOutcome).toBe("pass");
     expect(again?.authVerified).toBe(true);
     expect(again?.authProvider).toBe("sms");
+    expect(again?.portalMemberId).toBe("pm:0912345678");
+    expect(again?.memberIdentifier).toBe("0912345678");
   });
 
   it("壞掉的 cookie 當成未登入", () => {

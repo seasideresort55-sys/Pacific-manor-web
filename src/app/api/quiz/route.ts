@@ -26,6 +26,9 @@ export async function POST(request: Request) {
     session.authVerified = false;
     session.authProvider = null;
     session.pendingOtp = null;
+    session.portalMemberId = null;
+    session.memberIdentifier = null;
+    session.portalHandoff = null;
   }
   await writeSession(session);
 

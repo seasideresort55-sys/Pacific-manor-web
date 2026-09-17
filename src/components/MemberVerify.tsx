@@ -2,13 +2,26 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
-import { AUTH_PROVIDER_LABEL, MOCK_OTP_CODE } from "@/lib/auth";
+import { useEffect, useState } from "react";
+import { AUTH_PROVIDER_LABEL, EMAIL_PREVIEW_OTP } from "@/lib/auth";
 import type { AuthProvider } from "@/lib/types";
 import { AppleGlyph, GoogleGlyph, LineGlyph } from "./BrandIcons";
 import { useSession } from "./SessionProvider";
 
 type Channel = "email" | "sms";
+
+type AuthStatus = {
+  smsGo: {
+    wired: boolean;
+    configured: boolean;
+    otpLength: 4 | 6;
+    missing: string[];
+  };
+  memberPortal: {
+    tokenConfigured: boolean;
+    missing: string[];
+  };
+};
 
 export function MemberVerify() {
   const params = useSearchParams();
@@ -18,15 +31,35 @@ export function MemberVerify() {
   const [destination, setDestination] = useState("");
   const [code, setCode] = useState("");
   const [sentTo, setSentTo] = useState("");
-  const [previewCode, setPreviewCode] = useState("");
+  const [emailPreview, setEmailPreview] = useState("");
+  const [otpLength, setOtpLength] = useState(6);
   const [hint, setHint] = useState("");
   const [busy, setBusy] = useState(false);
   const [consent, setConsent] = useState(false);
   const [showNotice, setShowNotice] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [redo, setRedo] = useState(false);
+  const [status, setStatus] = useState<AuthStatus | null>(null);
 
   const applyHref = plan ? `/membership/apply?plan=${plan}` : "/membership/apply";
+  const smsReady = status?.smsGo.configured === true;
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetch("/api/auth", { cache: "no-store" })
+      .then((res) => res.json())
+      .then((data: AuthStatus) => {
+        if (cancelled) return;
+        setStatus(data);
+        if (data.smsGo?.otpLength) setOtpLength(data.smsGo.otpLength);
+      })
+      .catch(() => {
+        if (!cancelled) setStatus(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   async function post(body: Record<string, unknown>) {
     setBusy(true);
@@ -63,13 +96,15 @@ export function MemberVerify() {
     const data = await post({ action: "send_otp", channel, destination });
     if (!data) return;
     setSentTo(data.destination);
-    setPreviewCode(data.previewCode || MOCK_OTP_CODE);
     setCode("");
-    setHint(
-      channel === "sms"
-        ? `驗證碼已送出。預覽模式請輸入 ${data.previewCode || MOCK_OTP_CODE}。`
-        : `驗證碼已寄出。預覽模式請輸入 ${data.previewCode || MOCK_OTP_CODE}。`,
-    );
+    if (channel === "sms") {
+      setEmailPreview("");
+      if (data.otpLength) setOtpLength(Number(data.otpLength));
+      setHint("驗證碼已由 SMS Go 發送到手機。請輸入簡訊中的數字，沒有預覽假碼。");
+      return;
+    }
+    setEmailPreview(data.previewCode || EMAIL_PREVIEW_OTP);
+    setHint(`驗證碼已寄出。電子郵件仍為預覽模式，請輸入 ${data.previewCode || EMAIL_PREVIEW_OTP}。`);
   }
 
   async function verifyOtp() {
@@ -87,7 +122,7 @@ export function MemberVerify() {
     setDestination("");
     setCode("");
     setSentTo("");
-    setPreviewCode("");
+    setEmailPreview("");
     setHint("");
   }
 
@@ -109,6 +144,7 @@ export function MemberVerify() {
           <li>姓名：{session.name || "尚未填"}</li>
           <li>電子郵件：{session.email || "尚未填"}</li>
           <li>手機：{session.phone || "尚未填"}</li>
+          <li>會員識別：{session.memberIdentifier || session.phone || "尚未對齊"}</li>
         </ul>
         <Link href={nextHref} className="login-primary mt-8">
           {nextLabel}
@@ -125,6 +161,11 @@ export function MemberVerify() {
       <p className="login-kicker">太平洋莊園 · 會員</p>
       <h1 className="login-title">登入或註冊</h1>
       <p className="login-lead">用手機簡訊最快；也可 Google、LINE 或 Email。不用記密碼，選一種方式即可。</p>
+      <p className="mt-4 rounded-2xl bg-cream px-4 py-3 text-base leading-7 text-[#3d5a66]" data-testid="sms-gateway-status">
+        {smsReady
+          ? "簡訊：SMS Go 已接真閘道，驗證後進入預約系統同一會員。"
+          : `簡訊：SMS Go 已接真閘道，仍缺金鑰 ${status?.smsGo.missing.join("、") || "SMSGO_USERNAME、SMSGO_API_KEY"}。`}
+      </p>
 
       {!sentTo ? (
         <div className="mt-8 grid gap-4">
@@ -169,24 +210,26 @@ export function MemberVerify() {
         <div className="mt-8 grid gap-4">
           <p className="text-lg leading-8 text-[#3d5a66]">已送至 {sentTo}</p>
           <label className="grid gap-2">
-            <span className="text-lg font-semibold text-deep">6 位數驗證碼</span>
+            <span className="text-lg font-semibold text-deep">{otpLength} 位數驗證碼</span>
             <input
               className="login-field text-center text-[28px] tracking-[0.45em]"
               inputMode="numeric"
               autoComplete="one-time-code"
-              maxLength={6}
-              placeholder="123456"
+              maxLength={otpLength}
+              placeholder={otpLength === 4 ? "0000" : "000000"}
               value={code}
-              onChange={(event) => setCode(event.target.value.replace(/\D/g, "").slice(0, 6))}
+              onChange={(event) => setCode(event.target.value.replace(/\D/g, "").slice(0, otpLength))}
             />
           </label>
           <p className="text-base leading-7 text-[#5d6f75]">
-            預覽模式請輸入 {previewCode || MOCK_OTP_CODE}。正式簡訊閘道稍後接入。
+            {channel === "sms"
+              ? "請輸入手機簡訊中的驗證碼。正式路徑不使用預覽假碼。"
+              : `預覽模式請輸入 ${emailPreview || EMAIL_PREVIEW_OTP}。`}
           </p>
           <button
             type="button"
             className="login-primary"
-            disabled={busy || code.length !== 6}
+            disabled={busy || code.length !== otpLength}
             onClick={() => void verifyOtp()}
           >
             驗證並繼續
@@ -237,7 +280,7 @@ export function MemberVerify() {
       </label>
       {showNotice ? (
         <p className="mt-3 rounded-2xl bg-cream px-4 py-3 text-base leading-7 text-[#3d5a66]">
-          本站保存驗證後的 Email、手機與驗證紀錄，用於登入與會員服務。第三方登入不接收對方密碼。簽約資料可稍後補齊。登入後可至會員中心綁定其他方式。
+          本站保存驗證後的 Email、手機與驗證紀錄，用於登入與會員服務。驗證後的手機對齊預約系統／QloApps 同一會員識別。第三方登入不接收對方密碼。簽約資料可稍後補齊。
         </p>
       ) : null}
 
@@ -248,7 +291,7 @@ export function MemberVerify() {
       </button>
       {showPassword ? (
         <p className="mt-2 text-base leading-7 text-[#5d6f75]">
-          此預覽以簡訊與 Email 驗證碼為主。正式密碼登入稍後開放，登入後可至會員中心綁定其他方式。
+          正式密碼登入請至預約系統會員入口。此頁以簡訊與 Email 驗證碼為主，登入後可至會員中心綁定其他方式。
         </p>
       ) : null}
     </section>

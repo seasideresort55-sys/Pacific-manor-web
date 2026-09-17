@@ -2,9 +2,15 @@ import { NextResponse } from "next/server";
 import { emptySession, readSession, resetSession, writeSession } from "@/lib/session";
 import type { AuthProvider, MemberPlanId, QuizOutcome, SessionState } from "@/lib/types";
 
+function publicSession<T extends { pendingOtp: { code?: string } | null }>(session: T) {
+  if (!session.pendingOtp) return session;
+  const { code: _code, ...pending } = session.pendingOtp;
+  return { ...session, pendingOtp: pending };
+}
+
 export async function GET() {
   const session = await readSession();
-  return NextResponse.json(session);
+  return NextResponse.json(publicSession(session));
 }
 
 type PatchBody = {
@@ -23,7 +29,7 @@ export async function POST(request: Request) {
   const body = (await request.json()) as PatchBody;
   if (body.reset) {
     await resetSession();
-    return NextResponse.json(emptySession());
+    return NextResponse.json(publicSession(emptySession()));
   }
 
   const current = await readSession();
@@ -39,5 +45,5 @@ export async function POST(request: Request) {
     authProvider: body.authProvider === undefined ? current.authProvider : body.authProvider,
   };
   await writeSession(next);
-  return NextResponse.json(next);
+  return NextResponse.json(publicSession(next));
 }

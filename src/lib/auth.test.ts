@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
-  MOCK_OTP_CODE,
+  EMAIL_PREVIEW_OTP,
   canApplyMembership,
+  issueEmailOtp,
   issueOtp,
+  issueSmsGoPending,
   isValidEmail,
   normalizeTwPhone,
   otpMatches,
@@ -17,15 +19,31 @@ describe("normalizeTwPhone", () => {
 });
 
 describe("OTP", () => {
-  it("預覽模式固定驗證碼可通過，過期或錯碼不行", () => {
-    const pending = issueOtp("sms", "0912345678");
-    expect(pending.code).toBe(MOCK_OTP_CODE);
-    expect(otpMatches(pending, "sms", "0912345678", MOCK_OTP_CODE)).toBe(true);
-    expect(otpMatches(pending, "sms", "0912345678", "000000")).toBe(false);
-    expect(otpMatches(pending, "email", "0912345678", MOCK_OTP_CODE)).toBe(false);
-    expect(otpMatches({ ...pending, expiresAt: "2000-01-01T00:00:00.000Z" }, "sms", "0912345678", MOCK_OTP_CODE)).toBe(
+  it("電子郵件預覽碼可通過，過期或錯碼不行", () => {
+    const pending = issueEmailOtp("a@b.com");
+    expect(pending.code).toBe(EMAIL_PREVIEW_OTP);
+    expect(otpMatches(pending, "email", "a@b.com", EMAIL_PREVIEW_OTP)).toBe(true);
+    expect(otpMatches(pending, "email", "a@b.com", "000000")).toBe(false);
+    expect(otpMatches({ ...pending, expiresAt: "2000-01-01T00:00:00.000Z" }, "email", "a@b.com", EMAIL_PREVIEW_OTP)).toBe(
       false,
     );
+  });
+
+  it("正式簡訊不發本地假碼，須走 SMS Go serial", () => {
+    expect(() => issueOtp("sms", "0912345678")).toThrow(/SMS Go/);
+    const pending = issueSmsGoPending("0912345678", "2601270523943266");
+    expect(pending.code).toBeUndefined();
+    expect(pending.serial).toBe("2601270523943266");
+    expect(otpMatches(pending, "sms", "0912345678", "123456")).toBe(false);
+    expect(otpMatches(pending, "sms", "0912345678", EMAIL_PREVIEW_OTP)).toBe(false);
+    expect(
+      otpMatches(
+        { channel: "sms", destination: "0912345678", code: EMAIL_PREVIEW_OTP, gateway: "preview", expiresAt: pending.expiresAt },
+        "sms",
+        "0912345678",
+        EMAIL_PREVIEW_OTP,
+      ),
+    ).toBe(false);
   });
 
   it("電子郵件格式", () => {

@@ -1,6 +1,8 @@
 import type { AuthProvider, PendingOtp } from "./types";
 
-export const MOCK_OTP_CODE = process.env.SMS_MOCK_CODE || "123456";
+export const EMAIL_PREVIEW_OTP = process.env.EMAIL_PREVIEW_OTP || "123456";
+/** @deprecated 正式簡訊改走 SMS Go，不再用假碼。Email 預覽仍可用 EMAIL_PREVIEW_OTP。 */
+export const MOCK_OTP_CODE = EMAIL_PREVIEW_OTP;
 export const OTP_TTL_MS = 10 * 60 * 1000;
 
 export const AUTH_PROVIDER_LABEL: Record<AuthProvider, string> = {
@@ -50,21 +52,41 @@ export function nameFromEmail(email: string) {
   return local.replace(/[._-]+/g, " ").trim() || "會員";
 }
 
-export function issueOtp(channel: "sms" | "email", destination: string): PendingOtp {
+export function issueEmailOtp(destination: string): PendingOtp {
   return {
-    channel,
+    channel: "email",
     destination,
-    code: MOCK_OTP_CODE,
+    code: EMAIL_PREVIEW_OTP,
+    gateway: "preview",
     expiresAt: new Date(Date.now() + OTP_TTL_MS).toISOString(),
   };
+}
+
+export function issueSmsGoPending(destination: string, serial: string): PendingOtp {
+  return {
+    channel: "sms",
+    destination,
+    serial,
+    gateway: "smsgo",
+    expiresAt: new Date(Date.now() + OTP_TTL_MS).toISOString(),
+  };
+}
+
+/** @deprecated 僅 Email 預覽使用；SMS 必須走 SMS Go msgid。 */
+export function issueOtp(channel: "sms" | "email", destination: string): PendingOtp {
+  if (channel === "sms") {
+    throw new Error("正式簡訊不可再發本地假驗證碼，請改用 SMS Go。");
+  }
+  return issueEmailOtp(destination);
 }
 
 export function otpMatches(pending: PendingOtp | null, channel: "sms" | "email", destination: string, code: string) {
   if (!pending) return false;
   if (pending.channel !== channel) return false;
   if (pending.destination !== destination) return false;
+  if (channel === "sms" || pending.gateway === "smsgo") return false;
   if (Date.now() > new Date(pending.expiresAt).getTime()) return false;
-  return pending.code === code.trim();
+  return Boolean(pending.code) && pending.code === code.trim();
 }
 
 export function canApplyMembership(outcome: string | null, authVerified: boolean) {
