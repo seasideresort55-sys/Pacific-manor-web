@@ -141,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
         code: byId('phoneCode').value.trim(),
         consent: consent.checked ? '1' : '0',
       });
-      location.assign('pm_member_center_v17.php');
+      location.assign('pm_member_portal_v18.php');
     } catch (error) {
       say(error.message, true);
     } finally {
@@ -190,7 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
         consent: emailNext === 'signup_consent' && byId('emailCodeConsent').checked ? '1' : consent.checked ? '1' : '0',
         legacy_password: emailNext === 'legacy_password' ? byId('emailLegacyPassword').value : '',
       });
-      location.assign('pm_member_center_v17.php');
+      location.assign('pm_member_portal_v18.php');
     } catch (error) {
       if (['signup_consent', 'legacy_password'].includes(error.nextStep)) {
         emailNext = error.nextStep;
