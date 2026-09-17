@@ -1,4 +1,4 @@
-import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
+import { createHmac, randomBytes, timingSafeEqual } from "crypto";
 
 export function newOtpSalt() {
   return randomBytes(16).toString("hex");

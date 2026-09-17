@@ -1,4 +1,4 @@
-import { randomInt } from "node:crypto";
+import { randomInt } from "crypto";
 
 /** 對齊正式站 pm_smsgo_adapter.php：POST /sms_gw/sendsms.aspx */
 export const SMSGO_SEND_URL = "https://www.smsgo.com.tw/sms_gw/sendsms.aspx";

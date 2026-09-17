@@ -4,11 +4,11 @@ import {
   canApplyMembership,
   issueEmailOtp,
   issueOtp,
-  issueSmsGoPending,
   isValidEmail,
   normalizeTwPhone,
   otpMatches,
 } from "./auth";
+import { issueSmsGoPending, smsOtpMatches } from "./auth-otp";
 
 describe("normalizeTwPhone", () => {
   it("接受 09 開頭 10 碼與 886 國碼", () => {
@@ -35,9 +35,10 @@ describe("OTP", () => {
     expect(pending.code).toBeUndefined();
     expect(pending.codeHash).toBeTruthy();
     expect(pending.serial).toBe("2601270523943266");
-    expect(otpMatches(pending, "sms", "0912345678", "123456")).toBe(false);
-    expect(otpMatches(pending, "sms", "0912345678", EMAIL_PREVIEW_OTP)).toBe(false);
-    expect(otpMatches(pending, "sms", "0912345678", "654321")).toBe(true);
+    expect(otpMatches(pending, "sms", "0912345678", "654321")).toBe(false);
+    expect(smsOtpMatches(pending, "0912345678", "123456")).toBe(false);
+    expect(smsOtpMatches(pending, "0912345678", EMAIL_PREVIEW_OTP)).toBe(false);
+    expect(smsOtpMatches(pending, "0912345678", "654321")).toBe(true);
   });
 
   it("電子郵件格式", () => {

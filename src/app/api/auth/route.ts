@@ -4,12 +4,12 @@ import {
   EMAIL_PREVIEW_OTP,
   isValidEmail,
   issueEmailOtp,
-  issueSmsGoPending,
   mockOauthProfile,
   nameFromEmail,
   normalizeTwPhone,
   otpMatches,
 } from "@/lib/auth";
+import { issueSmsGoPending, smsOtpMatches } from "@/lib/auth-otp";
 import { handoffVerifiedPhone, memberPortalPublicStatus } from "@/lib/member-portal";
 import { readSession, writeSession } from "@/lib/session";
 import { generateSmsGoOtp, sendSmsGoOtp, SmsGoError, smsGoPublicStatus } from "@/lib/smsgo";
@@ -149,7 +149,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "請先送出驗證碼。" }, { status: 400 });
     }
 
-    if (!otpMatches(session.pendingOtp, channel, destination, body.code || "")) {
+    const matched =
+      channel === "sms"
+        ? smsOtpMatches(session.pendingOtp, destination, body.code || "")
+        : otpMatches(session.pendingOtp, channel, destination, body.code || "");
+    if (!matched) {
       return NextResponse.json({ error: "驗證碼不正確或已過期。" }, { status: 400 });
     }
 

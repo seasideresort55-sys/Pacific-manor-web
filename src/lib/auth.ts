@@ -1,4 +1,3 @@
-import { hashOtp, newOtpSalt, otpHashMatches } from "./otp-hash";
 import type { AuthProvider, PendingOtp } from "./types";
 
 export const EMAIL_PREVIEW_OTP = process.env.EMAIL_PREVIEW_OTP || "123456";
@@ -63,20 +62,7 @@ export function issueEmailOtp(destination: string): PendingOtp {
   };
 }
 
-export function issueSmsGoPending(destination: string, code: string, serial?: string): PendingOtp {
-  const salt = newOtpSalt();
-  return {
-    channel: "sms",
-    destination,
-    codeHash: hashOtp(code, salt),
-    salt,
-    serial,
-    gateway: "smsgo",
-    expiresAt: new Date(Date.now() + OTP_TTL_MS).toISOString(),
-  };
-}
-
-/** @deprecated 僅 Email 預覽使用；SMS 必須走 SMS Go msgid。 */
+/** @deprecated 僅 Email 預覽使用；SMS 必須走 SMS Go。 */
 export function issueOtp(channel: "sms" | "email", destination: string): PendingOtp {
   if (channel === "sms") {
     throw new Error("正式簡訊不可再發本地假驗證碼，請改用 SMS Go。");
@@ -89,9 +75,7 @@ export function otpMatches(pending: PendingOtp | null, channel: "sms" | "email",
   if (pending.channel !== channel) return false;
   if (pending.destination !== destination) return false;
   if (Date.now() > new Date(pending.expiresAt).getTime()) return false;
-  if (channel === "sms" || pending.gateway === "smsgo") {
-    return Boolean(pending.salt && pending.codeHash && otpHashMatches(code, pending.salt, pending.codeHash));
-  }
+  if (channel === "sms" || pending.gateway === "smsgo") return false;
   return Boolean(pending.code) && pending.code === code.trim();
 }
 
