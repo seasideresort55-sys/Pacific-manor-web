@@ -2,7 +2,9 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { StoreRecord } from "./types";
 
-const STORE_PATH = path.join(process.cwd(), "data", "store.json");
+const STORE_PATH = process.env.VERCEL
+  ? path.join("/tmp", "pacific-manor-store.json")
+  : path.join(process.cwd(), "data", "store.json");
 
 type StoreFile = {
   records: StoreRecord[];

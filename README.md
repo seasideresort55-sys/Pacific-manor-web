@@ -11,7 +11,12 @@
 
 ## 如何預覽
 
-需要 Node.js 18+（本環境以 Node 22 驗證）。
+**手機請直接開公開 HTTPS（不必本機 npm）：**  
+https://stake-hottest-emerald-keyboard.trycloudflare.com/
+
+此網址經 Cloudflare Tunnel 接到目前雲端預覽；首頁已驗證 HTTP 200。若之後要改掛到固定的 `*.vercel.app`，需在 Vercel 按一次同意授權。
+
+開發者本機（可選，需要 Node.js 18+）：
 
 ```bash
 npm install
