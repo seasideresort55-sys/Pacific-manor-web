@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --ocean: #2e5e73;
+  --deep: #1c3d4c;
+  --cream: #f6f1e7;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--cream);
+  color: var(--deep);
+}
+
+::selection {
+  background: #2e5e73;
+  color: #fffaf2;
+}
+
+.wave-band {
+  background:
+    radial-gradient(1200px 280px at 10% -10%, rgba(46, 94, 115, 0.16), transparent 55%),
+    radial-gradient(900px 240px at 90% 0%, rgba(196, 123, 90, 0.12), transparent 50%),
+    linear-gradient(180deg, #f6f1e7 0%, #eef4f6 100%);
+}
+
+.btn-primary {
+  @apply inline-flex min-h-14 w-full items-center justify-center rounded-2xl bg-ocean px-5 text-lg font-semibold text-white shadow-card transition hover:bg-deep focus-visible:outline focus-visible:outline-4 focus-visible:outline-coral disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto;
+}
+
+.btn-secondary {
+  @apply inline-flex min-h-14 w-full items-center justify-center rounded-2xl border-2 border-ocean bg-white/70 px-5 text-lg font-semibold text-ocean transition hover:bg-white focus-visible:outline focus-visible:outline-4 focus-visible:outline-coral sm:w-auto;
+}
+
+.field {
+  @apply w-full rounded-2xl border-2 border-sand bg-white px-4 py-3 text-lg text-deep placeholder:text-mist focus:border-ocean focus:outline-none;
+}
+
+.choice {
+  @apply block w-full rounded-2xl border-2 border-sand bg-white p-4 text-left transition hover:border-ocean;
+}
+
+.choice[data-active="true"] {
+  @apply border-ocean bg-[#e7f0f3] shadow-card;
+}
