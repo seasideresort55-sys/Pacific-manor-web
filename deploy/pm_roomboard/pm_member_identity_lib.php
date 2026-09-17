@@ -32,7 +32,10 @@ function pm_identity_messages()
         'logged_in' => '已登入。',
         'created' => '已建立會員。',
         'email_aux_only' => 'Email 僅作為輔助聯絡，不能用來建立或合併會員。請用手機簡訊、Google 或 Apple 登入。',
+        'email_exists_bind' => '這個 Email 已有會員帳號。請先用原本方式登入，再綁定到同一個會員。系統不會自動合併。',
+        'login_then_bind' => '請先用原本方式登入該會員，再確認綁定。系統不會在未登入時合併帳號。',
         'apple_relay_ok' => '可用 Apple 登入；若開啟隱藏信箱，我們會以手機聯絡您。',
+        'email_not_required' => '登入服務未提供 Email 也可以建立會員。',
         'sms_unavailable' => '簡訊服務目前無法送出，請稍後再試。',
         'unknown_action' => '無法辨識這個操作。',
         'csrf' => '頁面驗證已失效，請重新整理後再試。',
@@ -168,11 +171,27 @@ function pm_identity_decide_oauth(array $storeMembers, array $input)
         return pm_identity_ok('logged_in', (int) $owner['user_id'], ['created' => false, 'bound' => true]);
     }
 
+    $email = pm_identity_normalize_email($input['email'] ?? '');
+    if ($email) {
+        $byEmail = pm_identity_find_member($storeMembers, 'email', $email);
+        if ($byEmail) {
+            $existingId = (int) $byEmail['user_id'];
+            return [
+                'ok' => false,
+                'error' => pm_identity_msg('email_exists_bind'),
+                'next_step' => 'confirm_bind',
+                'prompt' => '您已有會員帳號，是否綁定 ' . pm_identity_provider_label($provider) . '？請先登入該帳號再確認。',
+                'existing_user_id' => $existingId,
+                'user_id' => null,
+            ];
+        }
+    }
+
     return pm_identity_ok('created', 0, [
         'action' => 'create',
         'column' => $col,
         'value' => $sub,
-        'aux_email' => pm_identity_normalize_email($input['email'] ?? '') ?: null,
+        'aux_email' => $email ?: null,
         'name' => trim((string) ($input['name'] ?? '')) ?: '會員',
         'created' => true,
     ]);
@@ -646,6 +665,7 @@ function pm_identity_apply_decision(array $decision)
         if (!$userId) {
             return pm_identity_fail('not_installed');
         }
+        pm_identity_save_social_row($userId, $decision);
         pm_identity_login_user($userId);
         $decision['user_id'] = $userId;
         $decision['id_member'] = $userId;
@@ -660,6 +680,7 @@ function pm_identity_apply_decision(array $decision)
         ])) {
             return ['ok' => false, 'error' => '無法寫入綁定資料，請聯絡客服。', 'next_step' => null];
         }
+        pm_identity_save_social_row($userId, $decision);
         pm_identity_login_user($userId);
         return $decision;
     }
@@ -773,7 +794,115 @@ function pm_identity_snapshot_for($decisionInput)
             $rows[] = $found;
         }
     }
+    $email = pm_identity_normalize_email($decisionInput['email'] ?? '');
+    if ($email) {
+        $found = pm_identity_load_member_by('email', $email);
+        if ($found) {
+            $rows[] = $found;
+        }
+    }
+    if (!empty($decisionInput['sub']) && !empty($decisionInput['provider'])) {
+        $sid = pm_identity_lookup_social_id($decisionInput['provider'], $decisionInput['sub']);
+        if ($sid) {
+            $found = pm_identity_load_member_by_id($sid);
+            if ($found) {
+                $rows[] = $found;
+            }
+        }
+    }
     return $rows;
+}
+
+function pm_identity_social_table()
+{
+    $prefix = defined('_DB_PREFIX_') ? _DB_PREFIX_ : 'qlo_';
+    return $prefix . 'pm_social_identity';
+}
+
+function pm_identity_social_table_exists()
+{
+    try {
+        $table = str_replace('`', '', pm_identity_social_table());
+        return (bool) pm_identity_db_value("SHOW TABLES LIKE '" . addslashes($table) . "'");
+    } catch (Throwable $e) {
+        return false;
+    }
+}
+
+function pm_identity_lookup_social_id($provider, $subject)
+{
+    $provider = strtolower(trim((string) $provider));
+    $subject = pm_identity_null_if_empty($subject);
+    if (!$provider || !$subject) {
+        return 0;
+    }
+    if (defined('PM_IDENTITY_TEST') && PM_IDENTITY_TEST) {
+        return 0;
+    }
+    try {
+        if (pm_identity_bootstrap_qlo() && pm_identity_social_table_exists()) {
+            $table = str_replace('`', '', pm_identity_social_table());
+            $id = (int) pm_identity_db_value(
+                'SELECT `id_member` FROM `' . $table . '` WHERE `provider` = ' . pm_identity_sql_str($provider)
+                . ' AND `subject` = ' . pm_identity_sql_str($subject) . ' LIMIT 1'
+            );
+            if ($id > 0) {
+                return $id;
+            }
+        }
+        $col = pm_identity_sub_column($provider);
+        if ($col) {
+            $row = pm_identity_load_member_by($col, $subject);
+            if ($row) {
+                return (int) $row['id_member'];
+            }
+        }
+    } catch (Throwable $e) {
+        return 0;
+    }
+    return 0;
+}
+
+function pm_identity_save_social_row($userId, array $decision)
+{
+    $userId = (int) $userId;
+    $col = $decision['column'] ?? '';
+    $subject = $decision['value'] ?? '';
+    $provider = $col === 'apple_sub' ? 'apple' : ($col === 'google_sub' ? 'google' : '');
+    if ($userId < 1 || !$provider || !pm_identity_null_if_empty($subject)) {
+        return;
+    }
+    if (defined('PM_IDENTITY_TEST') && PM_IDENTITY_TEST) {
+        return;
+    }
+    try {
+        if (!pm_identity_bootstrap_qlo() || !pm_identity_social_table_exists()) {
+            return;
+        }
+        $table = str_replace('`', '', pm_identity_social_table());
+        $email = $decision['aux_email'] ?? null;
+        $exists = (int) pm_identity_db_value(
+            'SELECT `id_social_identity` FROM `' . $table . '` WHERE `provider` = ' . pm_identity_sql_str($provider)
+            . ' AND `subject` = ' . pm_identity_sql_str($subject) . ' LIMIT 1'
+        );
+        if ($exists) {
+            pm_identity_db_exec(
+                'UPDATE `' . $table . '` SET `id_member` = ' . $userId
+                . ($email ? ', `email` = ' . pm_identity_sql_str($email) : '')
+                . ' WHERE `id_social_identity` = ' . $exists . ' LIMIT 1'
+            );
+            return;
+        }
+        pm_identity_db_exec(
+            'INSERT INTO `' . $table . '` SET `id_member` = ' . $userId
+            . ', `provider` = ' . pm_identity_sql_str($provider)
+            . ', `subject` = ' . pm_identity_sql_str($subject)
+            . ', `email` = ' . ($email ? pm_identity_sql_str($email) : 'NULL')
+            . ', `date_add` = ' . pm_identity_sql_str(date('Y-m-d H:i:s'))
+        );
+    } catch (Throwable $e) {
+        return;
+    }
 }
 
 function pm_identity_run_oauth(array $input)
@@ -1135,6 +1264,31 @@ function pm_identity_migrate()
             pm_identity_db_exec('ALTER TABLE `' . $table . '` ADD INDEX `idx_pm_member_email` (`email`)');
             $log[] = 'index email';
         }
+        $emailCol = pm_identity_table_columns()['email'] ?? [];
+        if (isset($emailCol['Null']) && strcasecmp((string) $emailCol['Null'], 'YES') !== 0) {
+            $type = $emailCol['Type'] ?? 'varchar(190)';
+            pm_identity_db_exec('ALTER TABLE `' . $table . '` MODIFY `email` ' . $type . ' NULL DEFAULT NULL');
+            $log[] = 'email column now NULL (Hide My Email / missing email allowed)';
+            pm_identity_reset_column_cache();
+        }
+    }
+
+    $social = str_replace('`', '', pm_identity_social_table());
+    if (!pm_identity_social_table_exists()) {
+        pm_identity_db_exec(
+            'CREATE TABLE `' . $social . '` (
+                `id_social_identity` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+                `id_member` INT UNSIGNED NOT NULL COMMENT \'user_id\',
+                `provider` VARCHAR(32) NOT NULL,
+                `subject` VARCHAR(255) NOT NULL,
+                `email` VARCHAR(190) NULL,
+                `date_add` DATETIME NOT NULL,
+                PRIMARY KEY (`id_social_identity`),
+                UNIQUE KEY `uniq_pm_social_provider_subject` (`provider`,`subject`),
+                KEY `idx_pm_social_member` (`id_member`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4'
+        );
+        $log[] = 'created ' . $social . ' UNIQUE(provider,subject)';
     }
 
     return [
@@ -1142,6 +1296,8 @@ function pm_identity_migrate()
         'message' => pm_identity_msg('install_ok'),
         'table' => $table,
         'user_id_column' => 'id_member',
+        'email_unique_required' => false,
+        'social_identity_table' => $social,
         'log' => $log,
         'columns' => array_keys(pm_identity_table_columns()),
     ];
@@ -1153,7 +1309,7 @@ function pm_identity_status_payload()
     $member = null;
     $userId = pm_identity_logged_in_user_id();
     try {
-        if (pm_identity_bootstrap_qlo() && pm_identity_has_column('apple_sub') && pm_identity_has_column('google_sub')) {
+        if (pm_identity_bootstrap_qlo() && (pm_identity_social_table_exists() || (pm_identity_has_column('apple_sub') && pm_identity_has_column('google_sub')))) {
             $installed = true;
             if ($userId) {
                 $row = pm_identity_load_member_by_id($userId);
@@ -1177,8 +1333,10 @@ function pm_identity_status_payload()
         ],
         'identity' => [
             'user_id_column' => 'id_member',
-            'lookup' => ['apple_sub', 'google_sub', 'phone'],
+            'user_id' => 'id_member',
+            'lookup' => ['apple_sub', 'google_sub', 'phone', 'pm_social_identity.subject'],
             'email_is_identity' => false,
+            'email_unique_required' => false,
         ],
     ];
 }

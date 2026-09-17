@@ -8,6 +8,7 @@
  */
 
 require_once __DIR__ . '/pm_member_identity_lib.php';
+require_once __DIR__ . '/pm_member_social_lib.php';
 
 $isCli = PHP_SAPI === 'cli';
 $keyOk = false;
@@ -23,14 +24,14 @@ if ($isCli) {
 
 $result = null;
 if ($keyOk && ($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET' || $isCli) {
-    $result = pm_identity_migrate();
+    $result = pms_schema();
 } elseif ($keyOk && isset($_GET['run'])) {
-    $result = pm_identity_migrate();
+    $result = pms_schema();
 }
 
 if ($isCli) {
     if (!$result) {
-        $result = pm_identity_migrate();
+        $result = pms_schema();
     }
     echo json_encode($result, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT), PHP_EOL;
     exit(!empty($result['ok']) ? 0 : 1);
@@ -55,7 +56,7 @@ button,.btn{display:inline-block;font:inherit;background:#2E5E73;color:#fff;bord
 <body>
 <main>
 <h1>會員身分欄位安裝</h1>
-<p>這支程式只改正式表 <code>qlo_pm_member</code>：主鍵仍是 <code>id_member</code>（= user_id）。不會另建會員庫。</p>
+<p>這支程式只改正式表 <code>qlo_pm_member</code>：主鍵仍是 <code>id_member</code>（= user_id）。<strong>Email 不再 UNIQUE</strong>（規格禁止）。不會另建會員庫。</p>
 <?php if (!$keyOk): ?>
 <p class="err">請先在主機 <code>/home/tdwhhyfe/pm_member_private/identity-install.key</code> 放一把安裝金鑰，再用 <code>?key=</code> 開啟，或用 SSH 執行 CLI。</p>
 <?php elseif (!$result): ?>

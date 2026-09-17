@@ -20,6 +20,21 @@ ALTER TABLE `qlo_pm_member` ADD UNIQUE KEY `uniq_pm_member_apple_sub` (`apple_su
 ALTER TABLE `qlo_pm_member` ADD UNIQUE KEY `uniq_pm_member_google_sub` (`google_sub`);
 ALTER TABLE `qlo_pm_member` ADD UNIQUE KEY `uniq_pm_member_phone` (`phone`);
 
--- 4) Email 只當輔助聯絡：若有 UNIQUE，改成普通 INDEX（不要 DROP 欄位）
+-- 4) Email 只當輔助聯絡：拿掉 UNIQUE，改普通 INDEX（不要 DROP 欄位）
+-- 規格禁止「Unique email migration required」。實際索引名請用安裝程式偵測。
 -- ALTER TABLE `qlo_pm_member` DROP INDEX `email`;
 -- ALTER TABLE `qlo_pm_member` ADD INDEX `idx_pm_member_email` (`email`);
+-- ALTER TABLE `qlo_pm_member` MODIFY `email` VARCHAR(190) NULL DEFAULT NULL;
+
+-- 5) 線上既有對照表（可與欄位並存）：UNIQUE(provider, subject) → id_member（= user_id）
+CREATE TABLE IF NOT EXISTS `qlo_pm_social_identity` (
+  `id_social_identity` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `id_member` INT UNSIGNED NOT NULL COMMENT 'user_id',
+  `provider` VARCHAR(32) NOT NULL,
+  `subject` VARCHAR(255) NOT NULL,
+  `email` VARCHAR(190) NULL,
+  `date_add` DATETIME NOT NULL,
+  PRIMARY KEY (`id_social_identity`),
+  UNIQUE KEY `uniq_pm_social_provider_subject` (`provider`,`subject`),
+  KEY `idx_pm_social_member` (`id_member`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
