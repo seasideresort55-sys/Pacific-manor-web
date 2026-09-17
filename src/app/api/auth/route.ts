@@ -9,7 +9,6 @@ import {
   normalizeTwPhone,
   otpMatches,
 } from "@/lib/auth";
-import { canStartMembershipVerify } from "@/lib/quiz";
 import { readSession, writeSession } from "@/lib/session";
 import type { AuthProvider } from "@/lib/types";
 
@@ -24,9 +23,6 @@ export async function POST(request: Request) {
   };
 
   if (body.action === "oauth") {
-    if (!canStartMembershipVerify(session.quizOutcome)) {
-      return NextResponse.json({ error: "需先通過了解問卷，才能驗證會員資料。" }, { status: 403 });
-    }
     if (body.provider !== "google" && body.provider !== "line" && body.provider !== "apple") {
       return NextResponse.json({ error: "不支援的驗證方式。" }, { status: 400 });
     }
@@ -46,9 +42,6 @@ export async function POST(request: Request) {
   }
 
   if (body.action === "send_otp") {
-    if (!canStartMembershipVerify(session.quizOutcome)) {
-      return NextResponse.json({ error: "需先通過了解問卷，才能驗證會員資料。" }, { status: 403 });
-    }
     const channel = body.channel;
     const raw = (body.destination || "").trim();
     if (channel === "sms") {
