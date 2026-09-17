@@ -5,7 +5,7 @@
  */
 define('PM_IDENTITY_TEST', true);
 require_once dirname(__DIR__) . '/pm_member_identity_lib.php';
-require_once dirname(__DIR__) . '/pm_member_social_lib.php';
+require_once dirname(__DIR__) . '/pm_member_identity_hooks.php';
 
 $failed = 0;
 $passed = 0;
@@ -142,28 +142,27 @@ expect($pub2['contact_priority'] === 'phone', '有手機則主要聯絡為手機
 expect(strpos(pm_identity_msg('google_conflict'), '請先用該方式登入') !== false, '衝突文案無英文代碼');
 expect(strpos(pm_identity_msg('email_aux_only'), 'Email') !== false, 'Email 不當主鍵說明');
 
-// 線上函式名：pms_schema / pms_member / qlo_pm_social_identity
-expect(pms_schema_requires_unique_email() === false, 'pms_schema 不再要求 Email UNIQUE');
-$schema = pms_schema();
-expect(!empty($schema['ok']) && empty($schema['email_unique_required']), 'pms_schema 成功且不要求 unique email');
+expect(pm_identity_empty_email_allowed() === true, 'hooks 允許空 Email');
+$schema = pm_identity_schema_relax_email();
+expect(!empty($schema['ok']) && empty($schema['email_unique_required']), 'schema hook 不要求 unique email');
 expect(strpos(json_encode($schema, JSON_UNESCAPED_UNICODE), 'Unique email migration required') === false, '不再出現 Unique email migration required');
 
-$emptyMail = pms_member('create', ['provider' => 'apple', 'sub' => 'NOMAIL2', 'email' => '']);
-expect(!empty($emptyMail['ok']) && ($emptyMail['action'] ?? '') === 'create', 'pms_member 無 Email 可建（Hide My Email）');
+$emptyMail = pm_identity_after_oauth_profile('apple', 'NOMAIL2', '', '會員');
+expect(!empty($emptyMail['ok']) && ($emptyMail['action'] ?? '') === 'create', 'hooks 無 Email 可建（Hide My Email）');
 expect(strpos(json_encode($emptyMail, JSON_UNESCAPED_UNICODE), '登入服務未提供 Email') === false, '不再擋沒有 Email');
 
-$bindHint = pms_member('create', ['provider' => 'google', 'sub' => 'GX', 'email' => 'same@example.com']);
-expect(empty($bindHint['ok']) && ($bindHint['next_step'] ?? '') === 'confirm_bind', 'pms_member Email 衝突走綁定提示');
+$bindHint = pm_identity_after_oauth_profile('google', 'GX', 'same@example.com');
+expect(empty($bindHint['ok']) && ($bindHint['next_step'] ?? '') === 'confirm_bind', 'hooks Email 衝突走綁定提示');
 
-$phoneGuest = pms_member('phone_login', ['phone' => '0986770718', 'phone_verified' => true]);
+$phoneGuest = pm_identity_phone_login_guest('0986770718', true);
 expect(!empty($phoneGuest['ok']) && ($phoneGuest['action'] ?? '') === 'create', '訪客手機驗證後可建檔登入');
 
-$phoneExist = pms_member('phone_login', ['phone' => '0900000001', 'phone_verified' => true]);
+$phoneExist = pm_identity_phone_login_guest('0900000001', true);
 expect(!empty($phoneExist['ok']) && (int) $phoneExist['user_id'] === 20001, '訪客手機驗證後登入同一 user_id');
 
-expect(pms_member_conflict_message('google') === pm_identity_msg('google_conflict'), 'Google 衝突白話');
-expect(pms_member_conflict_message('phone') === pm_identity_msg('phone_conflict'), '手機衝突白話');
-expect(qlo_pm_social_identity('apple', 'A12345') === 0 || qlo_pm_social_identity('apple', 'A12345') >= 0, 'qlo_pm_social_identity 可呼叫');
+expect(pm_identity_conflict_zh('google') === pm_identity_msg('google_conflict'), 'Google 衝突白話');
+expect(pm_identity_conflict_zh('phone') === pm_identity_msg('phone_conflict'), '手機衝突白話');
+expect(function_exists('pms_schema') === false && function_exists('pms_member') === false, 'hooks 不宣告線上 pms_* 以免覆蓋');
 
 echo "\n$passed passed, $failed failed\n";
 exit($failed > 0 ? 1 : 0);

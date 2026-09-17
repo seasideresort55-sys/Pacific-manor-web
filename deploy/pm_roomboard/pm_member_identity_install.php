@@ -8,7 +8,7 @@
  */
 
 require_once __DIR__ . '/pm_member_identity_lib.php';
-require_once __DIR__ . '/pm_member_social_lib.php';
+require_once __DIR__ . '/pm_member_identity_hooks.php';
 
 $isCli = PHP_SAPI === 'cli';
 $keyOk = false;
@@ -24,14 +24,14 @@ if ($isCli) {
 
 $result = null;
 if ($keyOk && ($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET' || $isCli) {
-    $result = pms_schema();
+    $result = pm_identity_schema_relax_email();
 } elseif ($keyOk && isset($_GET['run'])) {
-    $result = pms_schema();
+    $result = pm_identity_schema_relax_email();
 }
 
 if ($isCli) {
     if (!$result) {
-        $result = pms_schema();
+        $result = pm_identity_schema_relax_email();
     }
     echo json_encode($result, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT), PHP_EOL;
     exit(!empty($result['ok']) ? 0 : 1);

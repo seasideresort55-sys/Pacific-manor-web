@@ -1,0 +1,21 @@
+可上傳（新檔或已在線上的 identity 檔）
+  pm_member_identity_hooks.php     ← 這次必傳
+  pm_member_identity_lib.php
+  pm_member_identity_api.php
+  pm_member_identity_bridge.php
+  pm_member_identity_install.php
+  pm_member_identity.js
+  pm_smsgo_identity.php
+  pm_apple_*.php
+  pm_member_bind.php
+  sql/qlo_pm_member_identity.sql
+  PATCH_LIVE_SOCIAL_LIB.txt
+
+禁止覆蓋（覆蓋會讓社群登入 503）
+  pm_member_social_lib.php     線上約 12091 bytes，deploy 不再附此檔
+  pm_google_lib.php            線上約 8426 bytes；deploy 的 701b 只是薄包裝，不要傳
+  pm_member_social.php         LINE／Google 入口
+  pm_smsgo_adapter.php         若主機還有此檔
+
+pm_google_api.php 是另一條 GIS 路徑，讀 google-client-id.txt；
+正式 Google／LINE 仍走已還原的 social.php + social_lib。

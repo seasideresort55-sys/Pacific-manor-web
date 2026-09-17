@@ -7,7 +7,7 @@
  */
 
 require_once __DIR__ . '/pm_member_identity_lib.php';
-require_once __DIR__ . '/pm_member_social_lib.php';
+require_once __DIR__ . '/pm_member_identity_hooks.php';
 require_once __DIR__ . '/pm_smsgo_identity.php';
 
 if (PHP_SAPI !== 'cli' && realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? '')) === realpath(__FILE__)) {

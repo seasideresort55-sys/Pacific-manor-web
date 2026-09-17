@@ -1,0 +1,61 @@
+禁止覆蓋線上 pm_member_social_lib.php（約 12091 bytes）與 pm_google_lib.php（約 8426 bytes）。
+上一版 deploy 的 6KB stub 會讓 pm_member_social.php?action=providers 變成 503。
+
+只加新檔：pm_member_identity_hooks.php
+然後在「已還原的」social_lib 做下面三處字串替換。
+
+────────────────────────────────
+1) 檔案開頭、既有 require / include 之後加：
+
+if (is_file(__DIR__ . '/pm_member_identity_hooks.php')) {
+    require_once __DIR__ . '/pm_member_identity_hooks.php';
+}
+
+不要刪任何 Google／LINE／Apple JWT、Client ID、.p8 路徑。
+
+────────────────────────────────
+2) pms_schema() 裡搜尋：
+
+Unique email migration required
+
+整段「Email 必須 UNIQUE、否則失敗」改成（保留函式名 pms_schema）：
+
+if (function_exists('pm_identity_schema_relax_email')) {
+    return pm_identity_schema_relax_email();
+}
+
+────────────────────────────────
+3) 新建會員搜尋：
+
+登入服務未提供 Email
+
+改成允許沒有 Email（Hide My Email）。例如：
+
+if ($email === '' || $email === null) {
+    $email = null; // 繼續用 sub 建檔
+}
+
+不要 return／throw 那句錯誤。
+
+────────────────────────────────
+4) 「Email 已在別的會員」的硬擋，改呼叫：
+
+if (function_exists('pm_identity_after_oauth_profile')) {
+    return pm_identity_after_oauth_profile($provider, $subject, $email, $name, [
+        'confirm_bind' => !empty($confirm_bind),
+        'logged_in_user_id' => isset($id_member) ? (int) $id_member : 0,
+    ]);
+}
+
+OAuth 驗證（JWT、LINE、Apple .p8）仍用線上原函式；只把「找到 sub／email 之後」交給 hooks。
+qlo_pm_social_identity() 不要改簽名，它已經先用 sub 找 id_member。
+
+────────────────────────────────
+5) 訪客手機登入：不要改 SMS Go adapter。
+入口已打 pm_member_identity_api.php 的
+request_phone_login_code / verify_phone_login_code。
+若要從 social_lib 轉送：
+
+if (function_exists('pm_identity_phone_login_guest')) {
+    return pm_identity_phone_login_guest($phone, true);
+}
