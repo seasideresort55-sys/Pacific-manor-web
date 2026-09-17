@@ -11,9 +11,11 @@
 
 ## 如何預覽
 
-正式會員入口走官網，不再使用 Cloudflare Tunnel（`*.trycloudflare.com`）臨時公開預覽：
+正式會員入口走官網 v18（手機簡訊主路徑），不再使用 `#socialLogin` 當公開入口，也不再使用 Cloudflare Tunnel（`*.trycloudflare.com`）臨時公開預覽：
 
-https://seasideresort.com.tw/booking/pm_roomboard/pm_member_portal_v17.php#socialLogin
+https://seasideresort.com.tw/booking/pm_roomboard/pm_member_portal_v18.php
+
+可上傳檔在 [`deploy/`](deploy/README.md)。舊網址 `pm_member_portal_v17.php#socialLogin` 請改連 v18，或掛上 `pm_retire_social_login.js`。
 
 開發者本機（可選，需要 Node.js 18+）：
 
@@ -96,7 +98,7 @@ SMS Go 後台需開通 API，並把本站出站 IP 加入允許清單（否則 `
 4. 月租申請通過後，可用「模擬完成簽約」把狀態標成月租會員。簽約前必須完成驗證；不能只靠手填。
 4a. Google／LINE／Apple 為 mock OAuth，點選後帶入示範姓名、信箱、手機。正式金鑰可接 `GOOGLE_*`、`LINE_LOGIN_*`、`APPLE_*`。
 4b. **手機簡訊對齊正式 `pm_smsgo_adapter.php`**：`POST https://www.smsgo.com.tw/sms_gw/sendsms.aspx`（username + API Key、核准模板 `{code}`）。金鑰只讀環境變數，不寫進 repo。正式流量走 `seasideresort.com.tw` 會員入口；主機金鑰在 `/home/tdwhhyfe/pm_member_private/smsgo-api-key.txt`。交付包預設 `enabled=false`，未開旗標時送碼回 503，**不再接受 `123456` 當正式簡訊碼**。
-4c. 不另造會員庫。驗證後以手機號碼作為與 [pm_member_portal](https://seasideresort.com.tw/booking/pm_roomboard/pm_member_portal_v17.php#socialLogin)／`qlo_pm_member` 同一識別。官網電話 OTP 是「已登入會員綁定手機」（`phone_request`／`phone_verify`）。
+4c. 不另造會員庫。驗證後以手機號碼作為與 [pm_member_portal v18](https://seasideresort.com.tw/booking/pm_roomboard/pm_member_portal_v18.php)／`qlo_pm_member` 同一識別。正式 PHP 已補 `phone_login_request`／`phone_login_verify`（訪客簡訊登入）；登入後綁定仍走 `phone_request`／`phone_verify`。
 4d. 電子郵件仍為預覽 OTP（`EMAIL_PREVIEW_OTP`，預設 `123456`）。Google／LINE／Apple 仍為 mock OAuth。
 5. 體驗表單收集日期區間、入住人、電話、備註；文案提到三天兩夜只作為生活節奏說明，不是免費住房促銷。
 6. 咖啡兩週節奏預設連續 6 次、按月預設 3 次。
