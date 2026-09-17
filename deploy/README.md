@@ -2,13 +2,13 @@
 
 取代訪客主畫面的醜 `#socialLogin`「其他登入方式」區塊。正式入口改為 **登入或註冊**，手機簡訊為主路徑。
 
-## 建議正式網址
+## 建議正式網址（覆蓋現有檔名）
 
 ```
-https://seasideresort.com.tw/booking/pm_roomboard/pm_member_portal_v18.php
+https://seasideresort.com.tw/booking/pm_roomboard/pm_member_portal_v17.php
 ```
 
-舊連結 `pm_member_portal_v17.php#socialLogin` 不應再當公開入口。上傳後請把官網／信件／QR 改指向 v18。若 v17 網址必須暫留，把 `pm_retire_social_login.js` 加進 v17：
+請用本目錄的 `pm_member_portal_v17.php` **覆蓋** 正式站同名檔。舊 `#socialLogin` 不再當獨立入口，會落在同一張「登入或註冊」卡。`pm_member_portal_v18.php` 只是同一頁的別名。
 
 ```html
 <script src="pm_retire_social_login.js"></script>
@@ -20,7 +20,8 @@ https://seasideresort.com.tw/booking/pm_roomboard/pm_member_portal_v18.php
 
 | 檔案 | 說明 |
 | --- | --- |
-| `pm_member_portal_v18.php` | 訪客登入／註冊新畫面 + 原入住申請 |
+| `pm_member_portal_v17.php` | **覆蓋正式同名檔**：訪客登入／註冊（含可點的 Apple） |
+| `pm_member_portal_v18.php` | 同一頁別名 |
 | `pm_member_api_v18.php` | 先載入 phone host，再 `require` 現有 `pm_member_api_v17.php` |
 | `pm_phone_host_v18.php` | 補上 live v17 已呼叫但缺失的 `pm_phone_host_dispatch()` |
 | `pm_phone_lib_v18.php` | 電話正規化、OTP hash、SMS Go 解析 |
@@ -36,10 +37,30 @@ https://seasideresort.com.tw/booking/pm_roomboard/pm_member_portal_v18.php
 
 1. **主路徑**：台灣手機 → `phone_login_request` → 6 碼 → `phone_login_verify` → 寫入／對齊 `qlo_pm_member` → 同一套 `PMMEMBER` session。
 2. **次路徑**：既有 `request_email_code` / `verify_email_code`（v17 寄信）。
-3. **或使用**：Google、LINE 品牌鈕（`pm_member_social.php`）；Apple 灰態「即將開放」。
+3. **或使用**：Google、LINE、**可點的 Apple**（`pm_member_social.php` → fallback `pm_member_social_identity.php`／`pm_apple_api.php`）。認人用 **apple_sub**，不把 Email 當主鍵（對齊 PR #3 IDENTITY）。隱藏信箱可用。
 4. **密碼**：僅文字連結，仍走 v17 `login`。
 5. 未勾同意就送碼／點社群：卡片內輕提示，不整頁紅字。
 6. **正式路徑沒有固定碼 123456**。驗證只比對 SMS Go 寄出的 hash。
+
+## Apple 登入（可點，不是「即將開放」）
+
+按鈕預設啟用。點擊順序：
+
+1. `POST pm_member_social.php`（`provider=apple`）→ 應回 `https://appleid.apple.com/auth/authorize`
+2. 若 live social 仍回 `providers.apple=false`，改打 PR #3 的 `pm_member_social_identity.php`／`pm_apple_api.php`
+3. Callback 用 **apple_sub** 找／建 `qlo_pm_member`（`qlo_pm_social_identity` 或欄位 `apple_sub`）。Hide My Email 可以建檔。
+
+主機要有（皆在 `/home/tdwhhyfe/pm_member_private/`，勿進 git）：
+
+| 檔／環境變數 | 用途 |
+| --- | --- |
+| `apple-service-id.txt` 或 `APPLE_CLIENT_ID`／`APPLE_SERVICE_ID` | Sign in with Apple **Service ID**（也就是 client_id，例如 `com.seasideresort.web`） |
+| `apple-redirect-uri.txt` 或 `APPLE_REDIRECT_URI` | 可選；預設 `…/pm_apple_callback.php` |
+| Apple `.p8` 金鑰／Team ID／Key ID | 若之後要 server-to-server 換 token；目前認人只驗 **id_token 的 sub**（Apple JWKS），callback 在 PR #3 |
+
+Apple Developer 後台還要：Return URL 對齊 callback、網站用 Service ID、勾選 Sign in with Apple。
+
+**現況：** live `pm_member_social.php` 回 `apple: false`，PR #3 的 `pm_apple_*.php` 尚未在正式站。上傳本頁後 Apple **鈕可點**；要真正走完 OAuth，需放上 `apple-service-id.txt`，並一併上傳 PR #3 身分檔（或在 live social 打開 apple）。沒金鑰時點擊會得到白話錯誤，不會整頁壞掉。
 
 ## 主機依賴（簡訊）
 

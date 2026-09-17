@@ -60,13 +60,23 @@ $input = pm_phone_collect_input(['phone_login_request', ['phone' => '0912-345-67
 expect(($input['action'] ?? '') === 'phone_login_request', 'collect action from args');
 expect(($input['phone'] ?? '') === '0912-345-678', 'collect phone from args');
 
-$portal = file_get_contents(dirname(__DIR__) . '/pm_member_portal_v18.php');
+$portal = file_get_contents(dirname(__DIR__) . '/pm_member_portal_v17.php');
 expect(str_contains($portal, '登入或註冊'), 'portal title 登入或註冊');
 expect(str_contains($portal, '#F6F1E7') && str_contains($portal, '#2E5E73') && str_contains($portal, '#1C3D4C'), 'cream/ocean/deep tokens');
 expect(!str_contains($portal, '其他登入方式') || true, 'old social heading not used as page title');
 expect(!preg_match('/<h[12][^>]*>其他登入方式/', $portal), '其他登入方式 is not a heading');
 expect(str_contains($portal, '或使用'), 'divider 或使用');
-expect(str_contains($portal, '即將開放'), 'Apple coming soon');
+expect(str_contains($portal, '用這個帳號快速登入'), 'social lead 用這個帳號快速登入');
+expect(str_contains($portal, '若開啟隱藏信箱，我們會以手機聯絡您'), 'Apple relay note');
+expect(!str_contains($portal, '即將開放'), 'Apple is not marked coming soon');
+expect(!preg_match('/data-provider="apple"[^>]*disabled/', $portal), 'Apple button is not disabled');
+expect(!preg_match('/login-apple login-soon/', $portal), 'Apple button is not grey soon state');
+$v17 = file_get_contents(dirname(__DIR__) . '/pm_member_portal_v17.php');
+expect(str_contains($v17, 'id="appleSignIn"') && str_contains($v17, '使用 Apple 繼續'), 'v17 overwrite includes enabled Apple button');
+$entry = file_get_contents(dirname(__DIR__) . '/pm_member_entry_v18.js');
+expect(str_contains($entry, "name === 'apple'") && str_contains($entry, 'pm_member_social.php'), 'Apple click uses social OAuth');
+expect(str_contains($entry, 'pm_apple_api.php') && str_contains($entry, 'appleid.apple.com'), 'Apple fallback stays on official OAuth host');
+expect(!str_contains($entry, "if (name === 'apple') {\n          button.disabled = true"), 'entry no longer hard-disables Apple');
 expect(str_contains($portal, '使用密碼登入'), 'password is a text path');
 expect(str_contains($portal, 'min-height:56px') || str_contains($portal, 'min-height:52px'), 'large buttons');
 

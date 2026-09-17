@@ -9,11 +9,16 @@ if ($path === '/pm_member_social.php') {
     require __DIR__ . '/local/pm_member_social.php';
     return true;
 }
+if ($path === '/pm_member_client.js') {
+    header('Content-Type: text/javascript; charset=utf-8');
+    readfile(__DIR__ . '/pm_member_client_v18.js');
+    return true;
+}
 if ($path !== '/' && is_file($file)) {
     return false;
 }
 if ($path === '/' || $path === '') {
-    require __DIR__ . '/pm_member_portal_v18.php';
+    require __DIR__ . '/pm_member_portal_v17.php';
     return true;
 }
 return false;

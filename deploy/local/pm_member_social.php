@@ -10,7 +10,16 @@ if (str_contains(strtolower((string)($_SERVER['HTTP_HOST'] ?? '')), 'seasidereso
     exit;
 }
 if (strtoupper((string)($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'POST') {
+    $provider = strtolower((string)($_POST['provider'] ?? ''));
+    if ($provider === 'apple') {
+        echo json_encode([
+            'ok' => false,
+            'error' => '本機預覽：Apple 鈕已可點。正式站會導向 appleid.apple.com，只用 apple_sub 認人（不把 Email 當主鍵）。請在主機放 apple-service-id.txt。',
+            'identity' => 'apple_sub',
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
     echo json_encode(['ok' => false, 'error' => '本機預覽不開啟正式 Google／LINE。請用手機簡訊或 Email。'], JSON_UNESCAPED_UNICODE);
     exit;
 }
-echo json_encode(['ok' => true, 'providers' => ['google' => true, 'apple' => false, 'line' => true]], JSON_UNESCAPED_UNICODE);
+echo json_encode(['ok' => true, 'providers' => ['google' => true, 'apple' => true, 'line' => true]], JSON_UNESCAPED_UNICODE);

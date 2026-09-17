@@ -5,7 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const passwordCard = byId('passwordLogin');
   if (!card || !passwordCard) return;
 
-  const API = 'pm_member_api_v18.php';
+  const API = window.PM_MEMBER_API || 'pm_member_api_v17.php';
+  const PORTAL = window.PM_MEMBER_PORTAL || 'pm_member_portal_v17.php';
   const phoneRequest = byId('phoneRequest');
   const phoneVerify = byId('phoneVerify');
   const emailRequest = byId('emailCodeRequest');
@@ -45,7 +46,6 @@ document.addEventListener('DOMContentLoaded', () => {
     busy = value;
     card.querySelectorAll('button').forEach((button) => {
       if (button.dataset.keepEnabled === '1') return;
-      if (button.classList.contains('login-apple')) return;
       if (button.id === 'phoneResend' || button.id === 'emailCodeResend') return;
       button.disabled = value;
     });
@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
     card.classList.remove('hidden');
     if (name === 'phone') {
       title.textContent = '登入或註冊';
-      lead.textContent = '用手機簡訊最快；也可 Google、LINE 或 Email。不用記密碼，選一種方式即可。';
+      lead.textContent = '用手機簡訊最快；也可 Google、LINE、Apple 或 Email。不用記密碼，選一種方式即可。';
     } else if (name === 'phoneCode') {
       title.textContent = '輸入驗證碼';
       lead.textContent = '請查看手機簡訊，輸入 6 位數字。';
@@ -141,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
         code: byId('phoneCode').value.trim(),
         consent: consent.checked ? '1' : '0',
       });
-      location.assign('pm_member_portal_v18.php');
+      location.assign(PORTAL);
     } catch (error) {
       say(error.message, true);
     } finally {
@@ -190,7 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
         consent: emailNext === 'signup_consent' && byId('emailCodeConsent').checked ? '1' : consent.checked ? '1' : '0',
         legacy_password: emailNext === 'legacy_password' ? byId('emailLegacyPassword').value : '',
       });
-      location.assign('pm_member_portal_v18.php');
+      location.assign(PORTAL);
     } catch (error) {
       if (['signup_consent', 'legacy_password'].includes(error.nextStep)) {
         emailNext = error.nextStep;
@@ -270,48 +270,107 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const social = byId('socialRow');
   const socialMessage = byId('socialMessage');
+  const allowedHost = { google: 'accounts.google.com', apple: 'appleid.apple.com', line: 'access.line.me' };
+
+  function socialUrlOk(name, href) {
+    if (!href) return false;
+    if (/^pm_apple[_a-z0-9]*\.php/i.test(href) || href.startsWith('pm_apple_')) return name === 'apple';
+    try {
+      const url = new URL(href, location.href);
+      if (url.origin === location.origin && /pm_apple/i.test(url.pathname)) return name === 'apple';
+      return url.protocol === 'https:' && url.hostname === allowedHost[name];
+    } catch (_) {
+      return false;
+    }
+  }
+
+  async function startSocial(name) {
+    const attempts = name === 'apple'
+      ? [
+          { url: 'pm_member_social.php', body: { provider: 'apple', consent: '1' } },
+          { url: 'pm_member_social_identity.php', body: { provider: 'apple', consent: '1' } },
+          { url: 'pm_apple_api.php', json: { action: 'prepare' } },
+        ]
+      : [{ url: 'pm_member_social.php', body: { provider: name, consent: '1' } }];
+    let lastError = '無法開始登入';
+    for (const attempt of attempts) {
+      try {
+        let r;
+        if (attempt.json) {
+          r = await fetch(attempt.url, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(attempt.json),
+          });
+        } else {
+          const body = new FormData();
+          Object.entries(attempt.body).forEach(([key, value]) => body.set(key, value));
+          r = await pmMemberFetch(attempt.url, { method: 'POST', body });
+        }
+        const j = await r.json();
+        if (!r.ok || !j.ok) {
+          lastError = j.error || lastError;
+          continue;
+        }
+        if (j.mode === 'page' && j.url) {
+          location.assign(j.url);
+          return;
+        }
+        if (socialUrlOk(name, j.url)) {
+          location.assign(j.url);
+          return;
+        }
+        lastError = '登入網址不正確';
+      } catch (error) {
+        lastError = error.message || lastError;
+      }
+    }
+    throw new Error(lastError);
+  }
+
+  function bindSocialButton(button, name) {
+    if (button.dataset.bound === '1') return;
+    button.dataset.bound = '1';
+    button.disabled = false;
+    button.classList.remove('hidden', 'login-soon');
+    button.style.display = '';
+    button.addEventListener('click', async () => {
+      if (needConsent() || social.dataset.busy === '1') return;
+      social.dataset.busy = '1';
+      button.disabled = true;
+      socialMessage.textContent = name === 'apple' ? '正在前往 Apple…' : '正在前往登入服務…';
+      try {
+        await startSocial(name);
+      } catch (error) {
+        socialMessage.textContent = error.message;
+        button.disabled = false;
+        delete social.dataset.busy;
+      }
+    });
+  }
+
+  social.querySelectorAll('button[data-provider]').forEach((button) => {
+    const name = button.dataset.provider;
+    if (name === 'apple') bindSocialButton(button, 'apple');
+  });
+
   fetch('pm_member_social.php', { credentials: 'same-origin', cache: 'no-store' })
     .then(async (response) => {
       const data = await response.json();
       const providers = data.providers || {};
       social.querySelectorAll('button[data-provider]').forEach((button) => {
         const name = button.dataset.provider;
-        const ready = providers[name] === true;
         if (name === 'apple') {
+          bindSocialButton(button, 'apple');
+          return;
+        }
+        if (providers[name] !== true) {
           button.disabled = true;
           button.classList.add('login-soon');
           return;
         }
-        if (!ready) {
-          button.disabled = true;
-          button.classList.add('login-soon');
-          const label = button.querySelector('[data-label]');
-          if (label) label.textContent = button.dataset.soonLabel || label.textContent;
-          return;
-        }
-        button.disabled = false;
-        button.addEventListener('click', async () => {
-          if (needConsent() || social.dataset.busy === '1') return;
-          social.dataset.busy = '1';
-          button.disabled = true;
-          socialMessage.textContent = '正在前往登入服務…';
-          try {
-            const body = new FormData();
-            body.set('provider', name);
-            body.set('consent', '1');
-            const r = await pmMemberFetch('pm_member_social.php', { method: 'POST', body });
-            const j = await r.json();
-            if (!r.ok || !j.ok) throw new Error(j.error || '無法開始登入');
-            const url = new URL(j.url);
-            const allowed = { google: 'accounts.google.com', apple: 'appleid.apple.com', line: 'access.line.me' };
-            if (url.protocol !== 'https:' || url.hostname !== allowed[name]) throw new Error('登入網址不正確');
-            location.assign(url.href);
-          } catch (error) {
-            socialMessage.textContent = error.message;
-            button.disabled = false;
-            delete social.dataset.busy;
-          }
-        });
+        bindSocialButton(button, name);
       });
     })
     .catch(() => {
@@ -319,7 +378,8 @@ document.addEventListener('DOMContentLoaded', () => {
         button.disabled = true;
         button.classList.add('login-soon');
       });
-      socialMessage.textContent = '社群登入暫時無法連線，請改用手機簡訊或 Email。';
+      bindSocialButton(byId('appleSignIn'), 'apple');
+      socialMessage.textContent = 'Google／LINE 暫時無法連線。Apple 仍可點，或改用手機簡訊／Email。';
     });
 
   if (location.hash === '#socialLogin' || location.hash === '#passwordLogin') {
