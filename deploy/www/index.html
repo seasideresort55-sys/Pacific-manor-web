@@ -1415,7 +1415,7 @@ header,.top,.nav{box-sizing:border-box!important;max-width:100vw!important;}
 <div class="lang-switch">
 </div>
 <div class="pm-top-actions" translate="no">
-<a class="pm-top-action reserve" href="https://seasideresort.com.tw/booking/pm_front/" rel="noopener noreferrer" target="_blank">入住申請</a>
+<a class="pm-top-action reserve" data-pm-guest-cta href="https://seasideresort.com.tw/booking/pm_front/funnel.html" rel="noopener noreferrer" target="_blank">入住申請</a>
 <a class="pm-top-action" href="#familycare">安心專區</a>
 <a class="pm-top-action contact-top" href="#contact">聯繫我們</a>
 <a class="pm-top-action" href="https://seasideresort.com.tw/booking/pm_roomboard/pm_member_center_v17.php">會員中心</a></div>
@@ -1882,6 +1882,9 @@ footer.v220-footer .v220-staff-link:hover{opacity:1;background:rgba(255,255,255,
 
   </p>
 </div>
+<div style="text-align:center;margin:22px auto 0;">
+  <a class="cta" data-pm-guest-cta href="https://seasideresort.com.tw/booking/pm_front/funnel.html" rel="noopener noreferrer" target="_blank" style="display:inline-block;min-width:220px;text-align:center;">了解問卷｜申請入住</a>
+</div>
 </section>
 
 <style>
@@ -2072,7 +2075,7 @@ footer.v220-footer .v220-staff-link:hover{opacity:1;background:rgba(255,255,255,
 </div>
 
 <div style="text-align:center;margin:0 auto 22px;">
-  <a class="cta" href="#experience-application" style="display:inline-block;min-width:220px;text-align:center;">預約體驗｜開始申請</a>
+  <a class="cta" data-pm-guest-cta href="https://seasideresort.com.tw/booking/pm_front/funnel.html" rel="noopener noreferrer" target="_blank" style="display:inline-block;min-width:220px;text-align:center;">了解問卷｜申請入住</a>
 </div>
 
 
@@ -2088,10 +2091,10 @@ footer.v220-footer .v220-staff-link:hover{opacity:1;background:rgba(255,255,255,
   <p style="margin:0 auto 16px;max-width:620px;line-height:1.8;">
     先短期入住，實際了解莊園環境、生活方式與房型。
   </p>
-  <button type="button" id="open-stay-experience-form"
-    style="border:0;border-radius:999px;padding:13px 24px;font-size:17px;font-weight:700;cursor:pointer;background:#2f6f83;color:#fff;">
-    申請住宿體驗
-  </button>
+  <a class="cta" id="open-stay-experience-form" data-pm-guest-cta href="https://seasideresort.com.tw/booking/pm_front/funnel.html" rel="noopener noreferrer" target="_blank"
+    style="display:inline-block;border:0;border-radius:999px;padding:13px 24px;font-size:17px;font-weight:700;background:#2f6f83;color:#fff;">
+    了解問卷｜申請入住
+  </a>
 </div>
 
 <div id="stay-experience-form-wrap" style="display:none;">
@@ -2171,7 +2174,7 @@ function experienceFormSubmit(e){
 </div>
 
 <div style="margin-top:16px;text-align:center;">
-  <a class="cta" href="#experience-application" style="display:inline-block;min-width:220px;text-align:center;">預約參觀｜填寫表單</a>
+  <a class="cta" data-pm-guest-cta href="https://seasideresort.com.tw/booking/pm_front/funnel.html" rel="noopener noreferrer" target="_blank" style="display:inline-block;min-width:220px;text-align:center;">了解問卷｜預約參觀</a>
 </div>
 </div>
 
@@ -2328,7 +2331,10 @@ function experienceFormSubmit(e){
       <div class="heading" style="margin-bottom:14px;">
         <div class="kicker">住宿體驗申請</div>
         <h2 style="font-size:30px;margin:4px 0 8px;">填寫住宿體驗申請</h2>
-        <p style="margin:0;">50歲以上、生活可自理，並有長住評估需求者，歡迎提出申請。</p>
+        <p style="margin:0;">長住與體驗申請請先走了解問卷。舊表單僅供參考，資料不會送出。</p>
+        <p style="margin:12px 0 0;text-align:center;">
+          <a class="cta" data-pm-guest-cta href="https://seasideresort.com.tw/booking/pm_front/funnel.html" rel="noopener noreferrer" target="_blank" style="display:inline-block;min-width:220px;text-align:center;">了解問卷｜申請入住</a>
+        </p>
       </div>
 
       <form id="experience-form-v2140" class="experience-form-compact" onsubmit="return experienceFormSubmit(event)" style="display:grid;gap:14px;">
@@ -2767,7 +2773,7 @@ function experienceFormSubmit(e){
 <h2>入住前最常被問到的 20 件事</h2>
 <p>入住資格、租金、房型、生活設備、交通、醫療、探訪與參觀方式，都整理在這裡。</p>
 </div>
-<div class="faq-v62"><details><summary>1. 入住太平洋莊園需要什麼條件？</summary><div class="faq-answer"><p>太平洋莊園主要服務希望享受自主、自在、安靜海岸生活的熟齡人士。</p><p>入住前會先了解住戶目前的生活自理能力及實際需求，確認莊園環境與服務是否適合。</p></div></details><details><summary>2. 幾歲以上可以入住？陪同者有年齡限制嗎？</summary><div class="faq-answer"><p>主要入住者須年滿 60 歲以上。</p><p>未滿 60 歲者如陪同 60 歲以上住戶共同生活，也可一起入住，包括配偶、家人、朋友、生活陪伴者或外籍看護／照顧者。</p></div></details><details><summary>3. 一個月租金多少？</summary><div class="faq-answer"><p>依房型、位置及入住條件不同，長住月租為每月 NT$27,000～60,000。</p><p>實際租金與相關費用會在預約參觀及入住前清楚說明，可依需求與預算選擇合適房型。</p></div></details><details><summary>4. 入住需要繳保證金嗎？退住時如何退還？</summary><div class="faq-answer"><p>保證金、退住及退款方式依正式入住契約辦理。</p><p>簽約前會清楚說明保證金金額、退還條件及相關規定，確認後再辦理入住。</p></div></details><details><summary>5. 可以先體驗，再決定是否長住嗎？</summary><div class="faq-answer"><p>可以，歡迎預約體驗太平洋莊園。</p><p>實際入住幾天，親自感受房間、環境、海岸生活及莊園生活方式後，再決定是否適合長期入住。</p><p>體驗方案、最新價格及可預約日期，以官網預約系統公布內容為準。</p><a class="cta faq-link" href="https://seasideresort.com.tw/booking/pm_front/" target="_blank">查看體驗價格／預約體驗</a></div></details><details><summary>6. 房間有多大？有哪些房型？</summary><div class="faq-answer"><p>主要房型約 16 坪，提供較寬敞的長期居住空間。</p><p>依位置、樓層及景觀不同有不同房型，實際可入住房型可於預約參觀時了解。</p></div></details><details><summary>7. 房間裡有哪些家具、家電及生活設備？</summary><div class="faq-answer"><p>每間房依長期生活需求配置，提供冷氣、冰箱、電風扇、音響、網路電視、Wi-Fi、衣櫃、化妝台、曬衣架、吹風機及獨立衛浴等。</p><p>床鋪採五尺標準雙人床；一人入住一張，兩人入住配置兩張，讓每位住戶都有寬敞睡眠空間。</p></div></details><details><summary>8. 三餐如何安排？一定要在莊園用餐嗎？</summary><div class="faq-answer"><p>太平洋莊園重視住戶生活自主性，不強制統一用餐。</p><p>住戶可依自己的生活習慣安排餐食，實際餐飲服務依莊園當時提供內容辦理。</p></div></details><details><summary>9. 沒有開車，交通方便嗎？</summary><div class="faq-answer"><p>方便。公車站就在太平洋莊園門口，沒有開車也可利用大眾運輸往返花蓮及周邊地區。</p><p>詳細路線、班次及時刻表請參考官網「交通方式」。</p><a class="cta faq-link" href="#transport">交通方式／查看公車時刻表</a></div></details><details><summary>10. 附近有醫療及緊急救護資源嗎？</summary><div class="faq-answer"><p>有。太平洋莊園附近約 800 公尺即有醫療及消防救護資源。</p><p>如需緊急醫療處理，以撥打 119、由專業救護人員處理為原則。</p></div></details><details><summary>11. 夜間發生緊急狀況怎麼辦？</summary><div class="faq-answer"><p>房間設有熟齡住戶需要的緊急求助設備，包括床邊及衛浴緊急求助設備。</p><p>衛浴是較容易發生跌倒等意外的地方，因此浴室安全是莊園特別重視的項目。</p></div></details><details><summary>12. 需要看醫生時，可以協助就醫嗎？</summary><div class="faq-answer"><p>可依住戶實際情況協助聯繫或安排適當方式。</p><p>一般門診可依需求協助安排；緊急狀況則優先聯絡 119，交由專業醫療及救護人員處理。</p></div></details><details><summary>13. 如果以後身體狀況變差，還可以繼續住嗎？</summary><div class="faq-answer"><p>需依當時實際照護需求評估。</p><p>太平洋莊園定位為自主生活的熟齡住宅，並不是醫院或護理之家。</p><p>若未來需要高度醫療、24 小時專業護理，或無法維持基本生活安全，會與住戶及家屬討論較適合的後續照護安排。</p></div></details><details><summary>14. 家人或朋友可以來探訪嗎？</summary><div class="faq-answer"><p>可以，非常歡迎家人及朋友前來探望住戶。</p><p>週一至週五：親友探訪請先登記；如需留宿，每人每晚 NT$600。週六、週日：免費探訪。</p><p>週末免費探訪是希望鼓勵家人利用假日前來陪伴長輩，一起吃飯、聊天、散步、看看海。</p></div></details><details><summary>15. 家人或朋友可以留宿嗎？</summary><div class="faq-answer"><p>如親友需要留宿，可依房型、入住人數、安全及莊園管理規定事先詢問。</p><p>我們希望住戶保有與家人相聚的自由，同時兼顧其他住戶的安寧與隱私。</p></div></details><details><summary>16. 莊園平常有哪些活動？一定要參加嗎？</summary><div class="faq-answer"><p>莊園會依季節及住戶需求安排活動，例如晨曦瑜伽、散步、交流及休閒活動等。</p><p>所有活動皆以自由參加為原則；住戶也可自己看海、閱讀、散步或安排自己的生活。</p></div></details><details><summary>17. 可以自己洗衣服嗎？房務及清潔如何安排？</summary><div class="faq-answer"><p>可以。園區提供自助洗衣設備，可依自己的生活習慣使用。</p><p>太平洋莊園每個月提供一次免費房務整理服務。</p><p>如需增加房務整理次數，可依實際需求另行洽詢。</p></div></details><details><summary>18. 房間有 Wi-Fi、電話、電視及冷氣嗎？</summary><div class="faq-answer"><p>有。房間提供 Wi-Fi、網路電視、電話、冷氣等基本設備，方便長期生活及與家人聯繫。</p></div></details><details><summary>19. 入住後如果住不習慣，可以提前退住嗎？</summary><div class="faq-answer"><p>可以依正式入住契約辦理。</p><p>入住前會清楚說明退住通知期限、費用結算及保證金退還方式，簽約前即可充分了解。</p></div></details><details><summary>20. 什麼時間可以預約參觀太平洋莊園？</summary><div class="faq-answer"><p>目前開放預約參觀時間為每週六、週日，上午 10:00～下午 5:00。</p><p>為了有充足時間介紹環境、房型及長住生活方式，請在來訪前事先預約。</p><p>平日原則上不安排一般參觀，希望已入住住戶保有安靜、自在的生活環境。</p></div></details></div>
+<div class="faq-v62"><details><summary>1. 入住太平洋莊園需要什麼條件？</summary><div class="faq-answer"><p>太平洋莊園主要服務希望享受自主、自在、安靜海岸生活的熟齡人士。</p><p>入住前會先了解住戶目前的生活自理能力及實際需求，確認莊園環境與服務是否適合。</p></div></details><details><summary>2. 幾歲以上可以入住？陪同者有年齡限制嗎？</summary><div class="faq-answer"><p>主要入住者須年滿 60 歲以上。</p><p>未滿 60 歲者如陪同 60 歲以上住戶共同生活，也可一起入住，包括配偶、家人、朋友、生活陪伴者或外籍看護／照顧者。</p></div></details><details><summary>3. 一個月租金多少？</summary><div class="faq-answer"><p>依房型、位置及入住條件不同，長住月租為每月 NT$27,000～60,000。</p><p>實際租金與相關費用會在預約參觀及入住前清楚說明，可依需求與預算選擇合適房型。</p></div></details><details><summary>4. 入住需要繳保證金嗎？退住時如何退還？</summary><div class="faq-answer"><p>保證金、退住及退款方式依正式入住契約辦理。</p><p>簽約前會清楚說明保證金金額、退還條件及相關規定，確認後再辦理入住。</p></div></details><details><summary>5. 可以先體驗，再決定是否長住嗎？</summary><div class="faq-answer"><p>可以，歡迎預約體驗太平洋莊園。</p><p>實際入住幾天，親自感受房間、環境、海岸生活及莊園生活方式後，再決定是否適合長期入住。</p><p>體驗方案、最新價格及可預約日期，以官網預約系統公布內容為準。</p><a class="cta faq-link" data-pm-guest-cta href="https://seasideresort.com.tw/booking/pm_front/funnel.html" rel="noopener noreferrer" target="_blank">了解問卷／預約申請</a></div></details><details><summary>6. 房間有多大？有哪些房型？</summary><div class="faq-answer"><p>主要房型約 16 坪，提供較寬敞的長期居住空間。</p><p>依位置、樓層及景觀不同有不同房型，實際可入住房型可於預約參觀時了解。</p></div></details><details><summary>7. 房間裡有哪些家具、家電及生活設備？</summary><div class="faq-answer"><p>每間房依長期生活需求配置，提供冷氣、冰箱、電風扇、音響、網路電視、Wi-Fi、衣櫃、化妝台、曬衣架、吹風機及獨立衛浴等。</p><p>床鋪採五尺標準雙人床；一人入住一張，兩人入住配置兩張，讓每位住戶都有寬敞睡眠空間。</p></div></details><details><summary>8. 三餐如何安排？一定要在莊園用餐嗎？</summary><div class="faq-answer"><p>太平洋莊園重視住戶生活自主性，不強制統一用餐。</p><p>住戶可依自己的生活習慣安排餐食，實際餐飲服務依莊園當時提供內容辦理。</p></div></details><details><summary>9. 沒有開車，交通方便嗎？</summary><div class="faq-answer"><p>方便。公車站就在太平洋莊園門口，沒有開車也可利用大眾運輸往返花蓮及周邊地區。</p><p>詳細路線、班次及時刻表請參考官網「交通方式」。</p><a class="cta faq-link" href="#transport">交通方式／查看公車時刻表</a></div></details><details><summary>10. 附近有醫療及緊急救護資源嗎？</summary><div class="faq-answer"><p>有。太平洋莊園附近約 800 公尺即有醫療及消防救護資源。</p><p>如需緊急醫療處理，以撥打 119、由專業救護人員處理為原則。</p></div></details><details><summary>11. 夜間發生緊急狀況怎麼辦？</summary><div class="faq-answer"><p>房間設有熟齡住戶需要的緊急求助設備，包括床邊及衛浴緊急求助設備。</p><p>衛浴是較容易發生跌倒等意外的地方，因此浴室安全是莊園特別重視的項目。</p></div></details><details><summary>12. 需要看醫生時，可以協助就醫嗎？</summary><div class="faq-answer"><p>可依住戶實際情況協助聯繫或安排適當方式。</p><p>一般門診可依需求協助安排；緊急狀況則優先聯絡 119，交由專業醫療及救護人員處理。</p></div></details><details><summary>13. 如果以後身體狀況變差，還可以繼續住嗎？</summary><div class="faq-answer"><p>需依當時實際照護需求評估。</p><p>太平洋莊園定位為自主生活的熟齡住宅，並不是醫院或護理之家。</p><p>若未來需要高度醫療、24 小時專業護理，或無法維持基本生活安全，會與住戶及家屬討論較適合的後續照護安排。</p></div></details><details><summary>14. 家人或朋友可以來探訪嗎？</summary><div class="faq-answer"><p>可以，非常歡迎家人及朋友前來探望住戶。</p><p>週一至週五：親友探訪請先登記；如需留宿，每人每晚 NT$600。週六、週日：免費探訪。</p><p>週末免費探訪是希望鼓勵家人利用假日前來陪伴長輩，一起吃飯、聊天、散步、看看海。</p></div></details><details><summary>15. 家人或朋友可以留宿嗎？</summary><div class="faq-answer"><p>如親友需要留宿，可依房型、入住人數、安全及莊園管理規定事先詢問。</p><p>我們希望住戶保有與家人相聚的自由，同時兼顧其他住戶的安寧與隱私。</p></div></details><details><summary>16. 莊園平常有哪些活動？一定要參加嗎？</summary><div class="faq-answer"><p>莊園會依季節及住戶需求安排活動，例如晨曦瑜伽、散步、交流及休閒活動等。</p><p>所有活動皆以自由參加為原則；住戶也可自己看海、閱讀、散步或安排自己的生活。</p></div></details><details><summary>17. 可以自己洗衣服嗎？房務及清潔如何安排？</summary><div class="faq-answer"><p>可以。園區提供自助洗衣設備，可依自己的生活習慣使用。</p><p>太平洋莊園每個月提供一次免費房務整理服務。</p><p>如需增加房務整理次數，可依實際需求另行洽詢。</p></div></details><details><summary>18. 房間有 Wi-Fi、電話、電視及冷氣嗎？</summary><div class="faq-answer"><p>有。房間提供 Wi-Fi、網路電視、電話、冷氣等基本設備，方便長期生活及與家人聯繫。</p></div></details><details><summary>19. 入住後如果住不習慣，可以提前退住嗎？</summary><div class="faq-answer"><p>可以依正式入住契約辦理。</p><p>入住前會清楚說明退住通知期限、費用結算及保證金退還方式，簽約前即可充分了解。</p></div></details><details><summary>20. 什麼時間可以預約參觀太平洋莊園？</summary><div class="faq-answer"><p>目前開放預約參觀時間為每週六、週日，上午 10:00～下午 5:00。</p><p>為了有充足時間介紹環境、房型及長住生活方式，請在來訪前事先預約。</p><p>平日原則上不安排一般參觀，希望已入住住戶保有安靜、自在的生活環境。</p></div></details></div>
 </div>
 </section>
 <section class="white news-page-v61" id="news">
@@ -3163,5 +3169,37 @@ function escapeHtmlV192(s){
 })();
 </script>
 
+
+<script id="pm-funnel-cta">
+(function () {
+  /* A LIVE: funnel.html (default). B CANONICAL not uploaded: /match/ or /800plus/match-v3.1.html */
+  var TARGETS = {
+    live: 'https://seasideresort.com.tw/booking/pm_front/funnel.html',
+    canonical: 'https://seasideresort.com.tw/match/'
+  };
+  var ACTIVE = 'live';
+  var FUNNEL = TARGETS[ACTIVE] || TARGETS.live;
+  var nodes = document.querySelectorAll('a[href], a[data-pm-guest-cta]');
+  Array.prototype.forEach.call(nodes, function (el) {
+    var href = el.getAttribute('href') || '';
+    var marked = el.hasAttribute('data-pm-guest-cta');
+    if (href === '#experience-application') marked = true;
+    if (!marked) {
+      try {
+        var url = new URL(href, window.location.href);
+        var path = url.pathname.replace(/\/+$/, '') || '/';
+        if (url.origin === 'https://seasideresort.com.tw' &&
+            (path === '/booking/pm_front' || path === '/booking/pm_front/index.html')) {
+          marked = true;
+        }
+      } catch (e) {}
+    }
+    if (!marked) return;
+    el.setAttribute('href', FUNNEL);
+    el.setAttribute('target', '_blank');
+    el.setAttribute('rel', 'noopener noreferrer');
+  });
+})();
+</script>
 </body>
 </html>

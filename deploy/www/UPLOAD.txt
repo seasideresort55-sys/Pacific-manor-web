@@ -1,0 +1,37 @@
+FTPS upload list (cPanel public_html)
+
+This VM cannot publish to seasideresort.com.tw. Upload these files to go live.
+
+REQUIRED (one-file overwrite of the official homepage)
+  local:  deploy/www/index.html
+  remote: public_html/index.html
+  also covers: https://seasideresort.com.tw/  and  /index.html
+  do not upload into /booking/ or /booking/pm_front/
+
+OPTIONAL (if you cannot overwrite the whole homepage)
+  1. local:  deploy/www/pm_cta_target.js
+     remote: public_html/pm_cta_target.js
+  2. local:  deploy/www/pm_funnel_cta.js
+     remote: public_html/pm_funnel_cta.js
+  3. In the live homepage, add before </body>:
+     <script src="pm_cta_target.js"></script>
+     <script src="pm_funnel_cta.js"></script>
+  Then still edit the two hardcoded /booking/pm_front/ hrefs if you want
+  no-JS guests to hit the questionnaire.
+
+A/B TARGET
+  Default ACTIVE=live → /booking/pm_front/funnel.html
+  After match-v3.1.html is uploaded, set ACTIVE=canonical in:
+    - public_html/index.html (inline #pm-funnel-cta)
+    - public_html/pm_cta_target.js (if you uploaded the overlay)
+  Suggested canonical paths: /match/ or /800plus/match-v3.1.html
+  Do not point guests at /match/ while it 404s.
+
+DO NOT upload
+  - /booking/pm_front/index.html (old short-stay scheme page; leave in place)
+  - /booking/ QloApps / admin PHP
+  - funnel.html (already live; this PR does not rebuild it)
+
+After upload, hard-refresh https://seasideresort.com.tw/ and click:
+  入住申請, 了解問卷｜申請入住, 了解問卷｜預約參觀, FAQ「了解問卷／預約申請」
+Each should open the ACTIVE target (today: funnel.html).
