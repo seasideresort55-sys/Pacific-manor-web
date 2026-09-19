@@ -1,0 +1,3167 @@
+<!DOCTYPE html>
+
+<!-- 太平洋莊園 V21.4 最新正式版｜由 V20.37 僅修正安心生活頁圖片載入抖動 -->
+<html lang="zh-Hant">
+<head>
+<!-- PACIFIC MANOR BUILD: V21.3 | based on V20.37; life-page image loading stabilization only -->
+<link as="image" fetchpriority="high" href="images/img-001-d37267f9ff98.webp" rel="preload"/>
+<meta charset="utf-8"/>
+<meta name="pm-build" content="V22.3-WordPress-News"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>太平洋莊園｜花東海岸公路「唯一」海景第一排別墅群</title>
+<meta content="V22.0-20260821" name="pm-build"/>
+<style>
+:root{--ocean:#2E5E73;--deep:#1C3D4C;--light:#7BA7B8;--cream:#F6F1E7;--cream2:#EDE4D3;--ink:#2A2A28;--soft:#5C5C56;--white:#fff}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--cream);color:var(--ink);font-family:"PingFang TC","Microsoft JhengHei","Noto Sans TC",Arial,sans-serif;line-height:1.75}
+header{position:sticky;top:0;z-index:30;background:rgba(246,241,231,.97);backdrop-filter:blur(8px);border-bottom:1px solid var(--cream2)}
+.top{max-width:1200px;margin:auto;padding:12px 18px;display:flex;align-items:center;gap:16px}
+.brand{margin-right:auto;text-decoration:none;color:var(--deep)}
+.brand strong{display:block;font-size:24px;letter-spacing:2px}
+.brand small{display:block;color:var(--light);letter-spacing:3px}
+.globe{border:1px solid var(--cream2);background:#fff;width:42px;height:42px;border-radius:50%;font-size:22px;cursor:pointer}
+.nav{max-width:1200px;margin:auto;padding:7px 12px 12px;display:grid;grid-template-rows:repeat(2,auto);grid-auto-flow:column;grid-auto-columns:max-content;gap:8px;overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+.nav a{color:var(--deep);text-decoration:none;font-weight:700;font-size:14px;background:#fff;border:1px solid var(--cream2);border-radius:10px;padding:8px 12px;white-space:nowrap;text-align:center}
+@media (max-width: 768px){.nav{grid-template-rows:repeat(3,auto);}}
+.hero{position:relative;min-height:66vh;display:flex;align-items:flex-end;background-image:linear-gradient(to top,rgba(14,41,54,.75),rgba(14,41,54,.10) 58%),url('images/img-001-d37267f9ff98.webp');background-size:cover;background-position:center}
+.hero-inner{max-width:1100px;width:100%;margin:auto;padding:80px 24px;color:#fff}
+.hero h1{font-size:clamp(38px,6vw,68px);line-height:1.25;margin:.25em 0}
+.hero p{font-size:20px;max-width:720px}
+.eyebrow{letter-spacing:4px;font-weight:800}
+section{padding:80px 20px;scroll-margin-top:150px}
+.white{background:#fff}
+.wrap{max-width:1100px;margin:auto}
+.heading{max-width:790px;margin:0 auto 36px;text-align:center}
+.kicker{letter-spacing:4px;color:var(--ocean);font-weight:800}
+h2{font-size:clamp(28px,4vw,42px);line-height:1.35;color:var(--deep);margin:.35em 0}
+p{color:var(--soft);font-size:18px}
+.photo{margin:0;border-radius:20px;overflow:hidden;background:#fff;box-shadow:0 10px 32px rgba(0,0,0,.10)}
+.photo img{display:block;width:100%;height:auto}
+.photo figcaption{padding:10px 14px;text-align:center;color:#666;font-size:14px}
+.gallery{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.cardgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.card{background:#fff;border:1px solid var(--cream2);border-radius:16px;padding:22px}
+.card b{color:var(--deep)}
+.cta{display:inline-block;background:var(--ocean);color:#fff;text-decoration:none;border-radius:999px;padding:12px 20px;font-weight:800}
+footer{background:var(--deep);color:#fff;text-align:center;padding:28px}
+@media(max-width:760px){
+  .top{padding:10px 12px}
+  .nav{padding-left:10px;padding-right:10px}
+  section{padding:58px 15px;scroll-margin-top:165px}
+  .hero{min-height:58vh;background-position:center}
+  .hero-inner{padding:55px 18px}
+  .gallery,.cardgrid{grid-template-columns:1fr}
+  .photo{border-radius:14px}
+}
+
+.lang-switch{position:relative;flex:0 0 auto}
+.lang-switch details{position:relative}
+.lang-switch summary{list-style:none;width:46px;height:46px;border:1px solid var(--ocean);border-radius:50%;background:#fff;color:var(--deep);display:grid;place-items:center;cursor:pointer;font-size:23px}
+.lang-switch summary::-webkit-details-marker{display:none}
+.lang-switch .lang-menu{position:absolute;right:0;top:54px;min-width:168px;background:#fff;border:1px solid var(--cream2);border-radius:14px;padding:8px;box-shadow:0 12px 30px rgba(0,0,0,.14);display:grid;gap:6px;z-index:100}
+.lang-switch .lang-menu button{border:1px solid var(--ocean);background:#fff;color:var(--deep);border-radius:999px;padding:9px 12px;font-weight:800;cursor:pointer}
+.lang-switch .lang-menu button.active{background:var(--ocean);color:#fff}
+
+/* 語言選單穩定收合修正 */
+.lang-switch details:not([open]) .lang-menu{display:none !important}
+.lang-switch details[open] .lang-menu{display:grid !important}
+
+
+/* V6.0 正式版：聯繫我們／最新消息 */
+.news-card-v60{grid-column:1/-1;text-align:left}.news-feed-v60{display:grid;gap:12px;margin-top:16px}.news-item-v60{background:var(--cream);border:1px solid var(--cream2);border-radius:16px;padding:16px 18px}.news-date-v60{font-size:13px;color:var(--light);font-weight:700;letter-spacing:.04em}.news-title-v60{font-size:20px;color:var(--deep);font-weight:800;margin:4px 0 6px}.news-body-v60{color:var(--soft);white-space:pre-wrap}.news-img-v60{width:100%;height:auto;border-radius:12px;margin-top:12px;display:block}.news-note-v60{font-size:13px;color:var(--soft);margin-top:10px}.news-error-v60{font-size:14px;color:var(--soft)}
+
+
+/* V6.2 常見問題 */
+.faq-v62{max-width:980px;margin:24px auto 0;display:grid;gap:12px}
+.faq-v62 details{background:#fff;border:1px solid var(--cream2);border-radius:16px;padding:0;overflow:hidden;box-shadow:0 5px 18px rgba(28,61,76,.05)}
+.faq-v62 summary{cursor:pointer;list-style:none;padding:17px 20px;font-weight:800;color:var(--deep);font-size:18px;display:flex;gap:12px;align-items:flex-start}
+.faq-v62 summary::-webkit-details-marker{display:none}
+.faq-v62 summary::after{content:'＋';margin-left:auto;color:var(--ocean);font-size:22px;line-height:1}
+.faq-v62 details[open] summary::after{content:'－'}
+.faq-v62 .faq-answer{padding:0 20px 18px;color:var(--soft);font-size:16px;line-height:1.85}
+.faq-v62 .faq-answer p{margin:0 0 10px}
+.faq-v62 .faq-answer p:last-child{margin-bottom:0}
+.faq-v62 .faq-link{display:inline-block;margin-top:8px}
+@media(max-width:700px){.faq-v62 summary{font-size:17px;padding:15px 16px}.faq-v62 .faq-answer{padding:0 16px 16px}}
+/* V6.1 最新消息獨立頁 */
+.news-page-v61 .news-feed-v60{max-width:920px;margin:20px auto 0;display:grid;gap:14px}
+.news-page-v61 .news-item-v60{background:#fff;border:1px solid var(--cream2);border-radius:18px;padding:20px 22px;box-shadow:0 6px 22px rgba(28,61,76,.06)}
+.news-page-v61 .news-title-v60{font-size:22px;line-height:1.45}
+.news-page-v61 .news-body-v60{font-size:16px;line-height:1.85}
+.news-status-v61{background:#fff;border:1px solid var(--cream2);border-radius:16px;padding:18px;color:var(--soft);text-align:center}
+.news-actions-v61{text-align:center;margin-top:18px}
+.news-refresh-v61{border:0;cursor:pointer;font:inherit}
+@media(max-width:700px){.news-page-v61 .news-item-v60{padding:16px}.news-page-v61 .news-title-v60{font-size:20px}}
+
+/* V20.11：住民生活前兩張生活照排版修正 */
+#morning .life-photo-v199h{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:8px 0 18px}
+#morning .life-photo-v199h figure{margin:0;overflow:hidden;border-radius:16px;background:#fff;box-shadow:0 6px 18px rgba(28,61,76,.08)}
+#morning .life-photo-v199h img{display:block;width:100%;height:360px;object-fit:cover;object-position:center}
+@media(max-width:700px){#morning .life-photo-v199h{grid-template-columns:1fr;gap:12px;margin:8px 0 16px}#morning .life-photo-v199h figure{border-radius:14px;box-shadow:none}#morning .life-photo-v199h img{width:100%;height:auto;max-height:none;object-fit:contain}}
+
+</style>
+<style>
+/* V2.9 安心生活手機版修正 */
+@media (max-width: 700px){
+  #life .cardgrid{
+    grid-template-columns:1fr !important;
+  }
+  #life .card{
+    min-width:0 !important;
+  }
+
+  /* 房內緊急求助：手機改成上下排列，避免四欄文字被擠成直排 */
+  #life .card[style*="padding:0"] > div[style*="repeat(4,1fr)"]{
+    display:grid !important;
+    grid-template-columns:1fr !important;
+    gap:0 !important;
+  }
+  #life .card[style*="padding:0"] > div[style*="repeat(4,1fr)"] > div{
+    width:100% !important;
+    box-sizing:border-box !important;
+  }
+  #life .card[style*="padding:0"] > div[style*="repeat(4,1fr)"] img{
+    width:100% !important;
+    height:auto !important;
+    max-height:none !important;
+    object-fit:cover !important;
+  }
+
+  /* 醫院、消防與公車醫療照片：手機維持兩張並排，但文字正常換行 */
+  #life .card > div[style*="grid-template-columns:1fr 1fr"]{
+    grid-template-columns:1fr 1fr !important;
+  }
+  #life p, #life b, #life strong, #life h3{
+    word-break:normal !important;
+    overflow-wrap:break-word !important;
+    writing-mode:horizontal-tb !important;
+  }
+}
+</style>
+<style>
+@media (max-width:700px){
+  #contact .cardgrid{grid-template-columns:1fr !important;}
+  #contact .card{min-width:0 !important;}
+  #contact p,#contact b,#contact strong{word-break:normal !important;overflow-wrap:break-word !important;}
+}
+</style>
+<style>
+@media (max-width:700px){
+  #contact iframe{height:300px !important;}
+  #contact .cta{display:inline-block;margin-top:6px;}
+}
+</style>
+<style>
+@media(max-width:700px){
+  #about .manor-video-grid{grid-template-columns:1fr !important;}
+  #about .manor-video-section video{max-height:62vh;object-fit:contain;}
+}
+</style>
+<style>
+@media(max-width:700px){
+  #about .manor-video-grid{grid-template-columns:1fr !important;}
+  #about .manor-video-card video{max-height:62vh;object-fit:contain;}
+}
+</style>
+<style>
+@media(max-width:700px){
+  #nearby .cardgrid{grid-template-columns:1fr !important;}
+  #nearby .card{min-width:0 !important;}
+  #nearby img{width:100% !important;height:auto !important;}
+}
+</style>
+<style>
+@media(max-width:700px){
+  #nearby .nearby-live-grid{grid-template-columns:1fr !important;}
+  #nearby .nearby-live-grid .card{padding:10px !important;}
+  #nearby .nearby-live-grid iframe{max-height:230px;}
+}
+@media(min-width:701px){
+  #nearby .nearby-live-grid .card{max-width:560px;}
+}
+</style>
+<style>
+#nearby .nearby-live-grid img{
+  max-height:260px;
+}
+@media(max-width:700px){
+  #nearby .nearby-live-grid{grid-template-columns:1fr !important;}
+  #nearby .nearby-live-grid img{max-height:220px;}
+}
+</style>
+<style>
+@media(max-width:700px){
+  #nearby .route9-live-grid{grid-template-columns:1fr !important;}
+}
+</style>
+<style>
+@media(max-width:700px){
+ #nearby .island-live-grid{grid-template-columns:1fr !important;}
+}
+</style>
+<style>
+#rooms .room-gallery-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:14px;
+  margin-top:18px;
+}
+#rooms .room-gallery-card{
+  margin:0;
+  background:#fff;
+  border:1px solid var(--cream2);
+  border-radius:14px;
+  overflow:hidden;
+  box-shadow:0 6px 18px rgba(28,61,76,.08);
+}
+#rooms .room-gallery-card img{
+  width:100%;
+  height:260px;
+  object-fit:cover;
+  display:block;
+}
+#rooms .room-gallery-card figcaption{
+  padding:10px 12px;
+  color:var(--deep);
+  font-weight:700;
+  font-size:14px;
+}
+@media(max-width:900px){
+  #rooms .room-gallery-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+}
+@media(max-width:600px){
+  #rooms .room-gallery-grid{grid-template-columns:1fr;}
+  #rooms .room-gallery-card img{height:auto;max-height:430px;object-fit:cover;}
+}
+</style>
+<style>
+@media (max-width: 700px){
+  #experience .wrap{padding-top:18px !important;padding-bottom:18px !important;}
+  #experience .heading{margin-bottom:8px !important;}
+  #experience .heading h2{margin-bottom:6px !important;}
+  #experience .card{min-height:0 !important;}
+}
+</style>
+<style>
+#dining .zhongshan-gallery{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+  margin-top:18px;
+}
+#dining .zhongshan-gallery figure{
+  margin:0;
+  background:#fff;
+  border:1px solid var(--cream2);
+  border-radius:14px;
+  overflow:hidden;
+  box-shadow:0 6px 18px rgba(28,61,76,.08);
+}
+#dining .zhongshan-gallery img{
+  display:block;
+  width:100%;
+  height:330px;
+  object-fit:cover;
+}
+#dining .zhongshan-gallery figcaption{
+  padding:10px 12px;
+  color:var(--deep);
+  font-weight:700;
+  font-size:14px;
+}
+@media(max-width:700px){
+  #dining .zhongshan-gallery{grid-template-columns:1fr;gap:10px;margin-top:12px;}
+  #dining .zhongshan-gallery img{height:auto;max-height:430px;object-fit:cover;}
+  #dining .zhongshan-gallery figcaption{padding:8px 10px;}
+}
+</style>
+<style>
+header .nav a.active-page{
+  outline:2px solid rgba(36,70,85,.28);
+  outline-offset:-2px;
+}
+</style>
+<style>
+/* V12.8 中山交誼廳照片尺寸統一 */
+#morning .embedded-dining img,
+#morning .zhongshan-gallery img,
+#morning .embedded-dining figure img{
+  display:block;
+  width:100%;
+  height:280px;
+  object-fit:cover;
+  border-radius:12px;
+}
+#morning .embedded-dining figure,
+#morning .zhongshan-gallery figure{
+  margin:0;
+  overflow:hidden;
+}
+#morning .embedded-dining,
+#morning .zhongshan-gallery{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+}
+@media(max-width:700px){
+  #morning .embedded-dining,
+  #morning .zhongshan-gallery{
+    grid-template-columns:1fr;
+    gap:10px;
+  }
+  #morning .embedded-dining img,
+  #morning .zhongshan-gallery img,
+  #morning .embedded-dining figure img{
+    height:220px;
+  }
+}
+</style>
+<style>
+/* V12.9 新增的中山交誼廳生活實景照片 */
+#morning .zhongshan-added-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+}
+#morning .zhongshan-added-grid figure{
+  margin:0;
+  overflow:hidden;
+  border-radius:12px;
+}
+#morning .zhongshan-added-grid img{
+  display:block;
+  width:100%;
+  height:280px;
+  object-fit:cover;
+}
+@media(max-width:700px){
+  #morning .zhongshan-added-grid{
+    grid-template-columns:1fr;
+    gap:10px;
+  }
+  #morning .zhongshan-added-grid img{
+    height:220px;
+  }
+}
+</style>
+<style id="life-split-v132">
+.life-split-grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:18px;
+  margin:22px auto 30px;
+  width:100%;
+}
+.life-split-card{
+  margin:0;
+  width:100%;
+  overflow:hidden;
+  border-radius:18px;
+  background:#fff;
+  box-shadow:0 4px 16px rgba(0,0,0,.08);
+}
+.life-split-card img{
+  display:block;
+  width:100%;
+  height:auto;
+}
+@media (min-width:900px){
+  .life-split-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+}
+</style>
+<style id="v153-click-view-fix">
+/* 點擊頁面後，避免畫面卡在選單中段 */
+header{
+  position:relative !important;
+  top:auto !important;
+}
+
+/* 錨點定位時保留一點上方空間 */
+main section[id]{
+  scroll-margin-top:12px;
+}
+
+/* 手機保持原本窄版尺寸 */
+@media (max-width:700px){
+  .nav{
+    width:calc(100% - 24px) !important;
+    margin-left:auto !important;
+    margin-right:auto !important;
+  }
+}
+</style>
+<style id="v154-nav-compact">
+/* V15.4：縮短你圈起來的選單區高度，保留 4 欄與手機寬度 */
+header .nav{
+  gap:6px !important;
+  margin-top:8px !important;
+  margin-bottom:10px !important;
+}
+
+header .nav a,
+header .nav label,
+header .nav button{
+  min-height:44px !important;
+  height:auto !important;
+  padding:5px 3px !important;
+  line-height:1.12 !important;
+  border-radius:10px !important;
+}
+
+/* 手機再壓縮上下高度 */
+@media (max-width:700px){
+  header{
+    padding-bottom:6px !important;
+  }
+
+  header .nav{
+    gap:6px !important;
+    margin-top:6px !important;
+    margin-bottom:6px !important;
+  }
+
+  header .nav a,
+  header .nav label,
+  header .nav button{
+    min-height:42px !important;
+    padding:4px 2px !important;
+    font-size:clamp(11px, 3vw, 14px) !important;
+  }
+}
+
+/* 英文、日文、韓文只縮字，不增加按鈕高度 */
+body:has(#lang-en-target:target) header .nav a,
+body:has(#lang-en-target:target) header .nav label,
+body:has(#lang-ja-target:target) header .nav a,
+body:has(#lang-ja-target:target) header .nav label,
+body:has(#lang-ko-target:target) header .nav a,
+body:has(#lang-ko-target:target) header .nav label{
+  font-size:clamp(10px, 2.7vw, 13px) !important;
+}
+</style>
+<style id="v155-nav-center">
+/* 選單文字加大，並在每個框框內水平＋垂直正中央 */
+header .nav a,
+header .nav label,
+header .nav button{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  text-align:center !important;
+  vertical-align:middle !important;
+  font-size:16px !important;
+  font-weight:700 !important;
+  line-height:1.15 !important;
+  padding:4px 3px !important;
+  min-height:44px !important;
+}
+
+/* 手機版保持大字但不把框框撐寬 */
+@media (max-width:700px){
+  header .nav a,
+  header .nav label,
+  header .nav button{
+    font-size:15px !important;
+    font-weight:700 !important;
+    min-height:44px !important;
+    padding:4px 2px !important;
+  }
+}
+
+/* 外語字較長時稍微縮小，仍保持正中央 */
+body:has(#lang-en-target:target) header .nav a,
+body:has(#lang-en-target:target) header .nav label,
+body:has(#lang-ja-target:target) header .nav a,
+body:has(#lang-ja-target:target) header .nav label,
+body:has(#lang-ko-target:target) header .nav a,
+body:has(#lang-ko-target:target) header .nav label{
+  font-size:13px !important;
+  align-items:center !important;
+  justify-content:center !important;
+  text-align:center !important;
+}
+</style>
+<style id="v158-global-compact-layout">
+/* V15.8 全站緊湊化：縮短段落、標題、卡片與圖片之間的垂直距離 */
+section:not(.hero){padding-top:48px !important;padding-bottom:48px !important;}
+.heading{margin-bottom:22px !important;}
+.heading h2{margin-top:.22em !important;margin-bottom:.22em !important;}
+.heading p{margin-top:8px !important;margin-bottom:0 !important;line-height:1.65 !important;}
+.cardgrid{gap:12px !important;}
+.card{padding:17px 18px !important;}
+.card p{margin-top:10px !important;margin-bottom:6px !important;line-height:1.6 !important;}
+.card h3,.card h4{margin-top:0 !important;margin-bottom:10px !important;}
+.gallery{gap:12px !important;}
+.photo{margin-bottom:0 !important;}
+.photo figcaption{padding:8px 12px !important;}
+
+/* 常見問題、消息等列表也縮短間距 */
+.faq-v62{margin-top:16px !important;gap:9px !important;}
+.news-feed-v60{margin-top:12px !important;gap:9px !important;}
+.news-item-v60{padding:13px 15px !important;}
+
+@media(max-width:760px){
+  section:not(.hero){padding:30px 15px !important;}
+  .heading{margin-bottom:16px !important;}
+  .heading .kicker,.heading .eyebrow{margin-bottom:5px !important;}
+  .heading h2{font-size:clamp(27px,7.4vw,34px) !important;line-height:1.28 !important;margin:.16em 0 !important;}
+  .heading p{font-size:17px !important;line-height:1.55 !important;margin-top:7px !important;}
+  .cardgrid{gap:9px !important;}
+  .card{padding:14px 15px !important;border-radius:14px !important;}
+  .card p{font-size:16px !important;line-height:1.52 !important;margin:7px 0 3px !important;}
+  .card h3,.card h4{margin:0 0 7px !important;line-height:1.3 !important;}
+  .gallery{gap:10px !important;}
+  .photo figcaption{padding:7px 10px !important;}
+  .faq-v62{margin-top:12px !important;gap:8px !important;}
+  .news-feed-v60{gap:8px !important;}
+}
+</style>
+<style id="v159-reorder-polish">
+header .nav{
+  row-gap:7px !important;
+}
+@media (max-width:700px){
+  header .nav{
+    row-gap:6px !important;
+  }
+}
+</style>
+<style id="v169-auto-translate-style">
+.auto-lang{position:relative;z-index:1200;flex:0 0 auto}
+.auto-lang-globe{
+  width:48px;height:48px;border:2px solid var(--deep);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;background:#fff;
+  font-size:25px;cursor:pointer;-webkit-tap-highlight-color:transparent;
+}
+.auto-lang-menu{
+  display:none;position:absolute;right:0;top:56px;width:260px;
+  background:#fff;padding:12px;border-radius:18px;
+  box-shadow:0 12px 35px rgba(0,0,0,.20);gap:8px;
+}
+.auto-lang.open .auto-lang-menu{display:grid}
+.auto-lang-menu button{
+  min-height:48px;border:2px solid var(--deep);border-radius:24px;
+  background:#fff;color:var(--deep);font-weight:700;font-size:16px;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+}
+.auto-lang-menu button:active{transform:scale(.99)}
+
+header{
+  position:sticky!important;
+  top:0!important;
+  z-index:900!important;
+}
+@media(max-width:700px){
+  .auto-lang-menu{width:min(270px,calc(100vw - 24px))}
+  .auto-lang-globe{width:46px;height:46px;font-size:24px}
+}
+</style>
+<style id="v170-nav-layout-fix">
+/* V17.0：手機主選單依閱讀順序固定為 4 欄 × 3 列，不再使用直向填欄造成順序錯置 */
+.nav{
+  display:grid !important;
+  grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+  grid-template-rows:repeat(3,auto) !important;
+  grid-auto-flow:row !important;
+  grid-auto-columns:auto !important;
+  overflow-x:visible !important;
+}
+.nav a{min-width:0 !important;}
+@media(max-width:700px){
+  .nav{grid-template-columns:repeat(4,minmax(0,1fr)) !important;gap:6px !important;padding:7px 10px 10px !important;}
+  .nav a{font-size:14px !important;padding:7px 2px !important;white-space:nowrap !important;}
+}
+</style>
+<style id="v171-performance-css">
+/* 行動裝置效能優化：減少陰影與畫面外區塊的重繪 */
+@media (max-width:700px){
+  .card, .faq-v62 details{
+    box-shadow:none !important;
+  }
+}
+</style>
+<style id="v177-css-page-switch">
+/*
+ V17.7：完全不依賴 JavaScript 的頁面切換。
+ 手機直接開 HTML 也能正常使用，不會再因腳本沒執行而出現空白頁。
+*/
+
+/* 預設只顯示首頁 */
+main > section[id]{
+  display:none !important;
+}
+main > #home{
+  display:flex !important;
+}
+
+/* 點選任何 #頁面 後，只顯示該頁 */
+body:has(main > section:target) main > #home{
+  display:none !important;
+}
+main > section:target{
+  display:block !important;
+}
+main > #home:target{
+  display:flex !important;
+}
+
+/*
+ Fragment 跳轉時把可捲動偏移設為一整個視窗高度。
+ 因為所有其他 section 都已隱藏，目標頁實際就在 header 下方，
+ Safari 會因此停在文件最上方，而不是跳到內容中段。
+*/
+main > section[id]{
+  scroll-margin-top:100vh !important;
+}
+
+html,body{
+  scroll-behavior:auto !important;
+}
+
+/* 上方選單維持固定顯示 */
+header{
+  position:sticky !important;
+  top:0 !important;
+  z-index:900 !important;
+}
+
+/* 被選中的頁面不要再受舊 content-visibility 影響 */
+main > section:target{
+  content-visibility:visible !important;
+  contain:none !important;
+}
+</style>
+<style id="v213-farm-produce">
+#morning .farm-produce{margin-top:16px;padding-top:15px;border-top:1px solid var(--cream2);text-align:left}
+#morning .farm-produce-title{display:block;margin:0 0 6px;font-size:18px;color:var(--deep);font-weight:800}
+#morning .farm-produce-copy{display:block;color:var(--soft);line-height:1.7;margin-bottom:12px}
+#morning .farm-produce-gallery{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#morning .farm-produce-gallery figure{margin:0;overflow:hidden;border-radius:12px;background:#f3f1e8}
+#morning .farm-produce-gallery figure:first-child{grid-column:1/-1}
+#morning .farm-produce-gallery img{display:block;width:100%;height:120px;object-fit:cover;content-visibility:auto}
+#morning .farm-produce-gallery figure:first-child img{height:190px}
+#morning .farm-produce-badge{display:inline-block;margin-top:10px;padding:6px 10px;border-radius:999px;background:#f5f0df;color:var(--deep);font-size:14px;font-weight:700}
+@media(max-width:720px){
+  #morning .farm-produce{margin-top:18px;padding-top:16px}
+  #morning .farm-produce-gallery{gap:10px}
+  #morning .farm-produce-gallery img{height:145px}
+  #morning .farm-produce-gallery figure:first-child img{height:240px}
+}
+</style>
+<style id="v212-life-jitter-fix">
+/* V21.2：只修正安心生活頁面特定區塊在 iPhone/Safari 的抖動 */
+#life .safety-room-grid img,
+#life .pm-smart-locker-v197 img,
+#life .cardgrid img{
+  content-visibility:visible !important;
+  contain:none !important;
+  -webkit-transform:translateZ(0);
+  transform:translateZ(0);
+  backface-visibility:hidden;
+}
+#life .safety-room-grid,
+#life .pm-smart-locker-v197,
+#life .cardgrid,
+#life .safety-room-card,
+#life .card{
+  overflow-anchor:none;
+}
+@media(max-width:720px){
+  #life .safety-room-card img{
+    aspect-ratio:auto !important;
+  }
+}
+</style>
+<style id="v184-pure-css-language">
+body > input[name="pm-lang-state"]{
+  position:fixed!important;left:-10000px!important;top:-10000px!important;
+  width:1px!important;height:1px!important;opacity:0!important;
+}
+.pm-lang-text{display:none!important;}
+
+#pm-zh-Hant-closed:checked ~ .site-shell .pm-zh-Hant,
+#pm-zh-Hant-open:checked ~ .site-shell .pm-zh-Hant{display:inline!important;}
+#pm-en-closed:checked ~ .site-shell .pm-en,
+#pm-en-open:checked ~ .site-shell .pm-en{display:inline!important;}
+#pm-ja-closed:checked ~ .site-shell .pm-ja,
+#pm-ja-open:checked ~ .site-shell .pm-ja{display:inline!important;}
+#pm-ko-closed:checked ~ .site-shell .pm-ko,
+#pm-ko-open:checked ~ .site-shell .pm-ko{display:inline!important;}
+#pm-zh-Hans-closed:checked ~ .site-shell .pm-zh-Hans,
+#pm-zh-Hans-open:checked ~ .site-shell .pm-zh-Hans{display:inline!important;}
+
+.pm-lang-control{position:relative;z-index:1900;flex:0 0 auto}
+.pm-lang-globe{
+  width:48px;height:48px;border:2px solid var(--deep,#173e4d);border-radius:50%;
+  background:#fff;font-size:25px;align-items:center;justify-content:center;
+  cursor:pointer;-webkit-tap-highlight-color:transparent;display:none;
+}
+#pm-zh-Hant-closed:checked ~ .site-shell .gl-zh-Hant,
+#pm-zh-Hant-open:checked ~ .site-shell .gl-zh-Hant,
+#pm-en-closed:checked ~ .site-shell .gl-en,
+#pm-en-open:checked ~ .site-shell .gl-en,
+#pm-ja-closed:checked ~ .site-shell .gl-ja,
+#pm-ja-open:checked ~ .site-shell .gl-ja,
+#pm-ko-closed:checked ~ .site-shell .gl-ko,
+#pm-ko-open:checked ~ .site-shell .gl-ko,
+#pm-zh-Hans-closed:checked ~ .site-shell .gl-zh-Hans,
+#pm-zh-Hans-open:checked ~ .site-shell .gl-zh-Hans{display:flex!important;}
+
+.pm-lang-menu{
+  display:none;position:absolute;right:0;top:56px;width:268px;padding:12px;
+  background:#fff;border-radius:18px;box-shadow:0 12px 35px rgba(0,0,0,.22);gap:8px
+}
+#pm-zh-Hant-open:checked ~ .site-shell .pm-lang-menu,
+#pm-en-open:checked ~ .site-shell .pm-lang-menu,
+#pm-ja-open:checked ~ .site-shell .pm-lang-menu,
+#pm-ko-open:checked ~ .site-shell .pm-lang-menu,
+#pm-zh-Hans-open:checked ~ .site-shell .pm-lang-menu{display:grid!important;}
+
+.pm-lang-menu label{
+  min-height:48px;border:2px solid var(--deep,#173e4d);border-radius:24px;
+  background:#fff;color:var(--deep,#173e4d);font-size:16px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+@media(max-width:700px){.pm-lang-menu{width:min(268px,calc(100vw - 22px))}}
+</style>
+<style id="v185-nav-unified">
+/* V18.5：所有語言的主選單固定在同一個尺寸範圍 */
+.nav{
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:10px!important;
+  align-items:stretch!important;
+}
+.nav a{
+  box-sizing:border-box!important;
+  width:100%!important;
+  min-width:0!important;
+  height:76px!important;
+  min-height:76px!important;
+  max-height:76px!important;
+  padding:7px 5px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  text-align:center!important;
+  line-height:1.12!important;
+  overflow:hidden!important;
+  word-break:normal!important;
+  overflow-wrap:anywhere!important;
+  white-space:normal!important;
+}
+.nav a .pm-lang-text{
+  width:100%!important;
+  max-width:100%!important;
+  text-align:center!important;
+  line-height:1.12!important;
+}
+.nav a .pm-zh-Hant,.nav a .pm-zh-Hans{font-size:17px!important;font-weight:800!important;}
+.nav a .pm-en{font-size:14px!important;font-weight:750!important;}
+.nav a .pm-ja{font-size:15px!important;font-weight:750!important;}
+.nav a .pm-ko{font-size:15px!important;font-weight:750!important;}
+
+@media(max-width:430px){
+  .nav{gap:8px!important;}
+  .nav a{height:72px!important;min-height:72px!important;max-height:72px!important;padding:6px 4px!important;}
+  .nav a .pm-zh-Hant,.nav a .pm-zh-Hans{font-size:16px!important;}
+  .nav a .pm-en{font-size:13px!important;}
+  .nav a .pm-ja,.nav a .pm-ko{font-size:14px!important;}
+}
+</style>
+<style>
+.pm-top-actions{display:flex;align-items:center;gap:8px;margin-left:auto}
+.pm-top-action{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:8px 14px;border-radius:999px;border:1px solid var(--ocean);background:#fff;color:var(--deep);text-decoration:none;font-weight:800;font-size:14px;white-space:nowrap;box-shadow:0 3px 10px rgba(28,61,76,.06)}
+.pm-top-action.reserve{background:var(--ocean);color:#fff}
+.pm-top-action:hover{background:var(--deep);color:#fff}
+#familycare .family-hero-v191{background:linear-gradient(135deg,var(--deep),var(--ocean));color:#fff;border-radius:22px;padding:26px 28px;margin-bottom:18px}
+#familycare .family-hero-v191 h2{color:#fff;margin:4px 0 8px}
+#familycare .family-hero-v191 p{margin:0;color:#eef6f8}
+#familycare .family-grid-v191{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+#familycare .family-card-v191{background:#fff;border:1px solid var(--cream2);border-radius:18px;padding:20px;box-shadow:0 5px 18px rgba(28,61,76,.05)}
+#familycare .family-card-v191 h3{margin:4px 0 8px;color:var(--deep)}
+#familycare .family-list-v191{display:grid;gap:7px;margin-top:10px}
+#familycare .family-list-v191 div:before{content:"•";color:var(--ocean);font-weight:900;margin-right:8px}
+#familycare .medicine-v191{background:#f3f8f8;border:1px solid #d9e7ea;border-radius:14px;padding:14px 16px;margin-top:12px}
+#familycare .medicine-v191 strong{color:var(--deep)}
+#familycare .family-note-v191{font-size:13px;color:var(--soft);margin-top:10px}
+#familycare .family-login-v191{display:inline-block;margin-top:14px;padding:10px 16px;background:var(--ocean);color:#fff;text-decoration:none;border-radius:12px;font-weight:800}
+@media(max-width:700px){
+ .top{gap:8px!important}
+ .brand{margin-right:0!important;min-width:0}
+ .brand strong{font-size:22px!important}
+ .brand small{font-size:11px;letter-spacing:1.8px}
+ .pm-top-actions{margin-left:auto;gap:6px}
+ .pm-top-action{min-height:38px;padding:7px 9px;font-size:12px}
+ #familycare .family-grid-v191{grid-template-columns:1fr}
+ #familycare .family-hero-v191{padding:22px 18px}
+}
+@media(max-width:430px){
+ .top{padding-left:10px!important;padding-right:10px!important}
+ .brand strong{font-size:19px!important;letter-spacing:1px!important}
+ .brand small{font-size:9px;letter-spacing:1.3px}
+ .pm-top-action{padding:6px 7px;font-size:11px}
+}
+</style>
+<style>
+/* V19.2 安心專區登入 */
+.portal-tabs-v192{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0}
+.portal-tab-v192{border:1px solid var(--cream2);background:#fff;color:var(--deep);border-radius:14px;padding:14px 10px;font-weight:800;font-size:16px;cursor:pointer}
+.portal-tab-v192.active{background:var(--ocean);color:#fff;border-color:var(--ocean)}
+.portal-panel-v192{display:none;background:#fff;border:1px solid var(--cream2);border-radius:18px;padding:20px;margin-bottom:16px}
+.portal-panel-v192.active{display:block}
+.portal-login-grid-v192{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.portal-field-v192 label{display:block;font-size:13px;color:var(--soft);margin-bottom:4px}
+.portal-field-v192 input,.portal-field-v192 textarea,.portal-field-v192 select{
+ width:100%;border:1px solid #d8d8d2;border-radius:10px;padding:11px 12px;background:#fff;font:inherit
+}
+.portal-btn-v192{border:0;background:var(--ocean);color:#fff;border-radius:11px;padding:11px 16px;font-weight:800;cursor:pointer}
+.portal-btn-v192.secondary{background:#fff;color:var(--deep);border:1px solid var(--cream2)}
+.portal-btn-v192.danger{background:#8b4a45}
+.staff-tools-v192{display:none;margin-top:18px}
+.staff-tools-v192.show{display:block}
+.staff-layout-v192{display:grid;grid-template-columns:1.05fr .95fr;gap:14px}
+.news-editor-v192,.news-list-v192{background:#f9f7f1;border:1px solid var(--cream2);border-radius:16px;padding:16px}
+.news-item-v192{background:#fff;border:1px solid var(--cream2);border-radius:12px;padding:12px;margin-top:10px}
+.news-item-v192 .meta{font-size:12px;color:var(--soft)}
+.news-item-v192 .actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
+.portal-note-v192{font-size:13px;color:var(--soft);margin-top:8px}
+.portal-demo-v192{background:#fff8e8;border:1px solid #ead6a4;border-radius:12px;padding:11px 13px;margin-top:10px;color:#655534;font-size:13px}
+@media(max-width:700px){
+ .portal-tabs-v192{grid-template-columns:1fr}
+ .portal-login-grid-v192,.staff-layout-v192{grid-template-columns:1fr}
+}
+</style>
+<style>
+/* V19.4 醫院預約門診按鈕 */
+.pm-hospital-booking{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  margin-top:10px;
+  padding:9px 14px;
+  border-radius:11px;
+  background:var(--ocean);
+  color:#fff !important;
+  text-decoration:none !important;
+  font-weight:800;
+  font-size:14px;
+  box-shadow:0 3px 10px rgba(28,61,76,.08);
+}
+.pm-hospital-booking:hover{background:var(--deep)}
+</style>
+<style>
+/* V19.7 智慧領藥櫃圖片 */
+.pm-smart-locker-v197{
+  background:#fff;
+  border:1px solid var(--cream2);
+  border-radius:18px;
+  padding:18px;
+  margin:16px 0 22px;
+  box-shadow:0 5px 18px rgba(28,61,76,.05);
+}
+.pm-smart-locker-v197 h3{
+  margin:0 0 10px;
+  color:var(--deep);
+}
+.pm-smart-locker-v197 p{
+  margin:0 0 12px;
+  color:var(--soft);
+}
+.pm-smart-locker-v197 img{
+  width:100%;
+  height:auto;
+  display:block;
+  border-radius:14px;
+  border:1px solid #d9d9d2;
+}
+.pm-smart-locker-note-v197{
+  margin-top:10px;
+  font-size:14px;
+  color:var(--soft);
+}
+</style>
+<style id="v199g-story-compact">
+/* V19.9G：莊園故事頁面緊湊化 */
+#story{
+  padding-top:20px !important;
+  padding-bottom:34px !important;
+}
+#story .section-head{
+  max-width:980px;
+  margin:0 auto 14px !important;
+}
+#story .section-head .eyebrow{
+  display:block;
+  margin-bottom:6px !important;
+  letter-spacing:4px;
+}
+#story .section-head h2{
+  margin:0 0 6px !important;
+  line-height:1.2 !important;
+}
+#story .section-head p{
+  margin:0 !important;
+  line-height:1.5 !important;
+}
+#story > .card{
+  margin-top:0 !important;
+  padding-top:16px !important;
+}
+#story > .card h3{
+  margin-bottom:4px !important;
+}
+#story > .card > p{
+  margin-top:2px !important;
+  margin-bottom:12px !important;
+}
+@media(max-width:760px){
+  #story{
+    padding-top:18px !important;
+    padding-bottom:28px !important;
+  }
+  #story .section-head{
+    margin-bottom:12px !important;
+  }
+}
+</style>
+<style id="v199h-life-photo-clean">
+/* V19.9H：安心生活以照片為主，減少重複文字 */
+#life .life-photo-v199h{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:4px 0 18px}
+#life .life-photo-v199h figure,#about .about-life-photo-v199h{margin:0;overflow:hidden;border-radius:16px;background:#fff;box-shadow:0 6px 18px rgba(28,61,76,.08)}
+#life .life-photo-v199h img,#about .about-life-photo-v199h img{display:block;width:100%;height:auto}
+#about .about-life-photo-v199h{margin-top:18px}
+@media(max-width:700px){#life .life-photo-v199h{grid-template-columns:1fr;gap:10px;margin-bottom:14px}#life .life-photo-v199h figure,#about .about-life-photo-v199h{border-radius:12px;box-shadow:none}}
+</style>
+<style id="v199i-resident-life-text-compact">
+/* V19.9I：住民生活活動卡僅保留短標題，刪除重複說明文字 */
+#morning .resident-life-title-grid{
+  grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+  gap:10px !important;
+  margin-top:12px;
+}
+#morning .resident-life-title-grid .card{
+  min-height:58px !important;
+  padding:12px 10px !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  text-align:center !important;
+}
+#morning .resident-life-title-grid .card b{
+  font-size:17px;
+  line-height:1.25;
+}
+@media(max-width:700px){
+  #morning .resident-life-title-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    gap:8px !important;
+  }
+  #morning .resident-life-title-grid .card{
+    min-height:54px !important;
+    padding:10px 8px !important;
+  }
+  #morning .resident-life-title-grid .card b{font-size:16px;}
+}
+</style>
+<style id="v199k-desktop-morning-fix">
+/* V20.37：修正住民生活在電腦版的寬度與置中問題 */
+#morning{overflow-x:hidden!important;}
+#morning > .wrap,
+#morning > .card{
+  width:100%!important;
+  max-width:1100px!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
+  box-sizing:border-box!important;
+}
+#morning > .card{
+  margin-top:18px!important;
+}
+#morning .embedded-dining,
+#morning .zhongshan-gallery,
+#morning .zhongshan-added-grid,
+#morning .life-split-grid{
+  width:100%!important;
+  max-width:100%!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
+  box-sizing:border-box!important;
+}
+#morning figure,
+#morning img{
+  max-width:100%!important;
+  box-sizing:border-box!important;
+}
+@media(min-width:761px){
+  #morning{padding-left:24px!important;padding-right:24px!important;}
+  #morning > .card{padding:20px!important;border-radius:18px!important;}
+}
+@media(max-width:760px){
+  #morning > .card{margin-top:10px!important;}
+}
+</style>
+<style id="v199k-latest-performance">
+/* 最新優化版：媒體外部化後，隱藏頁面不預先做昂貴渲染 */
+main > section:not(#home):not(:target){content-visibility:auto;contain-intrinsic-size:1px 900px;}
+img{content-visibility:auto;}
+
+/* V20.1：住民生活共享空間／安心設備 */
+.resident-facility-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:18px 0 6px}
+.resident-facility-card{background:#fff;border:1px solid var(--cream2);border-radius:16px;padding:20px;text-align:center}
+.resident-facility-card b{display:block;font-size:19px;color:var(--deep);margin-bottom:6px}
+.safety-room-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:20px 0 8px}
+.safety-room-card{background:#fff;border:1px solid var(--cream2);border-radius:18px;overflow:hidden}
+.safety-room-card img{width:100%;height:280px;object-fit:cover;display:block;background:#f5f5f5}
+.safety-room-card .safety-copy{padding:16px 18px 18px}
+.safety-room-card h3{margin:0 0 7px;color:var(--deep);font-size:20px}
+.safety-room-card p{margin:0;color:var(--soft)}
+@media(max-width:720px){.resident-facility-grid,.safety-room-grid{grid-template-columns:1fr}.safety-room-card img{height:auto;max-height:420px;object-fit:contain}}
+</style>
+<style id="v2022-resident-life-size-fix">
+/* V20.30：住民生活圖片原字遮蓋＋標題統一 */
+#morning .life-split-grid{
+  display:grid!important;
+  grid-template-columns:1fr!important;
+  gap:16px!important;
+  margin:18px auto 26px!important;
+  width:100%!important;
+  max-width:760px!important;
+}
+#morning .life-split-card{
+  margin:0!important;
+  overflow:hidden!important;
+  border-radius:16px!important;
+  background:#fff!important;
+  box-shadow:0 4px 14px rgba(0,0,0,.09)!important;
+}
+#morning .life-split-card img{
+  display:block!important;
+  width:100%!important;
+  aspect-ratio:4/3!important;
+  height:auto!important;
+  object-fit:cover!important;
+}
+@media(min-width:760px){
+  #morning .life-split-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;max-width:980px!important;gap:16px!important;}
+}
+@media(min-width:1100px){
+  #morning .life-split-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;max-width:1180px!important;gap:18px!important;}
+}
+</style>
+<style id="v2021-wansui-gallery-overlay-fix">
+/* V20.24：萬歲咖啡圖片放大，改成圖片內疊字，移除圖片下方說明 */
+#wansui .room-gallery-grid{
+  display:grid!important;
+  grid-template-columns:1fr!important;
+  gap:16px!important;
+  margin:18px auto 24px!important;
+  width:100%!important;
+}
+#wansui .room-gallery-card{
+  position:relative!important;
+  margin:0!important;
+  overflow:hidden!important;
+  border-radius:16px!important;
+  background:#fff!important;
+  box-shadow:0 4px 14px rgba(0,0,0,.10)!important;
+}
+#wansui .room-gallery-card img{
+  display:block!important;
+  width:100%!important;
+  aspect-ratio:4/3!important;
+  height:auto!important;
+  object-fit:cover!important;
+}
+#wansui .room-gallery-card figcaption{
+  position:absolute!important;
+  left:0!important;
+  right:0!important;
+  bottom:0!important;
+  margin:0!important;
+  padding:34px 16px 16px!important;
+  font-size:18px!important;
+  line-height:1.35!important;
+  text-align:left!important;
+  color:#fff!important;
+  font-weight:700!important;
+  background:linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.18) 35%, rgba(0,0,0,.62) 100%)!important;
+  text-shadow:0 2px 6px rgba(0,0,0,.28)!important;
+}
+@media(min-width:760px){
+  #wansui .room-gallery-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:16px!important;}
+  #wansui .room-gallery-card:last-child{grid-column:1 / -1!important;max-width:720px!important;justify-self:center!important;width:100%!important;}
+  #wansui .room-gallery-card figcaption{font-size:20px!important;padding:40px 18px 18px!important;}
+}
+</style>
+<style id="v2023-fitness-gallery">
+/* V20.25：住民生活－健身房圖文更新 */
+#morning .resident-facility-card.fitness-feature{grid-column:1/-1!important;}
+#morning .fitness-gallery{display:grid;grid-template-columns:1fr;gap:14px;margin-top:14px;}
+#morning .fitness-photo{margin:0;overflow:hidden;border-radius:14px;background:#fff;box-shadow:0 3px 12px rgba(0,0,0,.08);}
+#morning .fitness-photo img{display:block;width:100%;height:auto;max-height:none;object-fit:cover;}
+#morning .fitness-copy{margin-top:4px;}
+@media(min-width:760px){#morning .fitness-gallery{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;}#morning .fitness-photo:last-child{grid-column:1/-1;max-width:720px;justify-self:center;width:100%;}}
+</style>
+<style id="v2025-life-caption-fix">
+#morning .life-main-caption{position:relative;margin:0;overflow:hidden;border-radius:16px;}
+#morning .life-main-caption img{display:block;width:100%;height:auto;}
+#morning .life-main-caption figcaption{position:absolute;left:0;right:0;bottom:0;padding:40px 18px 16px;color:#fff;font-weight:800;font-size:22px;line-height:1.25;background:linear-gradient(180deg,transparent,rgba(0,0,0,.64));text-shadow:0 2px 5px rgba(0,0,0,.4);}
+@media(max-width:640px){#morning .life-main-caption figcaption{font-size:20px;padding:34px 16px 14px;}}
+</style>
+<style id="v2028-android-mobile-compat">
+/* V20.28：Android / Samsung 窄螢幕與系統大字體相容 */
+html{-webkit-text-size-adjust:100%!important;text-size-adjust:100%!important;}
+body{overflow-x:hidden!important;}
+header,.top,.nav{box-sizing:border-box!important;max-width:100vw!important;}
+.hero,.hero *{-webkit-text-size-adjust:100%!important;text-size-adjust:100%!important;}
+.hero .hero-inner,.hero h1,.hero p,.hero .eyebrow{color:#fff!important;text-shadow:0 2px 8px rgba(0,0,0,.42)!important;}
+@media(max-width:520px){
+  header{position:sticky!important;top:0!important;}
+  .top{padding:8px 10px!important;gap:5px!important;min-height:60px!important;}
+  .brand{flex:1 1 auto!important;min-width:0!important;max-width:34vw!important;overflow:hidden!important;}
+  .brand strong{font-size:16px!important;line-height:1.05!important;letter-spacing:.4px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:clip!important;}
+  .brand small{font-size:7px!important;line-height:1.1!important;letter-spacing:.9px!important;white-space:nowrap!important;}
+  .pm-top-actions{gap:4px!important;flex:0 0 auto!important;}
+  .pm-top-action{min-height:34px!important;height:34px!important;padding:5px 7px!important;font-size:10px!important;line-height:1!important;border-width:1px!important;}
+  .pm-lang-globe{width:38px!important;height:38px!important;font-size:20px!important;border-width:2px!important;}
+  .nav{padding:6px 8px 8px!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:6px!important;overflow:visible!important;}
+  .nav a{height:54px!important;min-height:54px!important;max-height:54px!important;padding:4px 2px!important;border-radius:9px!important;line-height:1.08!important;}
+  .nav a .pm-zh-Hant,.nav a .pm-zh-Hans{font-size:13px!important;line-height:1.08!important;letter-spacing:0!important;overflow-wrap:normal!important;word-break:keep-all!important;}
+  .nav a .pm-en{font-size:10px!important;}
+  .nav a .pm-ja,.nav a .pm-ko{font-size:11px!important;}
+  section{scroll-margin-top:282px!important;}
+  .hero{min-height:54vh!important;background-position:center!important;}
+  .hero-inner{padding:42px 16px 34px!important;}
+  .hero h1{font-size:30px!important;line-height:1.22!important;margin:.18em 0!important;}
+  .hero p{font-size:16px!important;line-height:1.55!important;margin:.55em 0!important;max-width:92%!important;}
+  .hero .eyebrow{font-size:12px!important;letter-spacing:2px!important;}
+}
+@media(max-width:370px){
+  .brand{max-width:31vw!important;}
+  .brand strong{font-size:14px!important;}
+  .pm-top-action{font-size:9px!important;padding:4px 5px!important;}
+  .pm-lang-globe{width:36px!important;height:36px!important;font-size:19px!important;}
+  .nav{gap:5px!important;padding-left:6px!important;padding-right:6px!important;}
+  .nav a{height:50px!important;min-height:50px!important;max-height:50px!important;}
+  .nav a .pm-zh-Hant,.nav a .pm-zh-Hans{font-size:12px!important;}
+}
+</style>
+<style id="v2029-resident-life-caption-unify">
+/* V20.29：住民生活所有圖片文字統一，避免 Android 字體忽大忽小或看不到 */
+#morning .life-main-caption,
+#morning .life-split-card{
+  position:relative!important;
+  overflow:hidden!important;
+  border-radius:16px!important;
+  background:#000!important;
+}
+#morning .life-main-caption img,
+#morning .life-split-card img{
+  display:block!important;
+  width:100%!important;
+  aspect-ratio:4/3!important;
+  height:auto!important;
+  object-fit:cover!important;
+  object-position:center 42%!important;
+}
+#morning .life-main-caption figcaption,
+#morning .life-split-card figcaption{
+  position:absolute!important;
+  left:0!important;
+  right:0!important;
+  bottom:0!important;
+  box-sizing:border-box!important;
+  margin:0!important;
+  padding:38px 16px 14px!important;
+  color:#fff!important;
+  font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif!important;
+  font-size:18px!important;
+  font-weight:700!important;
+  line-height:1.25!important;
+  letter-spacing:.02em!important;
+  text-align:left!important;
+  white-space:normal!important;
+  -webkit-text-size-adjust:100%!important;
+  text-size-adjust:100%!important;
+  text-shadow:0 2px 5px rgba(0,0,0,.75)!important;
+  background:linear-gradient(180deg,rgba(0,0,0,0) 0%,rgba(0,0,0,.20) 38%,rgba(0,0,0,.72) 100%)!important;
+  z-index:2!important;
+}
+@media(max-width:430px){
+  #morning .life-main-caption figcaption,
+  #morning .life-split-card figcaption{
+    font-size:17px!important;
+    padding:34px 14px 12px!important;
+  }
+}
+@media(min-width:700px){
+  #morning .life-main-caption figcaption,
+  #morning .life-split-card figcaption{
+    font-size:20px!important;
+    padding:42px 18px 16px!important;
+  }
+}
+</style>
+<style id="v2031-resident-life-caption-clean">
+/* V20.31：加強遮蓋住民生活圖片內原始文字，只保留統一頁面標題 */
+#morning .life-main-caption,
+#morning .life-split-card{
+  position:relative!important;
+  overflow:hidden!important;
+}
+/* 主圖只保留輕微漸層 */
+#morning .life-main-caption::after{
+  content:""!important;
+  position:absolute!important;
+  left:0!important;
+  right:0!important;
+  bottom:0!important;
+  height:24%!important;
+  background:linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.22) 22%, rgba(0,0,0,.56) 68%, rgba(0,0,0,.76) 100%)!important;
+  z-index:1!important;
+}
+/* 小圖加深並加高遮罩，蓋住原本做在圖內的字 */
+#morning .life-split-card::after{
+  content:""!important;
+  position:absolute!important;
+  left:0!important;
+  right:0!important;
+  bottom:0!important;
+  height:46%!important;
+  background:linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.58) 22%, rgba(0,0,0,.88) 58%, rgba(0,0,0,.96) 100%)!important;
+  z-index:1!important;
+}
+#morning .life-main-caption figcaption,
+#morning .life-split-card figcaption{
+  position:absolute!important;
+  left:0!important;
+  right:0!important;
+  bottom:0!important;
+  z-index:2!important;
+  display:flex!important;
+  align-items:flex-end!important;
+  box-sizing:border-box!important;
+  margin:0!important;
+  color:#fff!important;
+  font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif!important;
+  font-weight:800!important;
+  line-height:1.2!important;
+  letter-spacing:.02em!important;
+  text-align:left!important;
+  white-space:normal!important;
+  text-shadow:0 2px 8px rgba(0,0,0,.92)!important;
+  background:none!important;
+  -webkit-text-size-adjust:100%!important;
+  text-size-adjust:100%!important;
+}
+#morning .life-main-caption figcaption{
+  min-height:78px!important;
+  padding:0 16px 14px!important;
+  font-size:20px!important;
+}
+#morning .life-split-card figcaption{
+  min-height:96px!important;
+  padding:0 16px 14px!important;
+  font-size:20px!important;
+}
+@media (max-width:430px){
+  #morning .life-main-caption::after{
+    height:26%!important;
+  }
+  #morning .life-split-card::after{
+    height:50%!important;
+  }
+  #morning .life-main-caption figcaption{
+    min-height:80px!important;
+    padding:0 14px 12px!important;
+    font-size:18px!important;
+  }
+  #morning .life-split-card figcaption{
+    min-height:100px!important;
+    padding:0 14px 12px!important;
+    font-size:18px!important;
+  }
+}
+@media (min-width:700px){
+  #morning .life-main-caption figcaption{
+    min-height:84px!important;
+    font-size:22px!important;
+    padding:0 18px 16px!important;
+  }
+  #morning .life-split-card figcaption{
+    min-height:104px!important;
+    font-size:22px!important;
+    padding:0 18px 16px!important;
+  }
+}
+</style>
+<style id="v2032-wansui-hours">
+#wansui .wansui-hours{margin:14px 0 20px;padding:14px 16px;border:1px solid var(--cream2);border-radius:14px;background:#fffdf8;color:var(--deep);line-height:1.6;text-align:left;}
+#wansui .wansui-hours strong{display:block;font-size:19px;margin-bottom:4px;}
+#wansui .wansui-hours span:not(.pm-lang-text){display:block;}
+#wansui .room-gallery-card.one-day-manager{grid-column:1/-1;}
+#wansui .room-gallery-card.one-day-manager img{width:100%;aspect-ratio:4/3;object-fit:cover;object-position:center;}
+@media(max-width:640px){#wansui .wansui-hours strong{font-size:18px;}#wansui .room-gallery-card.one-day-manager{grid-column:auto;}}
+</style>
+<style id="v2036-top-contact">
+@media(max-width:640px){
+  .pm-top-actions{gap:4px!important;}
+  .pm-top-action{padding-left:6px!important;padding-right:6px!important;}
+}
+@media(max-width:390px){
+  .pm-top-action{font-size:9px!important;padding-left:4px!important;padding-right:4px!important;}
+}
+</style>
+
+<style id="v2123-shared-kitchen-ratio-fix">
+/* V21.23：只修正住民生活「公共廚房」主圖在手機被拉長 */
+#morning .resident-facility-card:first-child > img[alt^="公共廚房"]{
+  display:block !important;
+  width:100% !important;
+  height:auto !important;
+  aspect-ratio:4 / 3 !important;
+  object-fit:cover !important;
+  object-position:center !important;
+}
+</style>
+
+<style id="v222-wp-news-embed">
+#news .pm-wp-news{
+  max-width:920px;
+  margin:18px auto 0;
+  display:grid;
+  gap:14px;
+}
+#news .pm-wp-news-card{
+  background:#fff;
+  border:1px solid var(--cream2);
+  border-radius:18px;
+  overflow:hidden;
+  box-shadow:0 6px 22px rgba(28,61,76,.07);
+}
+#news .pm-wp-news-cover{
+  width:100%;
+  max-height:520px;
+  object-fit:cover;
+  display:block;
+}
+#news .pm-wp-news-inner{padding:20px 22px 22px}
+#news .pm-wp-news-date{
+  color:var(--light);
+  font-size:14px;
+  font-weight:800;
+  letter-spacing:.04em;
+  margin-bottom:5px;
+}
+#news .pm-wp-news-title{
+  color:var(--deep);
+  font-size:24px;
+  line-height:1.4;
+  margin:0 0 12px;
+}
+#news .pm-wp-news-content{
+  color:var(--soft);
+  font-size:17px;
+  line-height:1.8;
+  overflow-wrap:anywhere;
+}
+#news .pm-wp-news-content img{
+  max-width:100%;
+  height:auto;
+  border-radius:12px;
+  margin:10px 0;
+}
+#news .pm-wp-news-content p{font-size:17px;line-height:1.8}
+#news .pm-wp-news-content iframe,
+#news .pm-wp-news-content video{
+  max-width:100%;
+}
+#news .pm-wp-news-more{
+  display:inline-block;
+  margin-top:10px;
+  color:var(--ocean);
+  font-weight:800;
+  text-decoration:none;
+}
+#news .pm-news-fallback{
+  max-width:920px;
+  margin:18px auto 0;
+  text-align:center;
+  background:#fff;
+  border:1px solid var(--cream2);
+  border-radius:16px;
+  padding:20px;
+}
+@media(max-width:700px){
+  #news .pm-wp-news{gap:10px;margin-top:12px}
+  #news .pm-wp-news-inner{padding:15px 16px 17px}
+  #news .pm-wp-news-title{font-size:21px}
+  #news .pm-wp-news-content,
+  #news .pm-wp-news-content p{font-size:16px;line-height:1.7}
+  #news .pm-wp-news-cover{max-height:360px}
+}
+</style>
+
+
+
+</head>
+<body><input checked="" id="pm-zh-Hant-closed" name="pm-lang-state" type="radio"/><input id="pm-zh-Hant-open" name="pm-lang-state" type="radio"/><input id="pm-en-closed" name="pm-lang-state" type="radio"/><input id="pm-en-open" name="pm-lang-state" type="radio"/><input id="pm-ja-closed" name="pm-lang-state" type="radio"/><input id="pm-ja-open" name="pm-lang-state" type="radio"/><input id="pm-ko-closed" name="pm-lang-state" type="radio"/><input id="pm-ko-open" name="pm-lang-state" type="radio"/><input id="pm-zh-Hans-closed" name="pm-lang-state" type="radio"/><input id="pm-zh-Hans-open" name="pm-lang-state" type="radio"/><div class="site-shell"><div class="site-shell">
+<header>
+<div class="top">
+<a class="brand" href="#home"><strong data-i18n="t0" data-i18n-src="太平洋莊園">太平洋莊園</strong><small>PACIFIC MANOR</small></a>
+<div class="lang-switch">
+</div>
+<div class="pm-top-actions" translate="no">
+<a class="pm-top-action reserve" href="https://seasideresort.com.tw/booking/pm_front/" rel="noopener noreferrer" target="_blank">入住申請</a>
+<a class="pm-top-action" href="#familycare">安心專區</a>
+<a class="pm-top-action contact-top" href="#contact">聯繫我們</a>
+<a class="pm-top-action" href="https://seasideresort.com.tw/booking/pm_roomboard/pm_member_center_v17.php">會員中心</a></div>
+<div class="pm-lang-control" translate="no">
+<label class="pm-lang-globe gl-zh-Hant" for="pm-zh-Hant-open">🌐</label>
+<label class="pm-lang-globe gl-en" for="pm-en-open">🌐</label>
+<label class="pm-lang-globe gl-ja" for="pm-ja-open">🌐</label>
+<label class="pm-lang-globe gl-ko" for="pm-ko-open">🌐</label>
+<label class="pm-lang-globe gl-zh-Hans" for="pm-zh-Hans-open">🌐</label>
+<div class="pm-lang-menu">
+<label for="pm-zh-Hant-closed">繁體中文</label>
+<label for="pm-en-closed">English</label>
+<label for="pm-ja-closed">日本語</label>
+<label for="pm-ko-closed">한국어</label>
+<label for="pm-zh-Hans-closed">简体中文</label>
+</div>
+</div></div>
+<nav class="nav">
+<a href="#about">認識莊園</a>
+<a href="#story">莊園故事</a>
+<a href="#rooms">觀海套房</a>
+<a href="#morning">住民生活</a>
+<a href="#wansui">萬歲咖啡</a>
+<a href="#life">安心生活</a>
+<a href="#longstay">長住方案</a>
+<a href="#experience">預約體驗</a>
+<a href="#news">最新消息</a>
+<a href="#nearby">附近景點</a>
+<a href="#transport">交通方式</a>
+<a href="#faq">常見問題</a>
+</nav>
+</header>
+<main>
+<section class="hero is-current" id="home">
+<div class="hero-inner">
+<div class="eyebrow" data-i18n="t14" data-i18n-src="花蓮・豐濱・太平洋畔">花蓮・豐濱・太平洋畔</div>
+<h1>面朝太平洋的家，<br/>為安心而生的每一天</h1>
+<p data-i18n="t15" data-i18n-src="為健康、可自理的長者提供長期居住與生活體驗。在海風與晨曦之間，過屬於自己的節奏。">為健康、可自理的長者提供長期居住與生活體驗。在海風與晨曦之間，過屬於自己的節奏。</p>
+</div>
+</section>
+<section id="about">
+<div class="manor-video-section" style="margin:0 0 24px;">
+<div class="kicker">太平洋莊園・實景影像</div>
+<h3>從不同角度，看見真正的太平洋莊園</h3>
+<p>以下皆為太平洋莊園實際拍攝影片，點擊即可播放。</p>
+<div class="manor-video-grid" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:18px;">
+<div class="card manor-video-card manor-combined-feature" style="padding:10px;grid-column:1/-1;">
+<video controls="" playsinline="" poster="images/img-002-891339e4951f.webp" preload="none" style="width:100%;display:block;border-radius:12px;background:#000;max-height:72vh;object-fit:contain;">
+<source data-pm-video-key="pmvid_1" src="videos/v2034-video-1.mp4" type="video/mp4"/>
+</video>
+<p style="margin:10px 4px 4px;"><strong>太平洋莊園｜園區空拍與建築實景</strong></p>
+</div>
+<div class="card manor-video-card" style="padding:10px;">
+<video controls="" playsinline="" poster="images/img-003-bb1f79edcff0.webp" preload="none" style="width:100%;display:block;border-radius:12px;background:#000;">
+<source data-pm-video-key="pmvid_2" src="videos/v2034-video-2.mp4" type="video/mp4"/>
+</video>
+<p style="margin:10px 4px 4px;"><strong>太平洋莊園｜園區與生活實景片段</strong></p></div>
+</div>
+</div>
+<div class="wrap">
+<div class="heading"><div class="kicker" data-i18n="t16" data-i18n-src="認識太平洋莊園">認識太平洋莊園</div><h2 data-i18n="t17" data-i18n-src="在太平洋畔，重新安排生活的節奏">在太平洋畔，重新安排生活的節奏</h2><p data-i18n="t18" data-i18n-src="太平洋莊園位於花蓮豐濱，以地中海風格建築、觀海套房與安靜環境，提供長住生活。">太平洋莊園位於花蓮豐濱，以地中海風格建築、觀海套房與安靜環境，提供長住生活。</p></div>
+<figure class="photo"><img alt="晨曦時光｜欣賞太平洋日出" decoding="async" height="271" loading="lazy" src="images/img-004-b666378b1102.webp" width="432"/><figcaption data-i18n="t19" data-i18n-src="晨曦觀海平台與步道">晨曦觀海平台與步道</figcaption></figure>
+</div>
+<div class="wrap">
+<div class="heading"><div class="kicker" data-i18n="t20" data-i18n-src="莊園環境">莊園環境</div><h2 data-i18n="t21" data-i18n-src="建築、花園、步道與太平洋">建築、花園、步道與太平洋</h2><p data-i18n="t22" data-i18n-src="從房間走上平台，沿著寬敞步道慢慢散步，欣賞太平洋不同時刻的光線。">從房間走上平台，沿著寬敞步道慢慢散步，欣賞太平洋不同時刻的光線。</p></div>
+<figure class="photo"><img alt="海景散步｜沿步道看海、吹海風" decoding="async" height="270" loading="lazy" src="images/img-005-cd088e0d19ee.webp" width="462"/><figcaption data-i18n="t23" data-i18n-src="觀海步道晨曦景觀">觀海步道晨曦景觀</figcaption></figure>
+</div>
+<div class="card" style="margin-top:22px;">
+<figure class="photo" style="margin-bottom:18px;"><img alt="戶外泡茶｜在海景平台與住民一起泡茶聊天" decoding="async" height="270" loading="lazy" src="images/img-006-5a8e3b157430.webp" width="546"/><figcaption>觀海平台休憩時光</figcaption></figure>
+<div class="gallery" style="margin-bottom:18px;">
+<figure class="photo"><img alt="園藝生活｜種花種草、親近自然" decoding="async" height="388" loading="lazy" src="images/img-007-02fbebd4c8af.webp" width="768"/><figcaption>園藝與庭園生活</figcaption></figure>
+<figure class="photo"><img alt="太平洋莊園園區配置與生活空間示意圖" decoding="async" height="1024" loading="lazy" src="images/img-008-04032f802a74.webp" width="1536"/><figcaption>園區配置與生活空間示意圖</figcaption></figure>
+</div>
+<div class="kicker">花東海岸・稀有的臨海生活</div>
+<h3>唯一的臨海別墅群・270° 開闊無遮蔽視野</h3>
+<p>太平洋莊園座落於花東海岸公路靠海一側，是目前沿線唯一的大型獨立別墅群。園區面向太平洋，擁有約 270 度開闊無遮蔽視野，一側緊鄰貓公溪，山、海、溪流與天空自然環繞。</p>
+<p>清晨迎接從太平洋海面升起的晨曦；午後約三點後，觀海平台逐漸避開陽光直曬，可以舒服地躺在躺椅上，迎著海風，靜靜欣賞遼闊的太平洋海景。</p>
+<p>入夜之後，來自海岸山脈的清涼山風徐徐吹進園區，即使在夏季，也能感受到花東海岸特有的自然涼意。</p>
+<p><strong>臨海、依山、傍溪，晨迎曙光、午後觀海、夜享山風。</strong>加上難以複製的 270 度開闊視野，成就太平洋莊園在花東海岸極為稀有的居住環境。</p>
+</div>
+
+<figure class="about-life-photo-v199h"><img alt="太平洋莊園白天散步生活" decoding="async" height="1193" loading="lazy" src="images/img-009-9934206db0c7.webp" width="896"/></figure>
+<div style="margin-top:24px;">
+<img alt="太平洋莊園園區配置與生活空間示意圖" decoding="async" height="1024" loading="lazy" src="images/img-008-04032f802a74.webp" style="display:block;width:100%;height:auto;border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,.10);" width="1536"/>
+</div>
+</section>
+<section class="section" id="story">
+<div class="section-head">
+<div>
+<span class="eyebrow">OUR STORY</span>
+<h2>莊園故事</h2>
+<p>用 AI 短視頻，記錄太平洋莊園的人、生活與故事。</p>
+</div>
+</div>
+<div class="card" style="max-width:980px;margin:0 auto;text-align:center">
+<h3 style="margin-top:0">退休後，我搬到了海邊 EP01</h3>
+<p style="color:var(--soft)">太平洋莊園 AI 微短劇・第一集</p>
+<video controls="" data-pm-video-key="pmvid_3" playsinline="" preload="none" src="videos/v2034-video-3.mp4" style="display:block;width:100%;max-width:880px;margin:18px auto 0;border-radius:18px;background:#000">
+      您的瀏覽器不支援影片播放。
+    </video>
+</div>
+</section>
+<section id="rooms">
+<div class="wrap">
+<div class="heading"><div class="kicker" data-i18n="t24" data-i18n-src="觀海套房">觀海套房</div><h2 data-i18n="t25" data-i18n-src="讓太平洋成為日常風景">讓太平洋成為日常風景</h2><p data-i18n="t26" data-i18n-src="一樓與二樓觀海套房，讓晨曦、海風與月光成為每天生活的一部分。">一樓與二樓觀海套房，讓晨曦、海風與月光成為每天生活的一部分。</p></div>
+<div class="cardgrid">
+</div>
+<div class="room-gallery-block">
+<div class="kicker" style="margin-top:26px;">觀海套房・實景生活</div>
+<h3 style="margin-top:6px;">從房間、窗景到衛浴，看見真正的長住空間</h3>
+<p>以下皆為觀海套房實景照片，保留房間原有配置與海景，呈現住民日常起居的真實感受。</p>
+<p style="margin-top:10px;">房內配備 58 吋網路電視，可觀看 YouTube、Netflix，收看新聞、影音娛樂與日常休憩都更方便。</p>
+<div class="room-gallery-grid">
+<figure class="room-gallery-card"><img alt="觀海套房｜客廳休憩空間" decoding="async" height="1050" loading="lazy" src="images/img-010-fbac36547228.webp" width="1400"/><figcaption>觀海套房｜客廳休憩空間</figcaption></figure><figure class="room-gallery-card"><img alt="觀海套房｜浴缸泡澡空間" decoding="async" height="1400" loading="lazy" src="images/img-011-2687d053ef54.webp" width="1050"/><figcaption>觀海套房｜浴缸泡澡空間</figcaption></figure><figure class="room-gallery-card"><img alt="觀海套房｜窗前觀海休憩區" decoding="async" height="1050" loading="lazy" src="images/img-012-0fc10762683f.webp" width="1400"/><figcaption>觀海套房｜窗前觀海休憩區</figcaption></figure><figure class="room-gallery-card"><img alt="觀海套房｜臥室與觀海窗景" decoding="async" height="1050" loading="lazy" src="images/img-013-ba40b53d6ac8.webp" width="1400"/><figcaption>觀海套房｜臥室與觀海窗景</figcaption></figure><figure class="room-gallery-card"><img alt="觀海套房｜客廳與室內動線" decoding="async" height="1400" loading="lazy" src="images/img-014-a7cb4a343a4a.webp" width="1050"/><figcaption>觀海套房｜客廳與室內動線</figcaption></figure><figure class="room-gallery-card"><img alt="觀海套房｜寬敞臥室空間" decoding="async" height="1050" loading="lazy" src="images/img-015-b83d1ee4a8dd.webp" width="1400"/><figcaption>觀海套房｜寬敞臥室空間</figcaption></figure><figure class="room-gallery-card"><img alt="觀海套房｜衛浴與洗手台空間" decoding="async" height="1050" loading="lazy" src="images/img-016-4d688659baaa.webp" width="1400"/><figcaption>觀海套房｜衛浴與洗手台空間</figcaption></figure><figure class="room-gallery-card"><img alt="觀海套房｜58吋網路電視" decoding="async" loading="lazy" src="images/img-017-69a080e33be8.webp" width="1400"/><figcaption>觀海套房｜58吋網路電視（可觀看 YouTube、Netflix）</figcaption></figure></div>
+</div>
+<div class="room-gallery-block" style="margin-top:22px;">
+<div class="kicker">觀海套房・房內設備</div>
+<h3 style="margin-top:6px;">長住更安心的房內配備</h3>
+<p>觀海套房內另備有房間大門密碼鎖與房內保險箱，兼顧出入便利、隱私與隨身貴重物品保管。</p>
+<div aria-label="觀海套房房內設備" class="safety-room-grid">
+<div class="safety-room-card">
+<img alt="觀海套房｜房間大門密碼鎖" decoding="async" height="500" loading="lazy" src="images/img-018-a03f1fede880.webp" width="310"/>
+<div class="safety-copy"><h3>🔐 觀海套房・房間大門密碼鎖</h3><p>住民可使用個人密碼進出房間，兼顧便利與隱私。</p></div>
+</div>
+<div class="safety-room-card">
+<img alt="觀海套房｜房內保險箱" decoding="async" height="1070" loading="lazy" src="images/img-019-964fbf4c3f39.webp" width="1070"/>
+<div class="safety-copy"><h3>🔒 觀海套房・房內保險箱</h3><p>可收納證件、現金與重要隨身物品，讓長住生活更安心。</p></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="morning">
+<div class="wrap">
+<div class="heading">
+<div class="kicker" data-i18n="t61" data-i18n-src="住民生活">住民生活</div>
+<h2 data-i18n="t62" data-i18n-src="從晨曦到星空，照自己的步調生活">從晨曦到星空，照自己的步調生活</h2>
+<p data-i18n="t63" data-i18n-src="早晨沿海堤漫步、在觀海平台看日出；白天可泡茶、園藝、健身與餵魚，傍晚散步，夜晚欣賞星空與流星。">早晨沿海堤漫步、在觀海平台看日出；白天可泡茶、園藝、健身與餵魚，傍晚散步，夜晚欣賞星空與流星。</p>
+<div class="life-photo-v199h">
+<figure class="life-main-caption"><img alt="觀海平台看流星許願" decoding="async" height="896" loading="lazy" src="images/img-020-07bf2668b8e8.webp" width="1195"/><figcaption>觀海平台看流星許願</figcaption></figure>
+<figure class="life-main-caption"><img alt="早上在海堤上漫步" decoding="async" height="1193" loading="lazy" src="images/img-021-3c7755948e90.webp" width="896"/><figcaption>早上在海堤上漫步</figcaption></figure>
+</div>
+<div class="life-split-grid">
+<figure class="life-split-card"><img alt="中山交誼廳｜長者泡茶、聊天與桌遊" decoding="async" height="686" loading="lazy" src="images/img-022-2c21360c2159.webp" width="960"/><figcaption>中山交誼廳</figcaption></figure>
+<figure class="life-split-card"><img alt="中山交誼廳｜閱讀、休閒與會客" decoding="async" height="686" loading="lazy" src="images/img-023-0d09ba910be4.webp" width="960"/><figcaption>中山交誼廳</figcaption></figure>
+<figure class="life-split-card"><img alt="中山交誼廳｜泡茶、聚餐與聯誼" decoding="async" height="686" loading="lazy" src="images/img-024-b9c6a54f597f.webp" width="960"/><figcaption>中山交誼廳</figcaption></figure>
+<figure class="life-split-card"><img alt="園藝生活｜種花種草、親近自然" decoding="async" height="388" loading="lazy" src="images/img-007-02fbebd4c8af.webp" width="768"/><figcaption>園藝生活</figcaption></figure>
+<figure class="life-split-card"><img alt="海景散步｜沿步道看海、吹海風" decoding="async" height="270" loading="lazy" src="images/img-005-cd088e0d19ee.webp" width="462"/><figcaption>海景散步</figcaption></figure>
+<figure class="life-split-card"><img alt="戶外泡茶｜在海景平台與住民一起泡茶聊天" decoding="async" height="270" loading="lazy" src="images/img-006-5a8e3b157430.webp" width="546"/><figcaption>戶外泡茶</figcaption></figure>
+<figure class="life-split-card"><img alt="晨間瑜伽｜在觀海平台舒展身體" decoding="async" height="270" loading="lazy" src="images/img-025-ff2eb83d3b9b.webp" width="528"/><figcaption>晨間瑜伽</figcaption></figure>
+<figure class="life-split-card"><img alt="晨曦時光｜欣賞太平洋日出" decoding="async" height="271" loading="lazy" src="images/img-004-b666378b1102.webp" width="432"/><figcaption>晨曦時光</figcaption></figure>
+<figure class="life-split-card"><img alt="餵魚樂趣｜在庭園餵魚、聊天" decoding="async" height="271" loading="lazy" src="images/img-026-06cce61e8987.webp" width="452"/><figcaption>餵魚樂趣</figcaption></figure>
+<figure class="life-split-card"><img alt="黃昏時光｜晚飯後散步、享受海風" decoding="async" height="271" loading="lazy" src="images/img-027-4fbbb1e950d4.webp" width="300"/><figcaption>黃昏散步</figcaption></figure>
+<figure class="life-split-card"><img alt="熄燈觀星｜20:00–20:30 一起看星空" decoding="async" height="271" loading="lazy" src="images/img-028-8b763f7fb705.webp" width="352"/><figcaption>熄燈觀星</figcaption></figure>
+</div>
+<div aria-label="住民生活共享空間" class="resident-facility-grid">
+<div class="resident-facility-card"><img alt="公共廚房｜住民一起備餐、泡茶與交流" decoding="async" height="1050" loading="lazy" src="images/img-029-b9b786d39ead.webp" style="width:100%;border-radius:12px;margin-bottom:12px;display:block;" width="1400"/><b>公共廚房</b>提供住民簡單備餐與料理，也能一起準備餐點、泡茶與交流。<div aria-label="在地安心食材" class="farm-produce"><span class="farm-produce-title">在地小農無農藥蔬果・開心農場蛋雞蛋鴨</span><span class="farm-produce-copy">在地小農無農藥蔬果，搭配開心農場自然活動的蛋雞與蛋鴨，讓住民在公共廚房也能簡單料理、吃得新鮮安心。</span><div class="farm-produce-gallery"><figure><img alt="開心農場蛋雞在草地活動" decoding="async" height="1200" loading="lazy" src="images/img-030-e7f64dad4891.webp" width="900"/></figure><figure><img alt="開心農場蛋雞與蛋鴨在池畔活動" decoding="async" height="1200" loading="lazy" src="images/img-031-06924e731d9b.webp" width="900"/></figure><figure><img alt="在地小農新鮮蔬菜與開心農場雞蛋" decoding="async" height="1536" loading="lazy" src="images/img-032-d8738f6dbe76.webp" width="1152"/></figure><figure><img alt="清洗整理後的新鮮無農藥蔬菜與雞蛋" decoding="async" height="1536" loading="lazy" src="images/img-033-d303dfc4161f.webp" width="1152"/></figure><figure><img alt="公共廚房準備中的新鮮蔬菜與雞蛋" decoding="async" height="1536" loading="lazy" src="images/img-034-616930c63d00.webp" width="1152"/></figure></div><span class="farm-produce-badge">🥬 新鮮在地・安心日常</span></div></div>
+<div class="resident-facility-card"><b>中山交誼廳</b>主要提供長者聯誼、聚餐、休閒、泡茶、打麻將與唱歌的共享空間。</div>
+<div class="resident-facility-card fitness-feature"><b>健身房</b><div class="fitness-copy">提供桌球自動發球、投籃、拳擊、倒立伸展及多功能手腳聯動訓練，讓住民依自己的體力選擇合適的日常運動。</div><div aria-label="健身房活動與設備" class="fitness-gallery"><figure class="fitness-photo"><img alt="長者拳擊運動" decoding="async" height="1050" loading="lazy" src="images/img-035-ba9b4e164630.webp" width="1400"/></figure><figure class="fitness-photo"><img alt="倒立機伸展運動" decoding="async" height="1050" loading="lazy" src="images/img-036-9efd97ab1d5b.webp" width="1400"/></figure><figure class="fitness-photo"><img alt="長者投籃活動" decoding="async" height="1050" loading="lazy" src="images/img-037-138391b4e054.webp" width="1400"/></figure><figure class="fitness-photo"><img alt="多功能手腳聯動訓練設備" decoding="async" height="1400" loading="lazy" src="images/img-038-2f0189cea6d7.webp" width="1050"/></figure><figure class="fitness-photo"><img alt="桌球自動發球機" decoding="async" height="1050" loading="lazy" src="images/img-039-1c5d2d4aa438.webp" width="1400"/></figure></div></div>
+</div>
+</div>
+</div>
+</section>
+<section id="wansui">
+<div class="wrap">
+<div class="heading"><div class="kicker">萬歲咖啡</div><h2>長輩自己當店長的咖啡廳</h2><p>這裡不只是一間咖啡廳，也是住民參與生活的一個舞台。長者可以依自己的興趣與體力，自願擔任店長、服務員，幫忙招呼客人、泡茶、端飲料、整理桌面。不是為了工作而工作，而是讓退休後的生活重新有參與感、有角色，也多一個和朋友聊天、認識新朋友的地方。</p><div class="wansui-hours" role="note"><strong>營業時間｜週六、週日</strong>其餘時間為住民生活共享空間，提供住民休憩、交流與日常活動使用。</div></div>
+<div aria-label="萬歲咖啡實景" class="room-gallery-grid">
+<figure class="room-gallery-card one-day-manager"><img alt="萬歲咖啡一日店長｜長者穿咖啡制服在吧台服務" decoding="async" height="1050" loading="lazy" src="images/img-040-db88068b5b57.webp" width="1400"/><figcaption>萬歲咖啡｜一日店長</figcaption></figure>
+<figure class="room-gallery-card"><img alt="萬歲咖啡聚會與音樂空間" decoding="async" height="1050" loading="lazy" src="images/img-041-adf0a8b3cc96.webp" width="1400"/><figcaption>萬歲咖啡｜長輩一起當店長、招呼朋友</figcaption></figure>
+<figure class="room-gallery-card"><img alt="萬歲咖啡海景長桌交流區" decoding="async" height="1050" loading="lazy" src="images/img-042-51e40cb33682.webp" width="1400"/><figcaption>萬歲咖啡｜泡茶、聊天、一起參與服務</figcaption></figure>
+<figure class="room-gallery-card"><img alt="萬歲咖啡住民茶敘交流" decoding="async" height="1050" loading="lazy" src="images/img-043-0074a9f96a5a.webp" width="1400"/><figcaption>萬歲咖啡｜退休後也有自己的角色與舞台</figcaption></figure>
+</div>
+</div>
+</section>
+<section id="life">
+<div class="wrap">
+<div class="heading">
+<div class="kicker">安心生活</div>
+<h2>安心生活</h2>
+</div>
+<div class="card pm-sleep-comfort-v2121" style="margin:8px 0 22px;padding:0;overflow:hidden;">
+  <img src="images/img-044-abc123614bce.png" alt="安心入眠｜智慧睡眠冷氣與電風扇個人化控制" width="1672" height="941" loading="eager" decoding="async" style="display:block;width:100%;height:auto;object-fit:contain;background:#101827;"/>
+  <div style="padding:16px 18px 18px;">
+    <h3 style="margin:0 0 8px;">🌙 安心入眠｜智慧睡眠溫控</h3>
+    <p style="margin:0 0 8px;">依每位住民怕冷、怕熱與睡眠習慣，個別設定冷氣與電風扇。深夜逐步調高溫度，清晨維持較舒適的溫度，避免醒來時過冷。</p>
+    <p style="margin:0;font-weight:700;">也可依個人習慣設定清晨幾點自動關閉冷氣。</p>
+  </div>
+</div>
+<div class="family-card-v191" id="prescription-service-v193" style="margin-top:18px;;margin-top:18px;margin-bottom:22px">
+<h3>💊 慢性處方箋代領服務</h3>
+<p>長住住民可委託莊園協助集中代領慢性處方箋藥品，減少往返市區的不便。</p>
+<div class="medicine-v191"><strong>每週二統一收件 → 每週五完成代領並交付</strong></div>
+<div class="family-note-v191">實際領藥依處方箋效期、健保規定及醫療院所／藥局作業規定辦理；特殊藥品依個別規定處理。</div>
+</div><div class="pm-smart-locker-v197"><h3>智慧領藥櫃</h3><p>住戶可於收件日前，將慢性處方箋與健保卡放入自己的智慧領藥櫃；工作人員統一取件代領，完成後再將藥品放回住戶專屬櫃格。</p><img alt="智慧領藥櫃｜人臉辨識＋密碼" decoding="async" height="1402" loading="eager" src="images/img-045-6e655c0c4075.webp" width="1122"><div class="pm-smart-locker-note-v197">設備形式：智慧領藥櫃｜開櫃方式：人臉辨識＋密碼</div></img></div>
+<div class="cardgrid" style="margin-top:18px;">
+<div class="card" style="padding:0;overflow:hidden;">
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+<div style="padding:18px;">
+<b>房內緊急求助</b>
+<p>房間床頭設有緊急按鈕，住戶需要協助時可快速發出求助。</p>
+</div>
+<div>
+<img alt="浴廁緊急按鈕" decoding="async" height="381" loading="eager" src="images/img-046-e13521ba24f6.webp" style="width:100%;height:220px;object-fit:cover;display:block;" width="900">
+<div style="padding:10px 12px 0;"><strong>浴廁緊急按鈕</strong></div>
+</img></div>
+<div>
+<img alt="夜間護理人員協助長者" decoding="async" height="176" loading="eager" src="images/img-047-eca86f9f454d.webp" style="width:100%;height:220px;object-fit:cover;display:block;" width="353">
+<div style="padding:10px 12px 0;"><strong>晚上有護理人員協助</strong></div>
+</img></div>
+<div style="padding:18px;">
+<b>夜間護理協助</b>
+<p>如有臨時身體不適或需要協助，可提供基本支援並協助聯繫醫療或救護資源。</p>
+</div>
+</div>
+<div style="padding:0 18px 18px;">
+<p>房間的廁所／浴室也設置緊急按鈕，萬一在浴廁內跌倒或身體不適，可以直接按鈕求助。</p>
+</div>
+</div>
+</div>
+<div class="cardgrid">
+<div class="card" style="padding:0;overflow:hidden;">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+<img alt="衛生福利部花蓮醫院豐濱原住民分院" decoding="async" height="593" loading="eager" src="images/img-048-268179280257.webp" style="width:100%;height:220px;object-fit:cover;display:block;" width="800"/>
+<img alt="豐濱原住民分院24小時急診服務" decoding="async" height="268" loading="eager" src="images/img-049-0149238ead4b.webp" style="width:100%;height:220px;object-fit:cover;display:block;" width="343">
+</img></div>
+<div style="padding:18px;">
+<h3 style="margin-top:0;">豐濱原住民分院｜24 小時急診</h3>
+<p>衛生福利部花蓮醫院豐濱原住民分院提供急診、門診與住院等醫療服務；院方資料顯示設有急診留觀病床，並提供 24 小時急診服務。園區如遇突發身體狀況，可就近銜接醫療資源。</p>
+</div>
+<a class="pm-hospital-booking" href="https://webreg.hwln.mohw.gov.tw/OINetReg.WebRwd/" rel="noopener noreferrer" target="_blank">預約門診</a></div>
+<div class="card" style="padding:0;overflow:hidden;">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+<img alt="花蓮縣消防局豐濱分隊" decoding="async" height="563" loading="eager" src="images/img-050-93528cc19e00.webp" style="width:100%;height:220px;object-fit:cover;display:block;" width="750">
+<img alt="豐濱消防分隊119救護車" decoding="async" height="270" loading="eager" src="images/img-051-ac31b9b2ff19.webp" style="width:100%;height:220px;object-fit:cover;display:block;" width="372">
+</img></img></div>
+<div style="padding:18px;">
+<h3 style="margin-top:0;">豐濱消防分隊｜119 緊急救護</h3>
+<p>豐濱消防分隊配置消防與救護勤務車輛，提供 119 緊急救護與消防支援。發生緊急事件時，可立即透過 119 啟動救護。</p>
+</div>
+</div>
+<div class="card"><h3>花蓮慈濟醫院</h3><p>花蓮市大型醫學中心，提供多科門診與完整醫療服務。</p><a class="pm-hospital-booking" href="https://hlapp.tzuchi.com.tw/tchw/opdreg/SecList_HL.aspx" rel="noopener noreferrer" target="_blank">預約門診</a></div><div class="card"><h3>門諾醫院</h3><p>花蓮市主要綜合醫院之一，提供多科門診與醫療服務。</p><a class="pm-hospital-booking" href="https://cgmwsin.mch.org.tw/registerin/Register/A" rel="noopener noreferrer" target="_blank">預約門診</a></div></div>
+<div class="cardgrid" style="margin-top:18px;">
+<div class="card" style="padding:0;overflow:hidden;">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+<div>
+<img alt="國軍花蓮總醫院" decoding="async" height="403" loading="eager" src="images/img-052-9f9234019017.webp" style="width:100%;height:220px;object-fit:cover;display:block;" width="538">
+<div style="padding:10px 14px 0;"><strong>國軍花蓮總醫院</strong></div>
+</img></div>
+<div>
+<img alt="衛生福利部花蓮醫院" decoding="async" height="494" loading="eager" src="images/img-053-503989a080de.webp" style="width:100%;height:220px;object-fit:cover;display:block;" width="800">
+<div style="padding:10px 14px 0;"><strong>衛生福利部花蓮醫院</strong></div>
+</img></div>
+</div>
+<div style="padding:14px 18px 18px;">
+<b>公車就醫便利</b>
+<p>搭乘公車可前往<strong>國軍花蓮總醫院</strong>及<strong>衛生福利部花蓮醫院</strong>，需要進一步檢查或專科醫療時，多一種大眾運輸選擇。</p>
+</div>
+<a class="pm-hospital-booking" href="https://webreg.hwln.mohw.gov.tw/OINetReg.WebRwd/" rel="noopener noreferrer" style="margin-right:8px;" target="_blank">花蓮醫院｜預約門診</a><a class="pm-hospital-booking" href="https://reg.805.mnd.gov.tw/" rel="noopener noreferrer" style="margin-right:8px;" target="_blank">國軍花蓮總醫院｜預約門診</a></div>
+</div>
+</div>
+</section>
+<section class="white family-portal-notice" id="familycare" aria-labelledby="family-portal-title" lang="zh-Hant">
+<div class="wrap">
+  <h2 id="family-portal-title">家屬／住戶／工作人員服務</h2>
+  <p>家屬／住戶／工作人員功能即將開放，請以市話／手機／官方 LINE 聯繫。</p>
+  <p>如需了解住宿、參觀或體驗安排，歡迎直接與太平洋莊園聯絡，我們會提供最新資訊。</p>
+  <p>
+    <a href="tel:038791468">電話：03-8791468</a>
+    <span aria-hidden="true">｜</span>
+    <a href="https://line.me/R/ti/p/@a0937667917">LINE：@a0937667917</a>
+  </p>
+</div>
+</section>
+
+<style id="v220-experience-staff-style">
+/* V22.0：僅新增體驗資格流程與頁尾工作人員入口 */
+.v220-flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:20px 0 24px}
+.v220-step{position:relative;background:#fff;border:1px solid var(--cream2);border-radius:16px;padding:18px 14px;text-align:center;box-shadow:0 5px 16px rgba(28,61,76,.05)}
+.v220-step .v220-icon{font-size:34px;line-height:1;margin-bottom:8px}
+.v220-step b{display:block;color:var(--deep);font-size:19px;margin-bottom:5px}
+.v220-step .v220-badge{display:inline-block;background:var(--ocean);color:#fff;border-radius:999px;padding:5px 10px;font-size:13px;font-weight:800;margin-bottom:8px}
+.v220-step p{font-size:15px;line-height:1.55;margin:5px 0 0}
+.v220-rule{background:#eef6f8;border:1px solid #cfe0e7;border-radius:16px;padding:15px 17px;margin:14px 0 18px;color:var(--deep);font-weight:700;line-height:1.75}
+.v220-month-title{font-size:20px;color:var(--deep);line-height:1.45}
+.v220-once{display:inline-block;margin-top:8px;padding:5px 10px;border-radius:999px;background:#2E5E73;color:#fff;font-size:13px;font-weight:800}
+footer.v220-footer{display:flex;align-items:flex-end;justify-content:center;position:relative;min-height:70px}
+footer.v220-footer .v220-footer-center{text-align:center}
+footer.v220-footer .v220-staff-link{position:absolute;right:16px;bottom:14px;color:#fff;text-decoration:none;border:1px solid rgba(255,255,255,.55);border-radius:999px;padding:6px 11px;font-size:12px;font-weight:700;opacity:.85}
+footer.v220-footer .v220-staff-link:hover{opacity:1;background:rgba(255,255,255,.08)}
+@media(max-width:760px){
+ .v220-flow{grid-template-columns:1fr 1fr;gap:9px}
+ .v220-step{padding:14px 10px}.v220-step .v220-icon{font-size:28px}.v220-step b{font-size:17px}
+ footer.v220-footer{padding-bottom:42px !important}
+ footer.v220-footer .v220-staff-link{right:10px;bottom:10px}
+}
+@media(max-width:430px){.v220-flow{grid-template-columns:1fr}}
+</style>
+<section class="white" id="longstay">
+<div class="wrap">
+<div class="heading">
+<div class="kicker" data-i18n="t33" data-i18n-src="長住方案">長住方案</div>
+<h2 data-i18n="t34" data-i18n-src="不是短暫停留，而是安頓下來">不是短暫停留，而是安頓下來</h2>
+    <div style="margin:18px 0 26px;">
+      <img src="images/img-054-95bf0911f65a.png" alt="人生清單｜在海邊的別墅住上一個月" style="width:100%;height:auto;border-radius:18px;display:block;">
+    </div>
+<p data-i18n="t35" data-i18n-src="太平洋莊園提供適合健康、可自理長者的長期居住方案，入住前進行健康與生活自理評估。">以私人空間、公共生活、安心設備與個人節奏為核心。</p>
+</div>
+
+
+
+
+
+<div class="v220-flow" aria-label="入住方案與體驗流程">
+  <div class="v220-step"><div class="v220-icon">🌊</div><b>短期體驗</b><span class="v220-badge">每人一生限一次</span><p>先短住認識莊園，感受海邊生活。</p></div>
+  <div class="v220-step"><div class="v220-icon">🏡</div><b>一個月體驗</b><span class="v220-badge">每人一生限一次</span><p>短期體驗後，仍可再申請一次。</p></div>
+  <div class="v220-step"><div class="v220-icon">🌿</div><b>季租方案</b><span class="v220-badge">可持續入住</span><p>完成體驗後，延續三個月海居生活。</p></div>
+  <div class="v220-step"><div class="v220-icon">☀️</div><b>年租方案</b><span class="v220-badge">長期海居生活</span><p>適合希望長期安定居住的住民。</p></div>
+</div>
+<div class="v220-rule">短期體驗與一個月體驗為兩種獨立體驗資格，每人各限一次；先參加短期體驗後，仍可再申請一次一個月體驗。完成體驗後，如欲繼續入住，請選擇季租或年租方案。</div>
+
+<div style="margin-top:26px;">
+  <div class="heading" style="margin-bottom:16px;">
+    <div class="kicker">
+      海景生活方案
+
+
+
+
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;">
+<div class="card">
+      <b>
+        人生清單｜一生僅此一次・海邊住一個月
+
+
+
+
+      </b>
+      <p style="font-size:28px;margin:10px 0 6px;"><strong>NT$59,800／
+        月
+
+
+
+
+      </strong></p>
+      <div class="v220-once">每人一生限一次｜短期體驗後仍可申請</div>
+
+      <p style="margin-top:12px;line-height:1.65;">
+        <strong>
+          一生一次的海居體驗：在海邊的別墅，住上一個月。
+
+
+
+
+        </strong><br>
+        不用出國，也能看日出、吹海風，享受一段悠閒的海景生活。
+
+
+
+
+      </p>
+</div>
+
+    <div class="card">
+      <b>
+        季租
+
+
+
+
+      </b>
+      <p style="font-size:28px;margin:10px 0 6px;"><strong>NT$45,000／
+        月
+
+
+
+
+      </strong></p>
+      <p>
+        平均每日約 NT$1,500。
+
+
+
+
+      </p>
+    </div>
+
+    <div class="card">
+      <b>
+        年租
+
+
+
+
+      </b>
+      <p style="font-size:28px;margin:10px 0 6px;"><strong>NT$33,000／
+        月
+
+
+
+
+      </strong></p>
+      <p>
+        平均每日約 NT$1,100；年租總額 NT$396,000。
+
+
+
+
+      </p>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:18px;">
+    <p style="margin:0 0 8px;">
+      <strong>
+        以上方案皆為1人價格，水電另計。
+
+
+
+
+      </strong>
+    </p>
+    <p style="margin:0 0 8px;">
+      同住家人：每增加1人＋NT$6,000／月，平均每日約 NT$200；每房最多3人。
+
+
+
+
+    </p>
+
+    <p style="margin:0 0 8px;">親友探訪｜白天免費，隨時歡迎</p>
+<p style="margin:0;"><strong>親友留宿</strong><br>・週六、週日及國定假日｜免費（歡迎家人利用假日團聚、共度時光）<br>・平日｜每人每晚 NT$600</p>
+  </div>
+
+  <div class="card" style="margin-top:18px;">
+    <p style="margin:0;">
+      <strong>
+        以上為2026年方案價格；未來年度依當年度公告為準。
+
+
+
+
+      </strong>
+    </p>
+  </div>
+</div>
+</div>
+
+<div class="card" style="margin-top:22px;padding:18px 20px;">
+  <b style="font-size:20px;">
+    入住條件
+
+
+
+
+  </b>
+  <p style="margin:10px 0 0;line-height:1.75;">
+    原則年滿60歲，具日常生活自理能力；入住前完成會談及健康資料確認。餐食可依需求加購，亦可自行料理；水電及個別消費另計。
+
+
+
+
+  </p>
+</div>
+</section>
+
+<style>
+#experience .experience-form-compact{gap:9px !important;}
+#experience .experience-form-compact .compact-two{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;
+}
+#experience .experience-form-compact label{margin:0;}
+#experience .experience-form-compact input,
+#experience .experience-form-compact select,
+#experience .experience-form-compact textarea{
+  margin-top:4px !important;
+  padding:9px 10px !important;
+}
+#experience #experience-apply-form{
+  padding-top:16px !important;
+  padding-bottom:16px !important;
+}
+@media(max-width:560px){
+  #experience .experience-form-compact .compact-two{
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+  }
+  #experience .experience-form-compact{gap:8px !important;}
+}
+</style>
+
+<style>
+/* V21.46：僅預約體驗表單再精簡 */
+#experience #experience-apply-form{
+  padding:12px 14px !important;
+  margin-top:10px !important;
+  margin-bottom:14px !important;
+}
+#experience #experience-apply-form .heading{
+  margin-bottom:8px !important;
+}
+#experience #experience-apply-form .heading h2{
+  font-size:23px !important;
+  margin-bottom:3px !important;
+}
+#experience #experience-apply-form .heading p{
+  font-size:14px !important;
+  line-height:1.45 !important;
+}
+#experience .experience-form-compact{
+  gap:6px !important;
+}
+#experience .experience-form-compact .compact-two{
+  gap:7px !important;
+}
+#experience .experience-form-compact b{
+  display:block;
+  font-size:15px !important;
+  line-height:1.25 !important;
+}
+#experience .experience-form-compact input,
+#experience .experience-form-compact select,
+#experience .experience-form-compact textarea{
+  min-height:42px !important;
+  padding:7px 9px !important;
+  margin-top:3px !important;
+  font-size:15px !important;
+  border-radius:9px !important;
+}
+#experience .experience-form-compact textarea{
+  min-height:58px !important;
+}
+#experience .experience-form-compact small{
+  margin-top:2px !important;
+}
+#experience .experience-form-compact label[style*="display:flex"]{
+  font-size:12.5px !important;
+  line-height:1.4 !important;
+}
+#experience .experience-form-compact button.cta{
+  padding:10px 12px !important;
+  font-size:15px !important;
+}
+@media(max-width:560px){
+  #experience #experience-apply-form{
+    padding:10px 12px !important;
+  }
+  #experience .experience-form-compact{
+    gap:5px !important;
+  }
+  #experience .experience-form-compact .compact-two{
+    gap:6px !important;
+  }
+  #experience .experience-form-compact input,
+  #experience .experience-form-compact select{
+    min-height:40px !important;
+    padding:6px 8px !important;
+  }
+}
+</style>
+
+<style>
+/* V21.47：僅預約體驗頁，入住/離開日期固定同一行 */
+#experience .experience-date-row{
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;
+  gap:8px !important;
+}
+#experience .experience-date-row label{
+  min-width:0 !important;
+}
+#experience .experience-date-row input{
+  width:100% !important;
+  min-width:0 !important;
+  font-size:14px !important;
+  padding:6px 7px !important;
+}
+@media(max-width:560px){
+  #experience .experience-date-row{
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;
+    gap:6px !important;
+  }
+  #experience .experience-date-row b{
+    font-size:14px !important;
+    line-height:1.2 !important;
+  }
+  #experience .experience-date-row input{
+    font-size:13px !important;
+    padding:6px 5px !important;
+  }
+}
+</style>
+
+<style>
+/* V21.48：僅預約體驗頁，日期欄樣式與 LINE ID＋同行人數一致 */
+#experience .experience-date-row{
+  display:grid !important;
+  grid-template-columns:1fr 1fr !important;
+  gap:7px !important;
+  align-items:start !important;
+}
+#experience .experience-date-row label{
+  min-width:0 !important;
+  margin:0 !important;
+}
+#experience .experience-date-row b{
+  display:block !important;
+  font-size:15px !important;
+  line-height:1.25 !important;
+  margin-bottom:0 !important;
+}
+#experience .experience-date-row input{
+  width:100% !important;
+  min-width:0 !important;
+  min-height:42px !important;
+  height:42px !important;
+  box-sizing:border-box !important;
+  margin-top:3px !important;
+  padding:7px 9px !important;
+  font-size:15px !important;
+  border-radius:9px !important;
+}
+@media(max-width:560px){
+  #experience .experience-date-row{
+    grid-template-columns:1fr 1fr !important;
+    gap:6px !important;
+  }
+  #experience .experience-date-row b{
+    font-size:14px !important;
+  }
+  #experience .experience-date-row input{
+    min-height:40px !important;
+    height:40px !important;
+    font-size:14px !important;
+    padding:6px 7px !important;
+  }
+}
+</style>
+<section id="experience"><div class="wrap">
+<div class="heading">
+<div class="kicker" data-i18n="t36" data-i18n-src="預約體驗">預約體驗</div>
+<h2 data-i18n="t37" data-i18n-src="先來看看，也可以住下來感受真正的日常">先來看看，也可以住下來感受真正的日常</h2>
+</div>
+<div class="v220-rule" style="max-width:980px;margin:0 auto 18px;">
+  <strong>短期體驗｜每人一生限一次。</strong><br>短期體驗與一個月體驗為獨立資格；短期體驗結束後，仍可再申請一次「一個月體驗」。
+</div>
+
+<div id="experience-flow-stable-v2137" style="margin:18px auto 22px;text-align:center;width:100%;">
+  <div style="max-width:980px;margin:0 auto;">
+    <img src="images/img-055-e65d1c6522d4.jpg" alt="太平洋莊園長住體驗流程"
+      style="display:block;width:100%;height:auto;margin:0 auto;border-radius:16px;box-shadow:0 6px 20px rgba(0,0,0,.08);">
+  </div>
+</div>
+
+<div style="text-align:center;margin:0 auto 22px;">
+  <a class="cta" href="#experience-application" style="display:inline-block;min-width:220px;text-align:center;">預約體驗｜開始申請</a>
+</div>
+
+
+<div id="experience-apply-form" class="card" style="display:none!important;margin:18px auto 22px;max-width:860px;">
+  <div class="heading" style="margin-bottom:14px;">
+    <h2 style="font-size:28px;margin:0 0 8px;">預約體驗申請</h2>
+    <p style="margin:0;">50歲以上、生活可自理，並有長住評估需求者，歡迎提出申請。</p>
+  </div>
+
+
+<div id="stay-experience-entry" class="card" style="padding:22px 24px;text-align:center;">
+  <h3 style="margin:0 0 10px;">住宿體驗</h3>
+  <p style="margin:0 auto 16px;max-width:620px;line-height:1.8;">
+    先短期入住，實際了解莊園環境、生活方式與房型。
+  </p>
+  <button type="button" id="open-stay-experience-form"
+    style="border:0;border-radius:999px;padding:13px 24px;font-size:17px;font-weight:700;cursor:pointer;background:#2f6f83;color:#fff;">
+    申請住宿體驗
+  </button>
+</div>
+
+<div id="stay-experience-form-wrap" style="display:none;">
+
+</div>
+</div>
+
+<style>
+@media(max-width:700px){
+  #experience-form-v2140 > div[style*="grid-template-columns:1fr 1fr"]{
+    grid-template-columns:1fr !important;
+  }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  var birthYear = document.getElementById('experience-birth-year');
+  var birthMonth = document.getElementById('experience-birth-month');
+  var birthDay = document.getElementById('experience-birth-day');
+  var checkIn = document.getElementById('experience-checkin');
+  var checkOut = document.getElementById('experience-checkout');
+
+  var now = new Date();
+  var today = now.toISOString().slice(0,10);
+
+  if(checkIn) checkIn.min = today;
+  if(checkOut) checkOut.min = today;
+
+  if(checkIn && checkOut){
+    checkIn.addEventListener('change', function(){
+      checkOut.min = checkIn.value || today;
+      if(checkOut.value && checkOut.value <= checkIn.value){
+        checkOut.value = '';
+      }
+    });
+  }
+});
+
+function experienceFormSubmit(e){
+  e.preventDefault();
+  var f = e.target;
+  var result = document.getElementById('experience-form-result');
+
+  var by = parseInt(f.birthYear.value,10);
+  var bm = parseInt(f.birthMonth.value,10);
+  var bd = parseInt(f.birthDay.value,10);
+  var birth = new Date(by, bm - 1, bd);
+  var today = new Date();
+  var age = today.getFullYear() - by;
+  var md = (today.getMonth()+1) - bm;
+  if(md < 0 || (md === 0 && today.getDate() < bd)) age--;
+
+  result.style.display = 'block';
+
+  if(!by || !bm || !bd || age < 50){
+    result.textContent = '長住體驗目前開放50歲以上申請。';
+    return false;
+  }
+
+  if(!f.checkIn.value || !f.checkOut.value || f.checkOut.value <= f.checkIn.value){
+    result.textContent = '離開日期必須晚於入住日期。';
+    return false;
+  }
+
+  result.textContent = '表單已完成填寫測試。目前此版本尚未連接後台，資料不會正式送出。';
+  return false;
+}
+</script>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:12px;">
+
+<div class="card" style="padding:22px 24px;">
+<h3 style="margin-top:0;">預約參觀</h3>
+<p style="margin-bottom:12px;"><span>參觀日限定於</span><strong><span>星期六、星期日</span></strong><span>。歡迎親自來看看房間、公共空間、海景與園區生活環境。</span></p>
+<div style="margin-top:8px;background:var(--cream2);padding:10px 14px;border-radius:10px;">
+<strong><span>開放參觀日：星期六、星期日</span></strong>
+</div>
+
+<div style="margin-top:16px;text-align:center;">
+  <a class="cta" href="#experience-application" style="display:inline-block;min-width:220px;text-align:center;">預約參觀｜填寫表單</a>
+</div>
+</div>
+
+</div>
+</div>
+<script>
+(function(){
+  var btn = document.getElementById('open-stay-experience-form');
+  var entry = document.getElementById('stay-experience-entry');
+  var wrap = document.getElementById('stay-experience-form-wrap');
+  if (!btn || !entry || !wrap) return;
+  btn.addEventListener('click', function(){
+    entry.style.display = 'none';
+    wrap.style.display = 'block';
+    wrap.scrollIntoView({behavior:'smooth', block:'start'});
+  });
+})();
+</script>
+
+<style id="v2168-application-screen-style">
+#experience-application-screen{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:99999;
+  background:var(--cream);
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+}
+#experience-application-screen.is-open{display:block;}
+#experience-application-screen .application-screen-top{
+  position:sticky;
+  top:0;
+  z-index:2;
+  background:rgba(246,241,231,.98);
+  border-bottom:1px solid var(--cream2);
+  padding:10px 14px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+#experience-application-screen .application-screen-back{
+  border:1px solid var(--cream2);
+  background:#fff;
+  color:var(--deep);
+  border-radius:999px;
+  padding:9px 15px;
+  font-size:16px;
+  font-weight:700;
+  cursor:pointer;
+}
+#experience-application-screen .application-screen-title{
+  color:var(--deep);
+  font-size:20px;
+  font-weight:800;
+}
+#experience-application-screen .application-screen-body{
+  max-width:860px;
+  margin:0 auto;
+  padding:20px 16px 50px;
+}
+#experience-application-screen .application-screen-heading{
+  text-align:center;
+  margin:4px auto 18px;
+}
+#experience-application-screen .application-screen-heading h2{
+  margin:0 0 8px;
+  font-size:30px;
+}
+#experience-application-screen .application-screen-heading p{
+  margin:0;
+  font-size:16px;
+}
+@media(max-width:700px){
+  #experience-application-screen .application-screen-body{padding:16px 12px 40px;}
+  #experience-application-screen .application-screen-heading h2{font-size:27px;}
+}
+</style>
+
+<div id="experience-application-screen" aria-hidden="true">
+  <div class="application-screen-top">
+    <button type="button" id="close-experience-application-screen" class="application-screen-back">← 返回</button>
+    <div class="application-screen-title">住宿體驗申請</div>
+  </div>
+  <div class="application-screen-body">
+    <div class="application-screen-heading">
+      <h2>住宿體驗申請</h2>
+      <p>50歲以上、生活可自理，並有長住評估需求者，歡迎提出申請。</p>
+    </div>
+    <div id="experience-application-form-host"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var openBtn = document.getElementById('open-experience-application-screen');
+  var closeBtn = document.getElementById('close-experience-application-screen');
+  var screen = document.getElementById('experience-application-screen');
+  var host = document.getElementById('experience-application-form-host');
+  var form = document.getElementById('experience-form-v2140');
+
+  if(!openBtn || !closeBtn || !screen || !host || !form) return;
+
+  function openScreen(){
+    if(form.parentNode !== host){
+      host.appendChild(form);
+    }
+    form.style.display = 'grid';
+    screen.classList.add('is-open');
+    screen.setAttribute('aria-hidden','false');
+    document.body.style.overflow = 'hidden';
+    screen.scrollTop = 0;
+  }
+
+  function closeScreen(){
+    screen.classList.remove('is-open');
+    screen.setAttribute('aria-hidden','true');
+    document.body.style.overflow = '';
+  }
+
+  openBtn.addEventListener('click', openScreen);
+  closeBtn.addEventListener('click', closeScreen);
+})();
+</script>
+
+<script>
+(function(){
+  var btn = document.getElementById('open-visit-application-screen');
+  var screen = document.getElementById('experience-application-screen');
+  var host = document.getElementById('experience-application-form-host');
+  var form = document.getElementById('experience-form-v2140');
+  if(!btn || !screen || !host || !form) return;
+
+  btn.addEventListener('click', function(){
+    if(form.parentNode !== host){
+      host.appendChild(form);
+    }
+    form.style.display = 'grid';
+    screen.classList.add('is-open');
+    screen.setAttribute('aria-hidden','false');
+    document.body.style.overflow = 'hidden';
+    screen.scrollTop = 0;
+  });
+})();
+</script>
+</section>
+<section id="experience-application" class="white">
+  <div class="wrap" style="max-width:900px;">
+    <div style="margin-bottom:14px;">
+      <a class="cta" href="#experience" style="background:#fff;color:var(--deep);border:1px solid var(--cream2);padding:9px 16px;">← 返回預約體驗</a>
+    </div>
+
+    <div class="card" style="max-width:860px;margin:0 auto;">
+      <div class="heading" style="margin-bottom:14px;">
+        <div class="kicker">住宿體驗申請</div>
+        <h2 style="font-size:30px;margin:4px 0 8px;">填寫住宿體驗申請</h2>
+        <p style="margin:0;">50歲以上、生活可自理，並有長住評估需求者，歡迎提出申請。</p>
+      </div>
+
+      <form id="experience-form-v2140" class="experience-form-compact" onsubmit="return experienceFormSubmit(event)" style="display:grid;gap:14px;">
+    <div class="compact-two"><label>
+      <b>姓名 *</b>
+      <input required name="name" type="text" placeholder="請輸入姓名"
+        style="width:100%;box-sizing:border-box;margin-top:6px;padding:12px 13px;border:1px solid var(--cream2);border-radius:10px;font-size:16px;">
+    </label>
+
+    <label>
+      <b>出生年月日 *</b>
+      <div style="display:grid;grid-template-columns:1.25fr 1fr 1fr;gap:8px;margin-top:6px;">
+        <select required name="birthYear" id="experience-birth-year"
+          style="width:100%;box-sizing:border-box;padding:12px 10px;border:1px solid var(--cream2);border-radius:10px;font-size:16px;background:#fff;">
+          <option value="1900">1900年</option>
+          <option value="1901">1901年</option>
+          <option value="1902">1902年</option>
+          <option value="1903">1903年</option>
+          <option value="1904">1904年</option>
+          <option value="1905">1905年</option>
+          <option value="1906">1906年</option>
+          <option value="1907">1907年</option>
+          <option value="1908">1908年</option>
+          <option value="1909">1909年</option>
+          <option value="1910">1910年</option>
+          <option value="1911">1911年</option>
+          <option value="1912">1912年</option>
+          <option value="1913">1913年</option>
+          <option value="1914">1914年</option>
+          <option value="1915">1915年</option>
+          <option value="1916">1916年</option>
+          <option value="1917">1917年</option>
+          <option value="1918">1918年</option>
+          <option value="1919">1919年</option>
+          <option value="1920">1920年</option>
+          <option value="1921">1921年</option>
+          <option value="1922">1922年</option>
+          <option value="1923">1923年</option>
+          <option value="1924">1924年</option>
+          <option value="1925">1925年</option>
+          <option value="1926">1926年</option>
+          <option value="1927">1927年</option>
+          <option value="1928">1928年</option>
+          <option value="1929">1929年</option>
+          <option value="1930">1930年</option>
+          <option value="1931">1931年</option>
+          <option value="1932">1932年</option>
+          <option value="1933">1933年</option>
+          <option value="1934">1934年</option>
+          <option value="1935">1935年</option>
+          <option value="1936">1936年</option>
+          <option value="1937">1937年</option>
+          <option value="1938">1938年</option>
+          <option value="1939">1939年</option>
+          <option value="1940">1940年</option>
+          <option value="1941">1941年</option>
+          <option value="1942">1942年</option>
+          <option value="1943">1943年</option>
+          <option value="1944">1944年</option>
+          <option value="1945">1945年</option>
+          <option value="1946">1946年</option>
+          <option value="1947">1947年</option>
+          <option value="1948">1948年</option>
+          <option value="1949">1949年</option>
+          <option value="1950">1950年</option>
+          <option value="1951">1951年</option>
+          <option value="1952">1952年</option>
+          <option value="1953">1953年</option>
+          <option value="1954">1954年</option>
+          <option value="1955">1955年</option>
+          <option value="1956">1956年</option>
+          <option value="1957">1957年</option>
+          <option value="1958">1958年</option>
+          <option value="1959">1959年</option>
+          <option value="1960" selected>1960年</option>
+          <option value="1961">1961年</option>
+          <option value="1962">1962年</option>
+          <option value="1963">1963年</option>
+          <option value="1964">1964年</option>
+          <option value="1965">1965年</option>
+          <option value="1966">1966年</option>
+          <option value="1967">1967年</option>
+          <option value="1968">1968年</option>
+          <option value="1969">1969年</option>
+          <option value="1970">1970年</option>
+          <option value="1971">1971年</option>
+          <option value="1972">1972年</option>
+          <option value="1973">1973年</option>
+          <option value="1974">1974年</option>
+          <option value="1975">1975年</option>
+          <option value="1976">1976年</option>
+        </select>
+        <select required name="birthMonth" id="experience-birth-month"
+          style="width:100%;box-sizing:border-box;padding:12px 10px;border:1px solid var(--cream2);border-radius:10px;font-size:16px;background:#fff;">
+          <option value="">月</option>
+          <option value="1">1月</option>
+          <option value="2">2月</option>
+          <option value="3">3月</option>
+          <option value="4">4月</option>
+          <option value="5">5月</option>
+          <option value="6">6月</option>
+          <option value="7">7月</option>
+          <option value="8">8月</option>
+          <option value="9">9月</option>
+          <option value="10">10月</option>
+          <option value="11">11月</option>
+          <option value="12">12月</option>
+        </select>
+        <select required name="birthDay" id="experience-birth-day"
+          style="width:100%;box-sizing:border-box;padding:12px 10px;border:1px solid var(--cream2);border-radius:10px;font-size:16px;background:#fff;">
+          <option value="">日</option>
+          <option value="1">1日</option>
+          <option value="2">2日</option>
+          <option value="3">3日</option>
+          <option value="4">4日</option>
+          <option value="5">5日</option>
+          <option value="6">6日</option>
+          <option value="7">7日</option>
+          <option value="8">8日</option>
+          <option value="9">9日</option>
+          <option value="10">10日</option>
+          <option value="11">11日</option>
+          <option value="12">12日</option>
+          <option value="13">13日</option>
+          <option value="14">14日</option>
+          <option value="15">15日</option>
+          <option value="16">16日</option>
+          <option value="17">17日</option>
+          <option value="18">18日</option>
+          <option value="19">19日</option>
+          <option value="20">20日</option>
+          <option value="21">21日</option>
+          <option value="22">22日</option>
+          <option value="23">23日</option>
+          <option value="24">24日</option>
+          <option value="25">25日</option>
+          <option value="26">26日</option>
+          <option value="27">27日</option>
+          <option value="28">28日</option>
+          <option value="29">29日</option>
+          <option value="30">30日</option>
+          <option value="31">31日</option>
+        </select>
+      </div>
+
+    </label>
+    </div>
+
+
+    <div class="compact-two phone-gender-row"><label>
+      <b>手機 *</b>
+      <input required name="phone" type="tel" placeholder="例如：0912-345-678"
+        style="width:100%;box-sizing:border-box;margin-top:6px;padding:12px 13px;border:1px solid var(--cream2);border-radius:10px;font-size:16px;">
+    </label>
+    <label>
+      <b>性別</b>
+      <select name="gender"
+        style="width:100%;box-sizing:border-box;margin-top:6px;padding:12px 13px;border:1px solid var(--cream2);border-radius:10px;font-size:16px;background:#fff;">
+        <option value="">請選擇</option>
+        <option value="男性">男性</option>
+        <option value="女性">女性</option>
+        <option value="其他">其他</option>
+        <option value="不願透露">不願透露</option>
+      </select>
+    </label>
+    </div>
+    <div class="compact-two"><label>
+      <b>LINE ID</b>
+      <input name="line" type="text" placeholder="選填"
+        style="width:100%;box-sizing:border-box;margin-top:6px;padding:12px 13px;border:1px solid var(--cream2);border-radius:10px;font-size:16px;">
+    </label>
+
+    <label>
+      <b>同行人數 *</b>
+      <select required name="people"
+        style="width:100%;box-sizing:border-box;margin-top:6px;padding:12px 13px;border:1px solid var(--cream2);border-radius:10px;font-size:16px;background:#fff;">
+        <option value="1">1人</option>
+        <option value="2">2人</option>
+        <option value="3">3人</option>
+      </select>
+    </label>
+
+    </div>
+    <div class="compact-two"><label>
+      <b>是否生活可自理 *</b>
+      <select required name="selfCare"
+        style="width:100%;box-sizing:border-box;margin-top:6px;padding:12px 13px;border:1px solid var(--cream2);border-radius:10px;font-size:16px;background:#fff;">
+        <option value="">請選擇</option>
+        <option value="是">是</option>
+        <option value="否">否</option>
+      </select>
+    </label>
+
+    <label>
+      <b>希望了解的方案 *</b>
+      <select required name="plan"
+        style="width:100%;box-sizing:border-box;margin-top:6px;padding:12px 13px;border:1px solid var(--cream2);border-radius:10px;font-size:16px;background:#fff;">
+        <option value="短期體驗">短期體驗</option>
+        <option value="月租">月租</option>
+        <option value="季租">季租</option>
+        <option value="年租">年租</option>
+        <option value="尚未決定">尚未決定</option>
+      </select>
+    </label>
+
+    </div>
+    <div class="compact-two experience-date-row">
+      <label>
+        <b>希望入住日期 *</b>
+        <input required name="checkIn" id="experience-checkin" type="date">
+      </label>
+      <label>
+        <b>希望離開日期 *</b>
+        <input required name="checkOut" id="experience-checkout" type="date">
+      </label>
+    </div>
+
+    <label>
+      <b>備註</b>
+      <textarea name="note" rows="2" placeholder="例如：希望海景房、同行家人需求、預計入住月份等"
+        style="width:100%;box-sizing:border-box;margin-top:6px;padding:12px 13px;border:1px solid var(--cream2);border-radius:10px;font-size:16px;resize:vertical;"></textarea>
+    </label>
+
+    <label style="display:flex;gap:8px;align-items:flex-start;font-size:14px;line-height:1.6;">
+      <input required type="checkbox" name="privacy" style="margin-top:4px;">
+      <span>我同意太平洋莊園為處理本次長住體驗申請之目的，蒐集、處理及利用上述個人資料。</span>
+    </label>
+
+    <button class="cta" type="submit"
+      style="border:0;cursor:pointer;width:100%;font-size:17px;">
+      送出預約體驗申請
+    </button>
+
+    <div id="experience-form-result"
+      style="display:none;background:var(--cream);border-radius:12px;padding:12px 14px;font-size:15px;"></div>
+  </form>
+    </div>
+  </div>
+</section>
+
+<style>
+/* V21.50：僅預約體驗頁，手機＋性別同列 */
+#experience #experience-form-v2140 .phone-gender-row{
+  display:grid !important;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;
+  gap:6px !important;
+}
+#experience #experience-form-v2140 .phone-gender-row label{
+  min-width:0 !important;
+}
+#experience #experience-form-v2140 .phone-gender-row input,
+#experience #experience-form-v2140 .phone-gender-row select{
+  width:100% !important;
+  min-width:0 !important;
+  box-sizing:border-box !important;
+}
+</style>
+
+<style>
+#experience #experience-form-v2140 .compact-two.experience-date-row{
+  display:grid !important;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;
+  gap:6px !important;
+  width:100% !important;
+}
+#experience #experience-form-v2140 .experience-date-row label{
+  display:block !important;
+  width:auto !important;
+  min-width:0 !important;
+}
+#experience #experience-form-v2140 .experience-date-row input[type="date"]{
+  display:block !important;
+  width:100% !important;
+  max-width:100% !important;
+  min-width:0 !important;
+  box-sizing:border-box !important;
+  min-height:40px !important;
+  height:40px !important;
+  margin-top:3px !important;
+  padding:6px 7px !important;
+  font-size:14px !important;
+}
+@media(max-width:560px){
+  #experience #experience-form-v2140 .compact-two.experience-date-row{
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;
+  }
+}
+</style>
+
+<section class="white" id="nearby">
+<div class="wrap">
+<div class="heading">
+<div class="kicker">附近景點</div>
+<h2><span>山海相伴・探索東海岸之美</span></h2>
+<p><span>從太平洋莊園出發，可沿花東海岸公路探索石門洞、石梯坪、長虹橋、牛山呼庭等東海岸景點，也可向縱谷方向前往林田山、吉利潭、瑞穗、玉里等地。</span></p>
+</div>
+<div class="card" style="padding:14px;overflow:hidden;">
+<img alt="太平洋莊園附近景點地圖" decoding="async" height="1400" loading="lazy" src="images/img-056-591043be75a9.webp" style="display:block;width:100%;height:auto;border-radius:14px;" width="933">
+</img></div>
+<div class="cardgrid" style="margin-top:20px;">
+<div class="card">
+<b><span>往北・花蓮方向</span></b>
+<p><span>牛山呼庭、芭崎休息區、親不知子海上古道、新社梯田，以及花蓮市區與縱谷景點。</span></p>
+</div>
+<div class="card">
+<b><span>往南・東海岸方向</span></b>
+<p><span>石門洞、石梯坪、長虹橋，再往南可延伸至八仙洞、金剛大道與台東海岸。</span></p>
+</div>
+</div>
+</div>
+<div class="heading" style="margin-top:30px;">
+<div class="kicker"><span>東海岸即時影像</span></div>
+<h2><span>出發前，先看看現在的海岸</span></h2>
+<p><span>即時影像來自太平洋莊園官網整理的東海岸 Live Cam。</span></p>
+</div>
+<div class="nearby-live-grid" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;">
+<div class="card" style="padding:12px;">
+<b>石梯坪 Shitiping</b>
+<a href="https://www.youtube.com/watch?v=mXnigLvIL0Q" rel="noopener noreferrer" style="display:block;margin-top:8px;text-decoration:none;" target="_blank">
+<img alt="石梯坪 Shitiping 景點封面" decoding="async" height="540" loading="lazy" src="images/img-057-024b715cf6b1.webp" style="display:block;width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:10px;" width="960">
+</img></a>
+<div style="margin-top:10px;">
+<a class="cta" href="https://www.youtube.com/watch?v=mXnigLvIL0Q" rel="noopener noreferrer" target="_blank"><span>觀看即時影像</span></a>
+</div>
+</div>
+<div class="card" style="padding:12px;">
+<b>大石鼻山 Dashshibi Hill</b>
+<a href="https://www.youtube.com/watch?v=JkoXcXI04Qk" rel="noopener noreferrer" style="display:block;margin-top:8px;text-decoration:none;" target="_blank">
+<img alt="大石鼻山 Dashshibi Hill 景點封面" decoding="async" height="540" loading="lazy" src="images/img-058-ea750249739a.webp" style="display:block;width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:10px;" width="960">
+</img></a>
+<div style="margin-top:10px;">
+<a class="cta" href="https://www.youtube.com/watch?v=JkoXcXI04Qk" rel="noopener noreferrer" target="_blank"><span>觀看即時影像</span></a>
+</div>
+</div>
+<div class="card" style="padding:12px;">
+<b>長虹橋 Changhong Bridge</b>
+<a href="https://www.youtube.com/watch?v=JnD8Rk3o0BM" rel="noopener noreferrer" style="display:block;margin-top:8px;text-decoration:none;" target="_blank">
+<img alt="長虹橋 Changhong Bridge 景點封面" decoding="async" height="540" loading="lazy" src="images/img-059-57e9a39440f2.webp" style="display:block;width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:10px;" width="960">
+</img></a>
+<div style="margin-top:10px;">
+<a class="cta" href="https://www.youtube.com/watch?v=JnD8Rk3o0BM" rel="noopener noreferrer" target="_blank"><span>觀看即時影像</span></a>
+</div>
+</div>
+<div class="card" style="padding:12px;">
+<b>三仙台 Sanxiantai</b>
+<a href="https://www.youtube.com/watch?v=dQ7Sd6PGLdA" rel="noopener noreferrer" style="display:block;margin-top:8px;text-decoration:none;" target="_blank">
+<img alt="三仙台 Sanxiantai 景點封面" decoding="async" height="540" loading="lazy" src="images/img-060-8b6065fd8550.webp" style="display:block;width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:10px;" width="960"/>
+</a>
+<div style="margin-top:10px;">
+<a class="cta" href="https://www.youtube.com/watch?v=dQ7Sd6PGLdA" rel="noopener noreferrer" target="_blank"><span>觀看即時影像</span></a>
+</div>
+</div>
+<div class="card" style="padding:12px;">
+<b>金樽遊憩區 Jinzun</b>
+<a href="https://www.youtube.com/watch?v=ZdqHgQwvZOw" rel="noopener noreferrer" style="display:block;margin-top:8px;text-decoration:none;" target="_blank">
+<img alt="金樽遊憩區 Jinzun 景點封面" decoding="async" height="540" loading="lazy" src="images/img-061-344f9a65b441.webp" style="display:block;width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:10px;" width="960"/>
+</a>
+<div style="margin-top:10px;">
+<a class="cta" href="https://www.youtube.com/watch?v=ZdqHgQwvZOw" rel="noopener noreferrer" target="_blank"><span>觀看即時影像</span></a>
+</div>
+</div>
+</div>
+<div class="heading" style="margin-top:34px;">
+<div class="kicker"><span>台9線・花東縱谷即時影像</span></div>
+<h2><span>另一條山線風景</span></h2>
+<p><span>除了台11線海岸景色，也可以從台9線走進花東縱谷，看看湖泊、山景與季節花海。</span></p>
+</div>
+<div class="route9-live-grid" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;">
+<div class="card" style="padding:12px;">
+<b>鯉魚潭 Liyu Lake</b>
+<a href="https://www.erv-nsa.gov.tw/zh-tw/service/live-camera/1" rel="noopener noreferrer" style="display:block;margin-top:8px;text-decoration:none;" target="_blank">
+<img alt="鯉魚潭 Liyu Lake 即時影像封面" decoding="async" height="540" loading="lazy" src="images/img-062-3dba1be05850.webp" style="display:block;width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:10px;" width="960"/>
+</a>
+<div style="margin-top:10px;">
+<a class="cta" href="https://www.erv-nsa.gov.tw/zh-tw/service/live-camera/1" rel="noopener noreferrer" target="_blank"><span>觀看即時影像</span></a>
+</div>
+</div>
+<div class="card" style="padding:12px;">
+<b>赤科山 Chike Mountain</b>
+<a href="https://www.erv-nsa.gov.tw/zh-tw/service/live-camera/2" rel="noopener noreferrer" style="display:block;margin-top:8px;text-decoration:none;" target="_blank">
+<img alt="赤科山 Chike Mountain 即時影像封面" decoding="async" height="540" loading="lazy" src="images/img-063-152cb16ca5f8.webp" style="display:block;width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:10px;" width="960"/>
+</a>
+<div style="margin-top:10px;">
+<a class="cta" href="https://www.erv-nsa.gov.tw/zh-tw/service/live-camera/2" rel="noopener noreferrer" target="_blank"><span>觀看即時影像</span></a>
+</div>
+</div>
+<div class="card" style="padding:12px;">
+<b>六十石山 Sixty Stone Mountain</b>
+<a href="https://www.erv-nsa.gov.tw/zh-tw/service/live-camera/13" rel="noopener noreferrer" style="display:block;margin-top:8px;text-decoration:none;" target="_blank">
+<img alt="六十石山 Sixty Stone Mountain 即時影像封面" decoding="async" height="540" loading="lazy" src="images/img-064-f087afa5f04c.webp" style="display:block;width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:10px;" width="960"/>
+</a>
+<div style="margin-top:10px;">
+<a class="cta" href="https://www.erv-nsa.gov.tw/zh-tw/service/live-camera/13" rel="noopener noreferrer" target="_blank"><span>觀看即時影像</span></a>
+</div>
+</div>
+</div>
+<div class="heading" style="margin-top:34px;">
+<div class="kicker"><span>離島即時影像</span></div>
+<h2><span>綠島・蘭嶼</span></h2>
+<p><span>沿著東海岸繼續往太平洋延伸，也可以看看綠島與蘭嶼現在的天氣與海況。</span></p>
+</div>
+<div class="island-live-grid" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;">
+<div class="card" style="padding:12px;">
+<b>綠島・柴口浮潛區</b>
+<a href="https://www.gov.tw/taiwan/index_653552" rel="noopener noreferrer" style="display:block;margin-top:8px;text-decoration:none;" target="_blank">
+<img alt="綠島・柴口浮潛區 即時影像封面" decoding="async" height="540" loading="lazy" src="images/img-065-d68e2886dacc.webp" style="display:block;width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:10px;" width="960"/>
+</a>
+<div style="margin-top:10px;">
+<a class="cta" href="https://www.gov.tw/taiwan/index_653552" rel="noopener noreferrer" target="_blank"><span>觀看即時影像</span></a>
+</div>
+</div>
+<div class="card" style="padding:12px;">
+<b>綠島・帆船鼻</b>
+<a href="https://www.gov.tw/taiwan/index_722899" rel="noopener noreferrer" style="display:block;margin-top:8px;text-decoration:none;" target="_blank">
+<img alt="綠島・帆船鼻 即時影像封面" decoding="async" height="540" loading="lazy" src="images/img-066-cf8f9894abe1.webp" style="display:block;width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:10px;" width="960"/>
+</a>
+<div style="margin-top:10px;">
+<a class="cta" href="https://www.gov.tw/taiwan/index_722899" rel="noopener noreferrer" target="_blank"><span>觀看即時影像</span></a>
+</div>
+</div>
+<div class="card" style="padding:12px;">
+<b>蘭嶼・航空站</b>
+<a href="https://tw.live/cam/?id=yfkv34afwFw" rel="noopener noreferrer" style="display:block;margin-top:8px;text-decoration:none;" target="_blank">
+<img alt="蘭嶼・航空站 即時影像封面" decoding="async" height="540" loading="lazy" src="images/img-067-2c67b1966540.webp" style="display:block;width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:10px;" width="960"/>
+</a>
+<div style="margin-top:10px;">
+<a class="cta" href="https://tw.live/cam/?id=yfkv34afwFw" rel="noopener noreferrer" target="_blank"><span>觀看即時影像</span></a>
+</div>
+</div>
+</div>
+</section>
+<section class="white" id="faq">
+<div class="wrap">
+<div class="heading">
+<div class="kicker">常見問題</div>
+<h2>入住前最常被問到的 20 件事</h2>
+<p>入住資格、租金、房型、生活設備、交通、醫療、探訪與參觀方式，都整理在這裡。</p>
+</div>
+<div class="faq-v62"><details><summary>1. 入住太平洋莊園需要什麼條件？</summary><div class="faq-answer"><p>太平洋莊園主要服務希望享受自主、自在、安靜海岸生活的熟齡人士。</p><p>入住前會先了解住戶目前的生活自理能力及實際需求，確認莊園環境與服務是否適合。</p></div></details><details><summary>2. 幾歲以上可以入住？陪同者有年齡限制嗎？</summary><div class="faq-answer"><p>主要入住者須年滿 60 歲以上。</p><p>未滿 60 歲者如陪同 60 歲以上住戶共同生活，也可一起入住，包括配偶、家人、朋友、生活陪伴者或外籍看護／照顧者。</p></div></details><details><summary>3. 一個月租金多少？</summary><div class="faq-answer"><p>依房型、位置及入住條件不同，長住月租為每月 NT$27,000～60,000。</p><p>實際租金與相關費用會在預約參觀及入住前清楚說明，可依需求與預算選擇合適房型。</p></div></details><details><summary>4. 入住需要繳保證金嗎？退住時如何退還？</summary><div class="faq-answer"><p>保證金、退住及退款方式依正式入住契約辦理。</p><p>簽約前會清楚說明保證金金額、退還條件及相關規定，確認後再辦理入住。</p></div></details><details><summary>5. 可以先體驗，再決定是否長住嗎？</summary><div class="faq-answer"><p>可以，歡迎預約體驗太平洋莊園。</p><p>實際入住幾天，親自感受房間、環境、海岸生活及莊園生活方式後，再決定是否適合長期入住。</p><p>體驗方案、最新價格及可預約日期，以官網預約系統公布內容為準。</p><a class="cta faq-link" href="https://seasideresort.com.tw/booking/pm_front/" target="_blank">查看體驗價格／預約體驗</a></div></details><details><summary>6. 房間有多大？有哪些房型？</summary><div class="faq-answer"><p>主要房型約 16 坪，提供較寬敞的長期居住空間。</p><p>依位置、樓層及景觀不同有不同房型，實際可入住房型可於預約參觀時了解。</p></div></details><details><summary>7. 房間裡有哪些家具、家電及生活設備？</summary><div class="faq-answer"><p>每間房依長期生活需求配置，提供冷氣、冰箱、電風扇、音響、網路電視、Wi-Fi、衣櫃、化妝台、曬衣架、吹風機及獨立衛浴等。</p><p>床鋪採五尺標準雙人床；一人入住一張，兩人入住配置兩張，讓每位住戶都有寬敞睡眠空間。</p></div></details><details><summary>8. 三餐如何安排？一定要在莊園用餐嗎？</summary><div class="faq-answer"><p>太平洋莊園重視住戶生活自主性，不強制統一用餐。</p><p>住戶可依自己的生活習慣安排餐食，實際餐飲服務依莊園當時提供內容辦理。</p></div></details><details><summary>9. 沒有開車，交通方便嗎？</summary><div class="faq-answer"><p>方便。公車站就在太平洋莊園門口，沒有開車也可利用大眾運輸往返花蓮及周邊地區。</p><p>詳細路線、班次及時刻表請參考官網「交通方式」。</p><a class="cta faq-link" href="#transport">交通方式／查看公車時刻表</a></div></details><details><summary>10. 附近有醫療及緊急救護資源嗎？</summary><div class="faq-answer"><p>有。太平洋莊園附近約 800 公尺即有醫療及消防救護資源。</p><p>如需緊急醫療處理，以撥打 119、由專業救護人員處理為原則。</p></div></details><details><summary>11. 夜間發生緊急狀況怎麼辦？</summary><div class="faq-answer"><p>房間設有熟齡住戶需要的緊急求助設備，包括床邊及衛浴緊急求助設備。</p><p>衛浴是較容易發生跌倒等意外的地方，因此浴室安全是莊園特別重視的項目。</p></div></details><details><summary>12. 需要看醫生時，可以協助就醫嗎？</summary><div class="faq-answer"><p>可依住戶實際情況協助聯繫或安排適當方式。</p><p>一般門診可依需求協助安排；緊急狀況則優先聯絡 119，交由專業醫療及救護人員處理。</p></div></details><details><summary>13. 如果以後身體狀況變差，還可以繼續住嗎？</summary><div class="faq-answer"><p>需依當時實際照護需求評估。</p><p>太平洋莊園定位為自主生活的熟齡住宅，並不是醫院或護理之家。</p><p>若未來需要高度醫療、24 小時專業護理，或無法維持基本生活安全，會與住戶及家屬討論較適合的後續照護安排。</p></div></details><details><summary>14. 家人或朋友可以來探訪嗎？</summary><div class="faq-answer"><p>可以，非常歡迎家人及朋友前來探望住戶。</p><p>週一至週五：親友探訪請先登記；如需留宿，每人每晚 NT$600。週六、週日：免費探訪。</p><p>週末免費探訪是希望鼓勵家人利用假日前來陪伴長輩，一起吃飯、聊天、散步、看看海。</p></div></details><details><summary>15. 家人或朋友可以留宿嗎？</summary><div class="faq-answer"><p>如親友需要留宿，可依房型、入住人數、安全及莊園管理規定事先詢問。</p><p>我們希望住戶保有與家人相聚的自由，同時兼顧其他住戶的安寧與隱私。</p></div></details><details><summary>16. 莊園平常有哪些活動？一定要參加嗎？</summary><div class="faq-answer"><p>莊園會依季節及住戶需求安排活動，例如晨曦瑜伽、散步、交流及休閒活動等。</p><p>所有活動皆以自由參加為原則；住戶也可自己看海、閱讀、散步或安排自己的生活。</p></div></details><details><summary>17. 可以自己洗衣服嗎？房務及清潔如何安排？</summary><div class="faq-answer"><p>可以。園區提供自助洗衣設備，可依自己的生活習慣使用。</p><p>太平洋莊園每個月提供一次免費房務整理服務。</p><p>如需增加房務整理次數，可依實際需求另行洽詢。</p></div></details><details><summary>18. 房間有 Wi-Fi、電話、電視及冷氣嗎？</summary><div class="faq-answer"><p>有。房間提供 Wi-Fi、網路電視、電話、冷氣等基本設備，方便長期生活及與家人聯繫。</p></div></details><details><summary>19. 入住後如果住不習慣，可以提前退住嗎？</summary><div class="faq-answer"><p>可以依正式入住契約辦理。</p><p>入住前會清楚說明退住通知期限、費用結算及保證金退還方式，簽約前即可充分了解。</p></div></details><details><summary>20. 什麼時間可以預約參觀太平洋莊園？</summary><div class="faq-answer"><p>目前開放預約參觀時間為每週六、週日，上午 10:00～下午 5:00。</p><p>為了有充足時間介紹環境、房型及長住生活方式，請在來訪前事先預約。</p><p>平日原則上不安排一般參觀，希望已入住住戶保有安靜、自在的生活環境。</p></div></details></div>
+</div>
+</section>
+<section class="white news-page-v61" id="news">
+<div class="wrap">
+  <div class="heading">
+    <div class="kicker">
+      最新消息
+
+
+
+
+    </div>
+    <h2>
+      莊園公告與生活資訊
+
+
+
+
+    </h2>
+    <p>
+      最新活動、參訪與園區消息由工作人員透過 WordPress 後台直接更新，並顯示在這個頁面。
+
+
+
+
+    </p>
+  </div>
+
+  <div id="pm-wp-news" class="pm-wp-news" aria-live="polite">
+    <div class="news-status-v61">正在載入最新消息…</div>
+  </div>
+
+  <div class="pm-news-fallback" id="pm-news-fallback" hidden>
+    <p>目前無法在頁面內讀取最新消息。</p>
+    <a class="cta" href="https://seasideresort.com.tw/news/">前往最新消息 →</a>
+  </div>
+</div>
+</section>
+<section class="white" id="transport">
+<div class="wrap">
+<div class="heading">
+<div class="kicker" data-i18n="t66" data-i18n-src="交通方式">交通方式</div>
+<h2 data-i18n="t67" data-i18n-src="小港站就在莊園門口">小港站就在莊園門口</h2>
+<p data-i18n="t68" data-i18n-src="從太平洋莊園步行約 1 分鐘即可到達小港站，搭乘南北向公車往返花蓮市區與東海岸。">從太平洋莊園步行約 1 分鐘即可到達小港站，搭乘南北向公車往返花蓮市區與東海岸。</p>
+</div>
+<div style="margin-top:28px">
+<figure class="photo">
+<img alt="太平洋莊園門口小港公車站" decoding="async" height="1024" loading="lazy" src="images/img-068-c6712b0ef5ac.webp" width="1536"/>
+</figure>
+<div style="max-width:850px;margin:22px auto 0;text-align:center">
+<h2 data-i18n="t69" data-i18n-src="公車站就在莊園門口" style="font-size:30px;margin-bottom:8px">公車站就在莊園門口</h2>
+<p data-i18n="t70" data-i18n-src="小港站步行約 1 分鐘，1140、1145 南北向公車皆可搭乘。" style="margin:5px 0">小港站步行約 1 分鐘，1140、1145 南北向公車皆可搭乘。</p>
+<p data-i18n="t71" data-i18n-src="往北花蓮市區・往南東海岸，長者日常就醫、購物、出遊都方便。" style="margin:5px 0">往北花蓮市區・往南東海岸，長者日常就醫、購物、出遊都方便。</p>
+</div>
+</div>
+<div style="margin-top:38px">
+<figure class="photo">
+<img alt="花蓮轉運站與小港站雙向公車時刻表" decoding="async" height="1086" loading="lazy" src="images/img-069-5282d7faca87.webp" style="width:100%;height:auto;display:block" width="1448"/>
+</figure>
+</div>
+</div>
+</section>
+<section class="white" id="contact">
+<div class="wrap">
+<div class="heading">
+<div class="kicker">聯繫我們</div>
+<h2><span>歡迎與太平洋莊園聯繫</span></h2>
+<p><span>想了解長住生活、預約參觀或住宿體驗，都歡迎直接與我們聯絡。</span></p>
+</div>
+<div class="cardgrid">
+
+
+
+
+<div class="card" style="padding:16px 18px;">
+<b><span>聯絡方式</span></b>
+<div style="margin-top:10px;display:grid;gap:5px;font-size:18px;line-height:1.35;">
+<div><strong>市話 03-8791468</strong></div>
+<div><strong>手機 09-3766-7917</strong></div>
+<div><strong>官方 LINE @a0937667917</strong></div>
+</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px;">
+<a class="cta" href="tel:038791468" style="padding:10px 16px;min-height:auto;"><span>撥打市話</span></a>
+<a class="cta" href="tel:0937667917" style="padding:10px 16px;min-height:auto;"><span>撥打手機</span></a>
+<a class="cta" href="https://line.me/R/ti/p/@a0937667917" rel="noopener noreferrer" target="_blank" style="padding:10px 16px;min-height:auto;display:inline-flex;align-items:center;justify-content:center;gap:6px;">
+<svg aria-hidden="true" height="22" style="vertical-align:middle;flex:none" viewBox="0 0 48 48" width="22"><circle cx="24" cy="24" fill="#06C755" r="22"></circle><path d="M37.5 22.2c0-6.1-6.1-11.1-13.5-11.1S10.5 16.1 10.5 22.2c0 5.5 4.9 10.1 11.5 11 .4.1 1 .3 1.1.7.1.4.1 1 .1 1.4l-.2 1.3c-.1.4-.3 1.6 1.4.9 1.7-.7 9.1-5.4 12.4-9.2 2.3-2.5 3.7-4.5 3.7-6.1z" fill="#fff"></path><text fill="#06C755" font-family="Arial,sans-serif" font-size="9" font-weight="700" text-anchor="middle" x="24" y="26.5">LINE</text></svg>
+<span>官方 LINE</span></a>
+</div>
+</div><div class="card" style="grid-column:1/-1;">
+<b><span>地址與導航</span></b>
+<p><strong><span>花蓮縣豐濱鄉豐濱村小港55號</span></strong><br/><span>花東海岸公路49公里旁</span></p>
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;">
+<a class="cta" href="https://www.google.com/maps/dir/?api=1&amp;destination=花蓮縣豐濱鄉豐濱村小港55號" rel="noopener noreferrer" target="_blank"><span>開始導航</span></a>
+<a class="cta" href="https://www.google.com/maps/search/?api=1&amp;query=花蓮縣豐濱鄉豐濱村小港55號" rel="noopener noreferrer" target="_blank"><span>在地圖中查看</span></a>
+</div>
+</div><div class="card">
+<b><span>官網與傳真</span></b>
+<p><strong>www.seasideresort.com.tw</strong></p>
+<p><span>傳真：03-8791813</span></p>
+<a class="cta" href="https://seasideresort.com.tw/" rel="noopener noreferrer" target="_blank"><span>前往官方網站</span></a>
+</div></div>
+</div>
+</section>
+</main>
+<footer class="v220-footer" style="padding:14px 10px;">
+<div class="v220-footer-center">
+<div style="font-size:.86em;font-weight:700;line-height:1.25;">太平洋莊園 PACIFIC MANOR</div>
+<div style="margin-top:2px;font-size:.86em;font-weight:700;line-height:1.25;">花東海岸公路海景第一排唯一建築別墅群</div>
+</div>
+<span class="v220-staff-link" style="opacity:.85">工作人員服務即將開放，請以市話／手機／官方 LINE 聯繫</span>
+</footer>
+
+</div>
+<script id="v171-performance-optimizer">
+(function(){
+  function b64ToBlobUrl(dataUrl){
+    try{
+      var parts=dataUrl.split(',');
+      var mime=(parts[0].match(/data:([^;]+)/)||[])[1]||'video/mp4';
+      var bin=atob(parts[1]);
+      var len=bin.length;
+      var arr=new Uint8Array(len);
+      for(var i=0;i<len;i++) arr[i]=bin.charCodeAt(i);
+      return URL.createObjectURL(new Blob([arr],{type:mime}));
+    }catch(e){ return dataUrl; }
+  }
+
+  var shared={};
+
+  function activate(el){
+    if(!el || el.dataset.pmActivated==='1') return;
+    el.dataset.pmActivated='1';
+
+    var srcEl = el.matches('source') ? el : el.querySelector('source[data-pm-video-key],source[data-pm-video-copy]');
+    var key = el.dataset.pmVideoKey || el.dataset.pmVideoCopy ||
+              (srcEl && (srcEl.dataset.pmVideoKey || srcEl.dataset.pmVideoCopy));
+
+    var original = el.getAttribute('src') || (srcEl && srcEl.getAttribute('src')) || '';
+
+    if(key && shared[key]){
+      if(srcEl) srcEl.src=shared[key]; else el.src=shared[key];
+      if(el.tagName==='VIDEO') el.load();
+      else if(el.parentElement && el.parentElement.tagName==='VIDEO') el.parentElement.load();
+      return;
+    }
+
+    if(original && original.indexOf('data:video/mp4;base64,')===0){
+      var url=b64ToBlobUrl(original);
+      if(key) shared[key]=url;
+      if(srcEl) srcEl.src=url; else el.src=url;
+      if(el.tagName==='VIDEO') el.load();
+      else if(el.parentElement && el.parentElement.tagName==='VIDEO') el.parentElement.load();
+      return;
+    }
+
+    if(key && shared[key]){
+      if(srcEl) srcEl.src=shared[key]; else el.src=shared[key];
+    }
+  }
+
+  // 先掃唯一影片並建立 key 對應，但不主動解碼
+  document.querySelectorAll('video').forEach(function(v){
+    v.preload='none';
+
+    // 點播放、觸控時才啟用
+    ['pointerdown','touchstart','click','play'].forEach(function(ev){
+      v.addEventListener(ev,function(){ activate(v); },{once:false,passive:true});
+    });
+  });
+
+  // 接近視窗時啟用，避免點播放才等太久
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){
+          activate(e.target);
+          io.unobserve(e.target);
+        }
+      });
+    },{rootMargin:'250px 0px'});
+    document.querySelectorAll('video').forEach(function(v){ io.observe(v); });
+  }
+})();
+</script>
+</div>
+<script>
+(function(){
+  const tabs=[...document.querySelectorAll('.portal-tab-v192')];
+  tabs.forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      tabs.forEach(x=>x.classList.remove('active'));
+      document.querySelectorAll('.portal-panel-v192').forEach(x=>x.classList.remove('active'));
+      btn.classList.add('active');
+      const p=document.getElementById('portal-'+btn.dataset.portal);
+      if(p) p.classList.add('active');
+    });
+  });
+
+  if(document.getElementById('news-date-v192')){
+    document.getElementById('news-date-v192').value = new Date().toISOString().slice(0,10);
+  }
+  renderNewsV192();
+})();
+
+function portalDemoLogin(role){
+  /* removed: public demo login */
+}
+
+function staffLoginV192(){
+  /* removed: public staff demo credentials */
+}
+
+function getNewsV192(){
+  try{return JSON.parse(localStorage.getItem('pm_news_v192')||'[]')}catch(e){return []}
+}
+function setNewsV192(items){
+  localStorage.setItem('pm_news_v192',JSON.stringify(items));
+  renderNewsV192();
+  renderStaffNewsV192();
+}
+function clearNewsFormV192(){
+  document.getElementById('news-title-v192').value='';
+  document.getElementById('news-body-v192').value='';
+  document.getElementById('news-pin-v192').value='0';
+  document.getElementById('news-edit-id-v192').value='';
+  document.getElementById('news-date-v192').value=new Date().toISOString().slice(0,10);
+}
+function saveNewsV192(){
+  const title=document.getElementById('news-title-v192').value.trim();
+  const body=document.getElementById('news-body-v192').value.trim();
+  const date=document.getElementById('news-date-v192').value;
+  const pin=document.getElementById('news-pin-v192').value==='1';
+  const editId=document.getElementById('news-edit-id-v192').value;
+  if(!title){alert('請輸入標題');return}
+  let items=getNewsV192();
+  if(editId){
+    const i=items.findIndex(x=>String(x.id)===String(editId));
+    if(i>=0) items[i]={...items[i],title,body,date,pin};
+  }else{
+    items.push({id:Date.now(),title,body,date,pin});
+  }
+  setNewsV192(items);
+  clearNewsFormV192();
+  alert('消息已儲存');
+}
+function editNewsV192(id){
+  const n=getNewsV192().find(x=>String(x.id)===String(id));
+  if(!n)return;
+  document.getElementById('news-title-v192').value=n.title||'';
+  document.getElementById('news-body-v192').value=n.body||'';
+  document.getElementById('news-date-v192').value=n.date||'';
+  document.getElementById('news-pin-v192').value=n.pin?'1':'0';
+  document.getElementById('news-edit-id-v192').value=n.id;
+  window.scrollTo({top:document.getElementById('portal-staff').offsetTop-120,behavior:'smooth'});
+}
+function deleteNewsV192(id){
+  if(!confirm('確定刪除這則消息？'))return;
+  setNewsV192(getNewsV192().filter(x=>String(x.id)!==String(id)));
+}
+function sortedNewsV192(items){
+  return items.sort((a,b)=>(Number(b.pin)-Number(a.pin))||String(b.date||'').localeCompare(String(a.date||''))||b.id-a.id);
+}
+function renderStaffNewsV192(){
+  const box=document.getElementById('staff-news-list-v192');
+  if(!box)return;
+  const items=sortedNewsV192(getNewsV192());
+  if(!items.length){box.innerHTML='<div class="portal-note-v192">目前尚未發布消息。</div>';return}
+  box.innerHTML=items.map(n=>`
+    <div class="news-item-v192">
+      <strong>${n.pin?'📌 ':''}${escapeHtmlV192(n.title)}</strong>
+      <div class="meta">${escapeHtmlV192(n.date||'')}</div>
+      <div>${escapeHtmlV192(n.body||'').replace(/\n/g,'<br>')}</div>
+      <div class="actions">
+        <button class="portal-btn-v192 secondary" onclick="editNewsV192('${n.id}')">修改</button>
+        <button class="portal-btn-v192 danger" onclick="deleteNewsV192('${n.id}')">刪除</button>
+      </div>
+    </div>`).join('');
+}
+function renderNewsV192(){
+  // 找「最新消息」section，如果存在就在最上方插入工作人員發布內容
+  const sec=document.getElementById('news');
+  if(!sec)return;
+  let box=document.getElementById('published-news-v192');
+  if(!box){
+    const wrap=sec.querySelector('.wrap')||sec;
+    box=document.createElement('div');
+    box.id='published-news-v192';
+    box.style.marginBottom='18px';
+    wrap.insertBefore(box,wrap.firstChild);
+  }
+  const items=sortedNewsV192(getNewsV192());
+  if(!items.length){box.innerHTML='';return}
+  box.innerHTML=items.map(n=>`
+    <div class="family-card-v191" style="margin-bottom:12px">
+      <div style="font-size:12px;color:var(--soft)">${escapeHtmlV192(n.date||'')}</div>
+      <h3 style="margin:3px 0 5px">${n.pin?'📌 ':''}${escapeHtmlV192(n.title)}</h3>
+      <div>${escapeHtmlV192(n.body||'').replace(/\n/g,'<br>')}</div>
+    </div>`).join('');
+}
+function escapeHtmlV192(s){
+  return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+}
+</script>
+
+<script id="v222-wp-news-loader">
+(function(){
+  const API = 'news-proxy.php';
+  const root = document.getElementById('pm-wp-news');
+  const fallback = document.getElementById('pm-news-fallback');
+  if(!root) return;
+
+  const decode = (html) => {
+    const t = document.createElement('textarea');
+    t.innerHTML = html || '';
+    return t.value;
+  };
+
+  const fmtDate = (iso) => {
+    try{
+      const d = new Date(iso);
+      return new Intl.DateTimeFormat('zh-TW',{
+        year:'numeric',month:'2-digit',day:'2-digit'
+      }).format(d);
+    }catch(e){ return ''; }
+  };
+
+  const getCover = (post) => {
+    try{
+      const media = post._embedded && post._embedded['wp:featuredmedia'];
+      if(media && media[0]){
+        return media[0].source_url || '';
+      }
+    }catch(e){}
+    return '';
+  };
+
+  fetch(API, {credentials:'same-origin', cache:'no-store'})
+    .then(r => {
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      return r.json();
+    })
+    .then(posts => {
+      if(!Array.isArray(posts) || !posts.length) throw new Error('empty');
+      root.innerHTML = '';
+
+      posts.forEach(post => {
+        const card = document.createElement('article');
+        card.className = 'pm-wp-news-card';
+
+        const cover = getCover(post);
+        if(cover){
+          const img = document.createElement('img');
+          img.className = 'pm-wp-news-cover';
+          img.src = cover;
+          img.alt = decode(post.title && post.title.rendered);
+          img.loading = 'lazy';
+          img.decoding = 'async';
+          card.appendChild(img);
+        }
+
+        const inner = document.createElement('div');
+        inner.className = 'pm-wp-news-inner';
+
+        const date = document.createElement('div');
+        date.className = 'pm-wp-news-date';
+        date.textContent = fmtDate(post.date);
+        inner.appendChild(date);
+
+        const title = document.createElement('h3');
+        title.className = 'pm-wp-news-title';
+        title.textContent = decode(post.title && post.title.rendered);
+        inner.appendChild(title);
+
+        const content = document.createElement('div');
+        content.className = 'pm-wp-news-content';
+        content.innerHTML = (post.content && post.content.rendered) || (post.excerpt && post.excerpt.rendered) || '';
+        content.querySelectorAll('script,style,link,meta').forEach(el => el.remove());
+        content.querySelectorAll('a').forEach(a => {
+          a.target = '_blank';
+          a.rel = 'noopener noreferrer';
+        });
+        inner.appendChild(content);
+
+        card.appendChild(inner);
+        root.appendChild(card);
+      });
+    })
+    .catch(err => {
+      root.innerHTML = '';
+      if(fallback) fallback.hidden = false;
+      console.warn('Pacific Manor news load failed:', err);
+    });
+})();
+</script>
+
+</body>
+</html>
