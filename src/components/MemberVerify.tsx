@@ -58,19 +58,25 @@ export function MemberVerify() {
   async function post(body: Record<string, unknown>) {
     setBusy(true);
     setHint("");
-    const res = await fetch("/api/auth", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    const data = await res.json();
-    setBusy(false);
-    if (!res.ok) {
-      setHint(guestSafeError(data.error || GUEST_OTP_UNAVAILABLE));
+    try {
+      const res = await fetch("/api/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setHint(guestSafeError(data.error || GUEST_OTP_UNAVAILABLE));
+        return null;
+      }
+      await refresh();
+      return data;
+    } catch {
+      setHint(GUEST_OTP_UNAVAILABLE);
       return null;
+    } finally {
+      setBusy(false);
     }
-    await refresh();
-    return data;
   }
 
   function needConsent() {
@@ -151,6 +157,11 @@ export function MemberVerify() {
       <p className="login-kicker">太平洋莊園 · 會員</p>
       <h1 className="login-title">登入或註冊</h1>
       <p className="login-lead">用手機簡訊最快；也可 Google、LINE 或電子郵件驗證碼。不用記密碼，選一種方式即可。</p>
+      {hint ? (
+        <p className="login-hint mt-4" role="alert" data-testid="login-hint">
+          {hint}
+        </p>
+      ) : null}
       {!smsReady && status ? (
         <p className="mt-4 rounded-2xl bg-cream px-4 py-3 text-base leading-7 text-[#3d5a66]" data-testid="sms-gateway-status">
           簡訊若暫時無法使用，請改用電子郵件驗證碼或其他登入方式。
@@ -271,8 +282,6 @@ export function MemberVerify() {
           本站保存驗證後的電子郵件、手機與驗證紀錄，用於登入與會員服務。第三方登入不接收對方密碼。簽約資料可稍後補齊。
         </p>
       ) : null}
-
-      {hint ? <p className="login-hint">{hint}</p> : null}
     </section>
   );
 }
