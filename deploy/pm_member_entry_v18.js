@@ -1,0 +1,405 @@
+// Guest login: phone SMS first, Email second, brand social, password as a text link.
+document.addEventListener('DOMContentLoaded', () => {
+  const byId = (id) => document.getElementById(id);
+  const card = byId('loginCard');
+  const passwordCard = byId('passwordLogin');
+  if (!card || !passwordCard) return;
+
+  const API = window.PM_MEMBER_API || 'pm_member_api_v17.php';
+  const PORTAL = window.PM_MEMBER_PORTAL || 'pm_member_portal_v17.php';
+  const phoneRequest = byId('phoneRequest');
+  const phoneVerify = byId('phoneVerify');
+  const emailRequest = byId('emailCodeRequest');
+  const emailVerify = byId('emailCodeVerify');
+  const emailComplete = byId('emailCodeComplete');
+  const message = byId('loginMessage');
+  const title = byId('loginTitle');
+  const lead = byId('loginLead');
+  const consent = byId('loginConsent');
+  const hint = byId('consentHint');
+  let busy = false;
+  let channel = 'sms';
+  let destination = '';
+  let readyAt = 0;
+  let timer;
+  let emailNext = '';
+
+  const say = (text, error = false) => {
+    message.textContent = text || '';
+    message.hidden = !text;
+    message.dataset.error = String(!!error);
+  };
+  const showHint = (text) => {
+    hint.textContent = text;
+    hint.hidden = !text;
+  };
+  const needConsent = () => {
+    if (consent.checked) {
+      showHint('');
+      return false;
+    }
+    showHint('請先勾選同意《會員資料使用說明》，再繼續。');
+    consent.focus({ preventScroll: true });
+    return true;
+  };
+  const setBusy = (value) => {
+    busy = value;
+    card.querySelectorAll('button').forEach((button) => {
+      if (button.dataset.keepEnabled === '1') return;
+      if (button.id === 'phoneResend' || button.id === 'emailCodeResend') return;
+      button.disabled = value;
+    });
+  };
+  const showPanel = (name) => {
+    phoneRequest.classList.toggle('hidden', name !== 'phone');
+    phoneVerify.classList.toggle('hidden', name !== 'phoneCode');
+    emailRequest.classList.toggle('hidden', name !== 'email');
+    emailVerify.classList.toggle('hidden', name !== 'emailCode');
+    emailComplete.classList.toggle('hidden', name !== 'emailComplete');
+    passwordCard.classList.add('hidden');
+    card.classList.remove('hidden');
+    if (name === 'phone') {
+      title.textContent = '登入或註冊';
+      lead.textContent = '用手機簡訊最快；也可 Google、LINE、Apple 或電子郵件驗證碼。不用記密碼，選一種方式即可。';
+    } else if (name === 'phoneCode') {
+      title.textContent = '輸入驗證碼';
+      lead.textContent = '請查看手機簡訊，輸入 6 位數字。';
+    } else if (name === 'email') {
+      title.textContent = '登入或註冊';
+      lead.textContent = '用電子郵件收取驗證碼，不用記密碼。';
+    } else if (name === 'emailCode') {
+      title.textContent = '輸入驗證碼';
+      lead.textContent = '請查看信箱，輸入信中的 6 位數字。';
+    }
+  };
+  const tick = () => {
+    const left = Math.max(0, Math.ceil((readyAt - Date.now()) / 1000));
+    const resend = channel === 'sms' ? byId('phoneResend') : byId('emailCodeResend');
+    if (!resend) return;
+    resend.disabled = busy || left > 0;
+    resend.textContent = left > 0 ? `${left} 秒後可主動重寄` : '重新寄送驗證碼';
+    if (left === 0) clearInterval(timer);
+  };
+
+  async function submit(action, data) {
+    const body = new FormData();
+    body.set('action', action);
+    Object.entries(data).forEach(([key, value]) => body.set(key, value ?? ''));
+    const response = await pmMemberFetch(API, { method: 'POST', body });
+    let result;
+    try {
+      result = await response.json();
+    } catch (_) {
+      throw new Error('目前無法完成，請稍後再試。');
+    }
+    if (window.pmGuestSanitizePayload) window.pmGuestSanitizePayload(result);
+    if (!response.ok || !result.ok) {
+      const raw = result.error || result.message || '這次沒有完成，請再試一次，或改用另一種方式。';
+      const safe = window.pmGuestSafeError ? window.pmGuestSafeError(raw) : raw;
+      const error = new Error(safe);
+      error.nextStep = result.next_step;
+      error.payload = result;
+      throw error;
+    }
+    return result;
+  }
+
+  async function sendPhone() {
+    const phone = byId('phoneNumber').value.trim();
+    if (needConsent() || busy) return;
+    if (!phoneRequest.reportValidity()) return;
+    setBusy(true);
+    say('正在送出簡訊驗證碼，請稍候…');
+    try {
+      const result = await submit('phone_login_request', { phone, consent: '1' });
+      destination = phone;
+      channel = 'sms';
+      readyAt = Date.now() + 60000;
+      byId('phoneDestination').textContent = '驗證碼已送至 ' + phone;
+      byId('phoneCode').value = '';
+      showPanel('phoneCode');
+      say(result.message || '驗證碼已送到手機。');
+      if (result.preview_code && !/seasideresort\.com\.tw$/i.test(location.hostname)) {
+        say((result.message || '') + ' 預覽碼：' + result.preview_code);
+      }
+      clearInterval(timer);
+      timer = setInterval(tick, 1000);
+      tick();
+      byId('phoneCode').focus();
+    } catch (error) {
+      say(error.message, true);
+    } finally {
+      setBusy(false);
+      tick();
+    }
+  }
+
+  async function verifyPhone() {
+    if (busy || !phoneVerify.reportValidity()) return;
+    setBusy(true);
+    say('正在驗證…');
+    try {
+      await submit('phone_login_verify', {
+        phone: destination || byId('phoneNumber').value.trim(),
+        code: byId('phoneCode').value.trim(),
+        consent: consent.checked ? '1' : '0',
+      });
+      location.assign(PORTAL);
+    } catch (error) {
+      say(error.message, true);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function sendEmail() {
+    const email = byId('emailCodeAddress').value.trim();
+    if (needConsent() || busy) return;
+    if (!emailRequest.reportValidity()) return;
+    setBusy(true);
+    say('正在寄送驗證碼，請稍候…');
+    try {
+      const result = await submit('request_email_code', { email });
+      destination = email;
+      channel = 'email';
+      readyAt = Date.now() + 60000;
+      byId('emailCodeDestination').textContent = '驗證收件位置：' + email;
+      byId('emailCodeValue').value = '';
+      showPanel('emailCode');
+      say(result.message || '驗證信已送出。');
+      if (result.preview_code) say((result.message || '') + ' 預覽碼：' + result.preview_code);
+      clearInterval(timer);
+      timer = setInterval(tick, 1000);
+      tick();
+      byId('emailCodeValue').focus();
+    } catch (error) {
+      say(error.message, true);
+    } finally {
+      setBusy(false);
+      tick();
+    }
+  }
+
+  async function verifyEmail(event) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    if (busy || !form.reportValidity()) return;
+    setBusy(true);
+    say('正在驗證…');
+    try {
+      await submit('verify_email_code', {
+        email: destination,
+        code: byId('emailCodeValue').value,
+        consent: emailNext === 'signup_consent' && byId('emailCodeConsent').checked ? '1' : consent.checked ? '1' : '0',
+        legacy_password: emailNext === 'legacy_password' ? byId('emailLegacyPassword').value : '',
+      });
+      location.assign(PORTAL);
+    } catch (error) {
+      if (['signup_consent', 'legacy_password'].includes(error.nextStep)) {
+        emailNext = error.nextStep;
+        byId('emailSignupStep').classList.toggle('hidden', emailNext !== 'signup_consent');
+        byId('emailLegacyStep').classList.toggle('hidden', emailNext !== 'legacy_password');
+        showPanel('emailComplete');
+        title.textContent = emailNext === 'signup_consent' ? '完成註冊' : '確認舊會員身分';
+        lead.textContent = emailNext === 'signup_consent'
+          ? '信箱驗證碼正確。請閱讀資料使用說明，同意後即可建立會員。'
+          : '請完成這一步，啟用此帳戶的電子郵件驗證碼登入。';
+        say(emailNext === error.nextStep ? error.message : '', !!error.message);
+      } else {
+        showPanel('emailCode');
+        say(error.message, true);
+      }
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  phoneRequest.addEventListener('submit', (event) => {
+    event.preventDefault();
+    sendPhone();
+  });
+  phoneVerify.addEventListener('submit', (event) => {
+    event.preventDefault();
+    verifyPhone();
+  });
+  emailRequest.addEventListener('submit', (event) => {
+    event.preventDefault();
+    sendEmail();
+  });
+  emailVerify.addEventListener('submit', verifyEmail);
+  emailComplete.addEventListener('submit', verifyEmail);
+  byId('phoneResend').addEventListener('click', () => sendPhone());
+  byId('emailCodeResend').addEventListener('click', () => sendEmail());
+  byId('phoneEdit').addEventListener('click', () => {
+    showPanel('phone');
+    say('');
+    byId('phoneNumber').focus();
+  });
+  byId('emailCodeEdit').addEventListener('click', () => {
+    showPanel('email');
+    say('');
+    byId('emailCodeAddress').focus();
+  });
+  byId('emailCompleteBack').addEventListener('click', () => {
+    emailNext = '';
+    showPanel('emailCode');
+    say('');
+    byId('emailCodeValue').focus();
+  });
+  byId('switchToEmail').addEventListener('click', () => {
+    channel = 'email';
+    showPanel('email');
+    say('');
+  });
+  byId('switchToPhone').addEventListener('click', () => {
+    channel = 'sms';
+    showPanel('phone');
+    say('');
+  });
+  byId('showPassword').addEventListener('click', () => {
+    card.classList.add('hidden');
+    passwordCard.classList.remove('hidden');
+    byId('loginIdentifier').focus({ preventScroll: true });
+  });
+  byId('backToOtp').addEventListener('click', () => {
+    passwordCard.classList.add('hidden');
+    card.classList.remove('hidden');
+    showPanel(channel === 'email' ? 'email' : 'phone');
+  });
+  byId('noticeToggle').addEventListener('click', () => {
+    const box = byId('noticeBox');
+    box.hidden = !box.hidden;
+  });
+
+  const social = byId('socialRow');
+  const socialMessage = byId('socialMessage');
+  const allowedHost = { google: 'accounts.google.com', apple: 'appleid.apple.com', line: 'access.line.me' };
+
+  function socialUrlOk(name, href) {
+    if (!href) return false;
+    if (/^pm_apple[_a-z0-9]*\.php/i.test(href) || href.startsWith('pm_apple_')) return name === 'apple';
+    try {
+      const url = new URL(href, location.href);
+      if (url.origin === location.origin && /pm_apple/i.test(url.pathname)) return name === 'apple';
+      return url.protocol === 'https:' && url.hostname === allowedHost[name];
+    } catch (_) {
+      return false;
+    }
+  }
+
+  async function startSocial(name) {
+    const attempts = name === 'apple'
+      ? [
+          { url: 'pm_member_social.php', body: { provider: 'apple', consent: '1' } },
+          { url: 'pm_member_social_identity.php', body: { provider: 'apple', consent: '1' } },
+          { url: 'pm_apple_api.php', json: { action: 'prepare' } },
+        ]
+      : [{ url: 'pm_member_social.php', body: { provider: name, consent: '1' } }];
+    let lastError = '無法開始登入';
+    for (const attempt of attempts) {
+      try {
+        let r;
+        if (attempt.json) {
+          r = await fetch(attempt.url, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(attempt.json),
+          });
+        } else {
+          const body = new FormData();
+          Object.entries(attempt.body).forEach(([key, value]) => body.set(key, value));
+          r = await pmMemberFetch(attempt.url, { method: 'POST', body });
+        }
+        const text = await r.text();
+        let j;
+        try {
+          j = JSON.parse(text);
+        } catch (_) {
+          continue;
+        }
+        if (!r.ok || !j.ok) {
+          lastError = j.error || lastError;
+          const retryable = /尚未啟用|尚未開放|未開|不支援|unknown/i.test(lastError);
+          if (!retryable && lastError) throw new Error(lastError);
+          continue;
+        }
+        if (j.mode === 'page' && j.url) {
+          location.assign(j.url);
+          return;
+        }
+        if (socialUrlOk(name, j.url)) {
+          location.assign(j.url);
+          return;
+        }
+        lastError = '登入網址不正確';
+      } catch (error) {
+        lastError = error.message || lastError;
+      }
+    }
+    throw new Error(lastError);
+  }
+
+  function bindSocialButton(button, name) {
+    if (button.dataset.bound === '1') return;
+    button.dataset.bound = '1';
+    button.disabled = false;
+    button.classList.remove('hidden', 'login-soon');
+    button.style.display = '';
+    button.addEventListener('click', async () => {
+      if (needConsent() || social.dataset.busy === '1') return;
+      social.dataset.busy = '1';
+      button.disabled = true;
+      socialMessage.textContent = name === 'apple' ? '正在前往 Apple…' : '正在前往登入服務…';
+      try {
+        await startSocial(name);
+      } catch (error) {
+        socialMessage.textContent = error.message;
+        button.disabled = false;
+        delete social.dataset.busy;
+      }
+    });
+  }
+
+  social.querySelectorAll('button[data-provider]').forEach((button) => {
+    const name = button.dataset.provider;
+    if (name === 'apple') bindSocialButton(button, 'apple');
+  });
+
+  fetch('pm_member_social.php', { credentials: 'same-origin', cache: 'no-store' })
+    .then(async (response) => {
+      const data = await response.json();
+      const providers = data.providers || {};
+      social.querySelectorAll('button[data-provider]').forEach((button) => {
+        const name = button.dataset.provider;
+        if (name === 'apple') {
+          bindSocialButton(button, 'apple');
+          return;
+        }
+        if (providers[name] !== true) {
+          button.disabled = true;
+          button.classList.add('login-soon');
+          return;
+        }
+        bindSocialButton(button, name);
+      });
+    })
+    .catch(() => {
+      social.querySelectorAll('button[data-provider="google"], button[data-provider="line"]').forEach((button) => {
+        button.disabled = true;
+        button.classList.add('login-soon');
+      });
+      bindSocialButton(byId('appleSignIn'), 'apple');
+      socialMessage.textContent = 'Google／LINE 暫時無法連線。Apple 仍可點，或改用手機簡訊／電子郵件。';
+    });
+
+  if (location.hash === '#socialLogin' || location.hash === '#passwordLogin') {
+    history.replaceState(null, '', location.pathname + location.search);
+  }
+  if (new URLSearchParams(location.search).get('login') === 'password') {
+    card.classList.add('hidden');
+    passwordCard.classList.remove('hidden');
+  } else {
+    showPanel('phone');
+  }
+});
