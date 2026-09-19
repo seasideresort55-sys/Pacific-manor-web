@@ -1,36 +1,25 @@
 /**
- * Guest long-stay / experience CTA target.
+ * Product lock 2026-09-19 (owner confirmed).
  *
- * Product has two questionnaire candidates. Do not treat this as a final
- * merge until they pick one.
+ * ACTIVE guest questionnaire is ONLY:
+ *   https://seasideresort.com.tw/booking/pm_front/funnel.html
  *
- * A LIVE (default):  /booking/pm_front/funnel.html
- *     Already on the official host. Long-stay intent funnel.
- * B CANONICAL (not uploaded): match-v3.1.html
- *     Title:「800+｜找到適合我的退休生活」
- *     Suggested paths once uploaded: /match/ or /800plus/match-v3.1.html
+ * match-v3.1.html / /match/ / /800plus/match-v3.1.html are archived.
+ * Do not send guests there. See deploy/www/archive/match/README.txt.
  *
- * Flip ACTIVE to "canonical" after B is on the host. Until then, A avoids
- * sending guests to a 404 or the old short-stay scheme page.
- *
- * After a pass: experience-type or monthly-type booking (interim pm_front OK).
- * After a fail: soft land, no booking calendar, no Prime /booking/ hotel UI.
+ * Primary CTA label: 「了解是否適合長住／月租會員」
+ * After pass: experience-type or monthly-type booking (interim pm_front OK).
+ * After fail: soft land, no booking calendar, no Prime /booking/ hotel UI.
  */
 (function (root) {
-  var TARGETS = {
-    live: "https://seasideresort.com.tw/booking/pm_front/funnel.html",
-    canonical: "https://seasideresort.com.tw/match/",
-  };
-  var ACTIVE = "live";
-  var url = TARGETS[ACTIVE] || TARGETS.live;
-  root.PM_CTA_TARGETS = TARGETS;
-  root.PM_CTA_ACTIVE = ACTIVE;
+  var url = "https://seasideresort.com.tw/booking/pm_front/funnel.html";
+  var PRIMARY_LABEL = "了解是否適合長住／月租會員";
   root.PM_GUEST_FUNNEL_URL = url;
+  root.PM_CTA_PRIMARY_LABEL = PRIMARY_LABEL;
   if (typeof module !== "undefined") {
     module.exports = {
-      TARGETS: TARGETS,
-      ACTIVE: ACTIVE,
       url: url,
+      PRIMARY_LABEL: PRIMARY_LABEL,
     };
   }
 })(typeof globalThis !== "undefined" ? globalThis : this);

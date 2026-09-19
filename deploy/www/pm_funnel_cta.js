@@ -1,12 +1,11 @@
 /**
  * Optional overlay if you cannot overwrite public_html/index.html.
- * Upload next to the homepage with pm_cta_target.js and add:
+ * Upload with pm_cta_target.js and add before </body>:
  *   <script src="pm_cta_target.js"></script>
  *   <script src="pm_funnel_cta.js"></script>
- * before </body>.
  *
- * Rewrites leftover guest entry links to PM_GUEST_FUNNEL_URL.
- * Does not touch 會員中心, hospital 預約門診, or /booking/ Prime hotel UI.
+ * Rewrites leftover guest entry links to the locked funnel URL.
+ * Does not touch 會員中心, hospital 預約門診, footer admin, or /booking/ hotel UI.
  */
 (function () {
   function targetUrl() {
@@ -27,6 +26,9 @@
       var url = new URL(href, "https://seasideresort.com.tw/");
       if (url.origin !== "https://seasideresort.com.tw") return false;
       var path = url.pathname.replace(/\/+$/, "") || "/";
+      if (path.indexOf("/match") === 0 || path.indexOf("/800plus/match") === 0) {
+        return true;
+      }
       return path === "/booking/pm_front" || path === "/booking/pm_front/index.html";
     } catch (e) {
       return false;
