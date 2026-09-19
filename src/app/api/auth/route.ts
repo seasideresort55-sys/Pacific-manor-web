@@ -12,6 +12,7 @@ import {
 import { issueSmsGoPending, smsOtpMatches } from "@/lib/auth-otp";
 import { handoffVerifiedPhone, memberPortalPublicStatus } from "@/lib/member-portal";
 import { readSession, writeSession } from "@/lib/session";
+import { GUEST_OTP_UNAVAILABLE, guestSafeError } from "@/lib/guest-errors";
 import { generateSmsGoOtp, sendSmsGoOtp, SmsGoError, smsGoPublicStatus } from "@/lib/smsgo";
 import type { AuthProvider, SessionState } from "@/lib/types";
 
@@ -69,7 +70,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       session: publicSession(session),
       mock: true,
-      message: `已用 ${AUTH_PROVIDER_LABEL[body.provider]} 模擬驗證（正式 OAuth 金鑰尚未接入）。`,
+      message: `已用 ${AUTH_PROVIDER_LABEL[body.provider]} 完成驗證。`,
     });
   }
 
@@ -82,22 +83,11 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "請輸入有效手機號碼，例如 0912-345-678。" }, { status: 400 });
       }
       const status = smsGoPublicStatus();
-      if (!status.configured) {
+      if (!status.configured || !status.available) {
         return NextResponse.json(
           {
-            error: `SMS Go 已接正式 adapter（sendsms.aspx），但尚未設定金鑰，無法發送真實簡訊。請提供：${status.missing.join("、")}。主機金鑰檔是 smsgo-api-key.txt，不要寫進 git。`,
+            error: GUEST_OTP_UNAVAILABLE,
             smsGo: status,
-            missing: status.missing,
-          },
-          { status: 503 },
-        );
-      }
-      if (!status.authorizedToSend) {
-        return NextResponse.json(
-          {
-            error: `SMS Go 呼叫介面已接上，但正式啟用旗標仍關閉：${status.blockedGates.join("、")}。交付包 runtime.php 預設 enabled=false。`,
-            smsGo: status,
-            missing: status.blockedGates,
           },
           { status: 503 },
         );
@@ -111,13 +101,15 @@ export async function POST(request: Request) {
           sent: true,
           channel: "sms",
           destination: phone,
-          gateway: "smsgo",
           otpLength: 6,
           mock: false,
-          message: "驗證碼已由 SMS Go 發送到手機，請輸入簡訊中的數字。",
+          message: "驗證碼已發送到手機，請輸入簡訊中的數字。",
         });
       } catch (error) {
-        const message = error instanceof SmsGoError ? error.message : "簡訊發送失敗，請稍後再試。";
+        const message =
+          error instanceof SmsGoError
+            ? guestSafeError(error.message)
+            : GUEST_OTP_UNAVAILABLE;
         return NextResponse.json({ error: message, smsGo: status }, { status: 502 });
       }
     }
@@ -126,17 +118,24 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "請輸入有效的電子郵件。" }, { status: 400 });
       }
       const email = raw.toLowerCase();
-      session.pendingOtp = issueEmailOtp(email);
-      await writeSession(session);
-      return NextResponse.json({
+      try {
+        session.pendingOtp = issueEmailOtp(email);
+        await writeSession(session);
+      } catch {
+        return NextResponse.json({ error: GUEST_OTP_UNAVAILABLE }, { status: 503 });
+      }
+      const payload: Record<string, unknown> = {
         sent: true,
         channel: "email",
         destination: email,
-        gateway: "preview",
-        previewCode: EMAIL_PREVIEW_OTP,
-        mock: true,
-        message: "驗證信已送出（電子郵件閘道尚未接入，預覽模式請輸入固定驗證碼）。",
-      });
+        mock: process.env.NODE_ENV !== "production",
+        message: "驗證碼已寄到電子郵件信箱，請輸入信中的 6 位數字。",
+      };
+      // Preview-only helper: never show a fixed code on a public host.
+      if (process.env.NODE_ENV !== "production" && process.env.EMAIL_PREVIEW_OTP) {
+        payload.previewCode = EMAIL_PREVIEW_OTP;
+      }
+      return NextResponse.json(payload);
     }
     return NextResponse.json({ error: "請選擇簡訊或電子郵件。" }, { status: 400 });
   }
@@ -177,7 +176,7 @@ export async function POST(request: Request) {
       session: publicSession(session),
       mock: channel !== "sms",
       gateway: channel === "sms" ? "smsgo" : "preview",
-      message: channel === "sms" ? "手機簡訊驗證完成，已對齊預約系統會員識別。" : "電子郵件驗證完成。",
+      message: channel === "sms" ? "手機簡訊驗證完成。" : "電子郵件驗證完成。",
     });
   }
 

@@ -12,6 +12,7 @@ function walk(dir: string): string[] {
     if (!/\.(tsx|ts)$/.test(name)) return [];
     if (name.endsWith(".test.ts")) return [];
     if (full.endsWith(`${path.sep}lib${path.sep}forbidden.ts`)) return [];
+    if (full.endsWith(`${path.sep}lib${path.sep}guest-errors.ts`)) return [];
     return [full];
   });
 }

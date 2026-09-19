@@ -6,7 +6,8 @@ export default function QuizPage() {
       <div className="mx-auto max-w-3xl px-4 py-12">
         <p className="text-sm tracking-[0.2em] text-ocean">了解是否適合</p>
         <p className="mt-2 text-xl leading-8 text-[#3d5a66]">
-          一題一題來，字夠大、選項都有說明。結果只有三種：通過、待人工、未通過。
+          一題一題來，字夠大、選項都有說明。結果只有三種：通過、待人工、未通過。了解問卷開放 50
+          歲以上或遠端工作者；長住入住原則年滿 60 歲。通過後才能申請月租、成為會員，再安排體驗。
         </p>
         <div className="mt-8">
           <QuizForm />

@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { memberPlans } from "@/data/plans";
 import { AUTH_PROVIDER_LABEL } from "@/lib/auth";
+import { ELIGIBILITY_COPY, EXPERIENCE_OR_QUIZ_MIN_AGE, ageFromBirthYear, birthYearOptions } from "@/lib/eligibility";
 import type { MemberPlanId } from "@/lib/types";
 import { useSession } from "./SessionProvider";
 
@@ -18,10 +19,12 @@ export function MembershipApplyForm() {
   const [name, setName] = useState(session?.name || "");
   const [phone, setPhone] = useState(session?.phone || "");
   const [email, setEmail] = useState(session?.email || "");
+  const [birthYear, setBirthYear] = useState("");
   const [acceptContract, setAcceptContract] = useState(false);
   const [noInstallmentAck, setNoInstallmentAck] = useState(false);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const yearOptions = useMemo(() => birthYearOptions(), []);
 
   useEffect(() => {
     if (session?.name) setName(session.name);
@@ -35,6 +38,18 @@ export function MembershipApplyForm() {
   async function submit(simulateSign: boolean) {
     setBusy(true);
     setError("");
+    const year = Number(birthYear);
+    const age = ageFromBirthYear(year);
+    if (!birthYear || age == null) {
+      setError(ELIGIBILITY_COPY.birthYear);
+      setBusy(false);
+      return;
+    }
+    if (age < EXPERIENCE_OR_QUIZ_MIN_AGE && session?.quizAnswers?.identities?.includes("remote") !== true) {
+      setError(`了解與月租申請以 ${EXPERIENCE_OR_QUIZ_MIN_AGE} 歲以上為原則；遠端工作者請在問卷中勾選該身分。長住入住原則年滿 60 歲。`);
+      setBusy(false);
+      return;
+    }
     const res = await fetch("/api/membership", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -42,6 +57,7 @@ export function MembershipApplyForm() {
         name,
         phone,
         email,
+        birthYear: year,
         planId,
         acceptContract,
         noInstallmentAck,
@@ -117,9 +133,29 @@ export function MembershipApplyForm() {
         <input className="field" required inputMode="tel" value={phone} onChange={(event) => setPhone(event.target.value)} />
       </label>
       <label className="grid gap-2">
-        <span>電子信箱（選填）</span>
+        <span>電子郵件（選填）</span>
         <input className="field" type="email" value={email} onChange={(event) => setEmail(event.target.value)} />
       </label>
+      <label className="grid gap-2">
+        <span>出生年（請確認，用於年齡資格）</span>
+        <select
+          className="field"
+          required
+          value={birthYear}
+          onChange={(event) => setBirthYear(event.target.value)}
+        >
+          <option value="">請選擇出生年</option>
+          {yearOptions.map((year) => (
+            <option key={year} value={year}>
+              {year}年
+            </option>
+          ))}
+        </select>
+        <span className="text-sm leading-6 text-[#5d6f75]">{ELIGIBILITY_COPY.birthYear}</span>
+      </label>
+      <p className="rounded-2xl bg-cream px-4 py-3 text-base leading-7 text-[#3d5a66]">
+        {ELIGIBILITY_COPY.experience}
+      </p>
       <label className="flex items-start gap-3 rounded-2xl bg-cream p-4">
         <input
           type="checkbox"

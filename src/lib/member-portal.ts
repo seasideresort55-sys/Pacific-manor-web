@@ -30,12 +30,7 @@ export function memberPortalConfig(): MemberPortalConfig {
 export function memberPortalPublicStatus() {
   const config = memberPortalConfig();
   return {
-    aligned: true,
-    system: "pm_member_portal",
-    baseUrl: config.baseUrl,
-    tokenConfigured: config.tokenConfigured,
-    missing: config.tokenConfigured ? [] : ["MEMBER_API_TOKEN"],
-    optionalEnv: [...MEMBER_API_OPTIONAL_ENV],
+    available: config.tokenConfigured,
   };
 }
 

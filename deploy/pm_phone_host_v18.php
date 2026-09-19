@@ -9,11 +9,12 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/pm_phone_lib_v18.php';
+require_once __DIR__ . '/pm_guest_errors.php';
 
 if (!function_exists('pm_phone_host_dispatch')) {
     function pm_phone_host_dispatch(...$args)
     {
-        $result = pm_phone_handle($args);
+        $result = pm_guest_sanitize_payload(pm_phone_handle($args));
         if (!headers_sent()) {
             header('Content-Type: application/json; charset=utf-8');
             header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
@@ -228,19 +229,16 @@ function pm_phone_action_verify(array $input, bool $asLogin): array
             return [
                 'ok' => false,
                 'code' => 'unavailable',
-                'error' => '驗證碼正確，但目前無法對齊預約系統會員。請改用 Email 驗證碼登入，或聯絡莊園。',
-                'message' => '驗證碼正確，但目前無法對齊預約系統會員。請改用 Email 驗證碼登入，或聯絡莊園。',
-                'gap' => 'qlo_pm_member_write',
+                'error' => '驗證碼正確，但目前無法完成會員登入。請改用電子郵件驗證碼，或聯絡莊園。',
+                'message' => '驗證碼正確，但目前無法完成會員登入。請改用電子郵件驗證碼，或聯絡莊園。',
             ];
         }
         if (!pm_phone_attach_session($member)) {
             return [
                 'ok' => false,
                 'code' => 'unavailable',
-                'error' => '驗證碼正確，會員已對齊，但正式登入工作階段無法寫入。請改用 Email 驗證碼或密碼登入。',
-                'message' => '驗證碼正確，會員已對齊，但正式登入工作階段無法寫入。請改用 Email 驗證碼或密碼登入。',
-                'gap' => 'pm_member_session',
-                'member_id' => $member['id_member'] ?? null,
+                'error' => '驗證碼正確，但目前無法完成會員登入。請改用電子郵件驗證碼，或聯絡莊園。',
+                'message' => '驗證碼正確，但目前無法完成會員登入。請改用電子郵件驗證碼，或聯絡莊園。',
             ];
         }
         unset($_SESSION['pm_phone_otp']);
@@ -291,10 +289,10 @@ function pm_phone_send_sms(string $phone, string $code): array
                     return ['ok' => true, 'gateway' => 'pm_smsgo_adapter', 'message_id' => is_array($result) ? ($result['message_id'] ?? $result['msgid'] ?? null) : null];
                 }
                 if (is_array($result) && !empty($result['error'])) {
-                    return ['ok' => false, 'code' => 'rejected', 'error' => (string)$result['error'], 'gateway' => 'pm_smsgo_adapter'];
+                    return ['ok' => false, 'code' => 'rejected', 'error' => PM_GUEST_OTP_UNAVAILABLE, 'gateway' => 'sms'];
                 }
             } catch (Throwable $e) {
-                return ['ok' => false, 'code' => 'unavailable', 'error' => '簡訊閘道暫時無法完成，請稍後再試，或改用 Email。', 'gateway' => 'pm_smsgo_adapter'];
+                return ['ok' => false, 'code' => 'unavailable', 'error' => PM_GUEST_OTP_UNAVAILABLE, 'gateway' => 'sms'];
             }
         }
     }
@@ -309,18 +307,16 @@ function pm_phone_send_sms(string $phone, string $code): array
         return [
             'ok' => false,
             'code' => 'unavailable',
-            'error' => '正式簡訊閘道已接上，但主機尚未讀到 SMS Go 帳號或 API Key。金鑰在 smsgo-api-key.txt，不要寫進 git。請改用 Email 驗證碼。',
-            'gap' => 'smsgo_credentials',
-            'gateway' => 'smsgo',
+            'error' => PM_GUEST_OTP_UNAVAILABLE,
+            'gateway' => 'sms',
         ];
     }
     if (!$enabled) {
         return [
             'ok' => false,
             'code' => 'unavailable',
-            'error' => '簡訊服務目前關閉（SMSGO_ENABLED / runtime enabled）。請改用 Email 驗證碼，或請管理員開啟正式簡訊。',
-            'gap' => 'smsgo_enabled',
-            'gateway' => 'smsgo',
+            'error' => PM_GUEST_OTP_UNAVAILABLE,
+            'gateway' => 'sms',
         ];
     }
 

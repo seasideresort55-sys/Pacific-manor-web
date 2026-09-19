@@ -17,7 +17,7 @@ export default function HomePage() {
               先了解自己，再決定要不要過月租的海邊生活
             </h1>
             <p className="mt-5 max-w-xl text-xl leading-8 text-[#3d5a66]">
-              太平洋莊園是熟齡與遠端工作者的生活方式網絡。主商品是月租會員；體驗是會員權益，不是可單賣的停留商品。
+              太平洋莊園是熟齡與遠端工作者的生活方式網絡。主商品是月租會員；體驗是會員權益，不是可單賣的停留商品。了解與體驗以 50 歲以上、生活可自理為原則；長住入住原則年滿 60 歲。
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link href="/quiz" className="btn-primary">

@@ -51,7 +51,8 @@ describe("smsGoConfig", () => {
     expect(config.enabled).toBe(false);
     expect(config.authorizedToSend).toBe(false);
     expect(config.missing).toEqual(["SMSGO_USERNAME", "SMSGO_API_KEY"]);
-    expect(smsGoPublicStatus().alignedWith).toBe("pm_smsgo_adapter.php");
+    expect(smsGoPublicStatus().available).toBe(false);
+    expect(JSON.stringify(smsGoPublicStatus())).not.toMatch(/SMSGO_|pm_smsgo_adapter|missing/);
   });
 });
 
@@ -61,9 +62,8 @@ describe("SMS Go sendsms", () => {
     try {
       await sendSmsGoOtp("0912345678", "654321");
     } catch (error) {
-      expect(String(error)).not.toMatch(/secret|sk_/i);
-      expect((error as SmsGoError).message).toContain("SMSGO_USERNAME");
-      expect((error as SmsGoError).message).toContain("SMSGO_API_KEY");
+      expect(String(error)).not.toMatch(/secret|sk_|SMSGO_|pm_member_private|api-key/i);
+      expect((error as SmsGoError).message).toContain("暫時無法寄送驗證碼");
     }
   });
 
@@ -97,6 +97,7 @@ describe("SMS Go sendsms", () => {
   });
 
   it("錯碼對應文案", () => {
-    expect(smsGoUserMessage(-15)).toContain("IP");
+    expect(smsGoUserMessage(-15)).toContain("暫時無法寄送驗證碼");
+    expect(smsGoUserMessage(-5)).toContain("手機號碼");
   });
 });

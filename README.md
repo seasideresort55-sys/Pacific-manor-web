@@ -15,7 +15,7 @@
 
 https://seasideresort.com.tw/booking/pm_roomboard/pm_member_portal_v17.php
 
-可上傳檔在 [`deploy/`](deploy/README.md)。
+可上傳檔在 [`deploy/`](deploy/README.md)。客人看到的驗證碼失敗只會是「暫時無法寄送驗證碼，請稍後再試或改用其他方式」。簡訊金鑰與電子郵件唯一索引仍須主機設定，見 [`deploy/OPERATOR_OTP.md`](deploy/OPERATOR_OTP.md)。
 
 開發者本機（可選，需要 Node.js 18+）：
 

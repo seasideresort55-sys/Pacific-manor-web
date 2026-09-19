@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { AUTH_PROVIDER_LABEL, EMAIL_PREVIEW_OTP } from "@/lib/auth";
+import { AUTH_PROVIDER_LABEL } from "@/lib/auth";
+import { GUEST_OTP_UNAVAILABLE, guestSafeError } from "@/lib/guest-errors";
 import type { AuthProvider } from "@/lib/types";
 import { AppleGlyph, GoogleGlyph, LineGlyph } from "./BrandIcons";
 import { useSession } from "./SessionProvider";
@@ -11,18 +12,10 @@ import { useSession } from "./SessionProvider";
 type Channel = "email" | "sms";
 
 type AuthStatus = {
-  smsGo: {
-    wired: boolean;
-    configured: boolean;
-    enabled: boolean;
-    authorizedToSend: boolean;
-    otpLength: 4 | 6;
-    missing: string[];
-    blockedGates: string[];
-  };
-  memberPortal: {
-    tokenConfigured: boolean;
-    missing: string[];
+  smsGo?: {
+    available?: boolean;
+    configured?: boolean;
+    otpLength?: 4 | 6;
   };
 };
 
@@ -34,19 +27,16 @@ export function MemberVerify() {
   const [destination, setDestination] = useState("");
   const [code, setCode] = useState("");
   const [sentTo, setSentTo] = useState("");
-  const [emailPreview, setEmailPreview] = useState("");
   const [otpLength, setOtpLength] = useState(6);
   const [hint, setHint] = useState("");
   const [busy, setBusy] = useState(false);
   const [consent, setConsent] = useState(false);
   const [showNotice, setShowNotice] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
   const [redo, setRedo] = useState(false);
   const [status, setStatus] = useState<AuthStatus | null>(null);
 
   const applyHref = plan ? `/membership/apply?plan=${plan}` : "/membership/apply";
-  const smsReady = status?.smsGo.authorizedToSend === true;
-  const smsHasKeys = status?.smsGo.configured === true;
+  const smsReady = status?.smsGo?.available === true;
 
   useEffect(() => {
     let cancelled = false;
@@ -76,7 +66,7 @@ export function MemberVerify() {
     const data = await res.json();
     setBusy(false);
     if (!res.ok) {
-      setHint(data.error || "這次沒有完成，請再試一次，或改用另一種方式。");
+      setHint(guestSafeError(data.error || GUEST_OTP_UNAVAILABLE));
       return null;
     }
     await refresh();
@@ -102,13 +92,11 @@ export function MemberVerify() {
     setSentTo(data.destination);
     setCode("");
     if (channel === "sms") {
-      setEmailPreview("");
       if (data.otpLength) setOtpLength(Number(data.otpLength));
-      setHint("驗證碼已由 SMS Go 發送到手機。請輸入簡訊中的數字，沒有預覽假碼。");
+      setHint("驗證碼已發送到手機。請輸入簡訊中的數字。");
       return;
     }
-    setEmailPreview(data.previewCode || EMAIL_PREVIEW_OTP);
-    setHint(`驗證碼已寄出。電子郵件仍為預覽模式，請輸入 ${data.previewCode || EMAIL_PREVIEW_OTP}。`);
+    setHint("驗證碼已寄到電子郵件。請輸入信中的 6 位數字。");
   }
 
   async function verifyOtp() {
@@ -126,7 +114,6 @@ export function MemberVerify() {
     setDestination("");
     setCode("");
     setSentTo("");
-    setEmailPreview("");
     setHint("");
   }
 
@@ -148,7 +135,6 @@ export function MemberVerify() {
           <li>姓名：{session.name || "尚未填"}</li>
           <li>電子郵件：{session.email || "尚未填"}</li>
           <li>手機：{session.phone || "尚未填"}</li>
-          <li>會員識別：{session.memberIdentifier || session.phone || "尚未對齊"}</li>
         </ul>
         <Link href={nextHref} className="login-primary mt-8">
           {nextLabel}
@@ -164,14 +150,12 @@ export function MemberVerify() {
     <section className="login-card">
       <p className="login-kicker">太平洋莊園 · 會員</p>
       <h1 className="login-title">登入或註冊</h1>
-      <p className="login-lead">用手機簡訊最快；也可 Google、LINE 或 Email。不用記密碼，選一種方式即可。</p>
-      <p className="mt-4 rounded-2xl bg-cream px-4 py-3 text-base leading-7 text-[#3d5a66]" data-testid="sms-gateway-status">
-        {smsReady
-          ? "簡訊：已對齊正式 SMS Go adapter，可發送真實簡訊；驗證後進入預約系統同一會員識別。"
-          : smsHasKeys
-            ? `簡訊：金鑰已接上呼叫介面，但啟用旗標仍關（${status?.smsGo.blockedGates.join("、") || "SMSGO_ENABLED"}）。`
-            : `簡訊：已接正式 SMS Go adapter，仍缺主機金鑰 ${status?.smsGo.missing.join("、") || "SMSGO_USERNAME、SMSGO_API_KEY"}。`}
-      </p>
+      <p className="login-lead">用手機簡訊最快；也可 Google、LINE 或電子郵件驗證碼。不用記密碼，選一種方式即可。</p>
+      {!smsReady && status ? (
+        <p className="mt-4 rounded-2xl bg-cream px-4 py-3 text-base leading-7 text-[#3d5a66]" data-testid="sms-gateway-status">
+          簡訊若暫時無法使用，請改用電子郵件驗證碼或其他登入方式。
+        </p>
+      ) : null}
 
       {!sentTo ? (
         <div className="mt-8 grid gap-4">
@@ -228,9 +212,7 @@ export function MemberVerify() {
             />
           </label>
           <p className="text-base leading-7 text-[#5d6f75]">
-            {channel === "sms"
-              ? "請輸入手機簡訊中的驗證碼。正式路徑不使用預覽假碼。"
-              : `預覽模式請輸入 ${emailPreview || EMAIL_PREVIEW_OTP}。`}
+            {channel === "sms" ? "請輸入手機簡訊中的驗證碼。" : "請輸入電子郵件中的驗證碼。"}
           </p>
           <button
             type="button"
@@ -242,7 +224,7 @@ export function MemberVerify() {
           </button>
           <div className="flex flex-wrap gap-x-5 gap-y-2">
             <button type="button" className="login-text-link" onClick={() => setSentTo("")}>
-              {channel === "sms" ? "更改手機號碼" : "更改 Email"}
+              {channel === "sms" ? "更改手機號碼" : "更改電子郵件"}
             </button>
             <button type="button" className="login-text-link" disabled={busy} onClick={() => void sendOtp()}>
               重新寄送
@@ -286,20 +268,11 @@ export function MemberVerify() {
       </label>
       {showNotice ? (
         <p className="mt-3 rounded-2xl bg-cream px-4 py-3 text-base leading-7 text-[#3d5a66]">
-          本站保存驗證後的 Email、手機與驗證紀錄，用於登入與會員服務。驗證後的手機對齊預約系統／QloApps 同一會員識別。第三方登入不接收對方密碼。簽約資料可稍後補齊。
+          本站保存驗證後的電子郵件、手機與驗證紀錄，用於登入與會員服務。第三方登入不接收對方密碼。簽約資料可稍後補齊。
         </p>
       ) : null}
 
       {hint ? <p className="login-hint">{hint}</p> : null}
-
-      <button type="button" className="login-text-link mt-6" onClick={() => setShowPassword((value) => !value)}>
-        使用密碼登入
-      </button>
-      {showPassword ? (
-        <p className="mt-2 text-base leading-7 text-[#5d6f75]">
-          正式密碼登入請至預約系統會員入口。此頁以簡訊與 Email 驗證碼為主，登入後可至會員中心綁定其他方式。
-        </p>
-      ) : null}
     </section>
   );
 }

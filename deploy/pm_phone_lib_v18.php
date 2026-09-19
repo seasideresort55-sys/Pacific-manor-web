@@ -198,16 +198,8 @@ function pm_phone_smsgo_user_message(int $statuscode): string
 {
     return match ($statuscode) {
         0 => '成功',
-        -1 => '簡訊閘道參數格式不正確。',
-        -2 => 'SMS Go 帳號、API Key 或來源 IP 驗證失敗。',
-        -3 => '尚未設定 SMS Go 帳號或 API Key。',
-        -5 => '手機號碼格式不被簡訊閘道接受。',
-        -8 => 'SMS Go 點數不足，請先加值。',
-        -10 => '簡訊發送失敗。',
-        -15 => '此伺服器 IP 尚未加入 SMS Go 允許清單。',
-        -16 => 'SMS Go 尚未開通 API。',
+        -5 => '請輸入台灣手機號碼，例如 09 開頭的十位數字。',
         -21 => '已達發送上限，請稍後再試。',
-        -23 => '簡訊缺少 NCC 署名。',
-        default => '簡訊服務這次沒有完成，請稍後再試，或改用 Email。',
+        default => '暫時無法寄送驗證碼，請稍後再試或改用其他方式',
     };
 }

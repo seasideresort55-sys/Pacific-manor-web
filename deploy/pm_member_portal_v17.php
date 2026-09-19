@@ -106,7 +106,7 @@ button{margin-top:14px;padding:12px 16px;border:0;border-radius:10px;background:
       <strong>太平洋莊園</strong><small>PACIFIC MANOR</small>
     </a>
     <div class="pm-actions">
-      <a class="pm-action primary" href="pm_member_portal_v17.php">入住申請</a>
+      <a class="pm-action primary" href="pm_member_portal_v17.php">登入或註冊</a>
       <a class="pm-action" href="https://seasideresort.com.tw/#familycare">安心專區</a>
       <a class="pm-action" href="https://seasideresort.com.tw/#contact">聯繫我們</a>
       <a class="pm-action" href="pm_member_center_v17.php">會員中心</a>
@@ -122,7 +122,7 @@ button{margin-top:14px;padding:12px 16px;border:0;border-radius:10px;background:
     <a href="https://seasideresort.com.tw/#transport">交通方式</a><a href="https://seasideresort.com.tw/#faq">常見問題</a>
   </div>
 </div>
-<div class="page-titlebar"><h1>會員與入住申請</h1><p>登入或建立會員，入住資料可稍後補齊。</p></div>
+<div class="page-titlebar"><h1>登入或註冊</h1><p>先完成會員驗證，月租申請與體驗安排可稍後補齊。</p></div>
 <div id="guestWrap" class="login-shell">
 <main>
 <div id="status" class="loading">正在連線會員系統…</div>
@@ -131,7 +131,7 @@ button{margin-top:14px;padding:12px 16px;border:0;border-radius:10px;background:
   <div class="login-card" id="loginCard">
     <p class="login-kicker">太平洋莊園 · 會員</p>
     <h1 class="login-title" id="loginTitle">登入或註冊</h1>
-    <p class="login-lead" id="loginLead">用手機簡訊最快；也可 Google、LINE、Apple 或 Email。不用記密碼，選一種方式即可。</p>
+    <p class="login-lead" id="loginLead">用手機簡訊最快；也可 Google、LINE、Apple 或電子郵件驗證碼。不用記密碼，選一種方式即可。</p>
     <p id="loginMessage" class="login-hint" hidden role="status" aria-live="polite"></p>
 
     <form id="phoneRequest" class="login-stack">
@@ -167,7 +167,7 @@ button{margin-top:14px;padding:12px 16px;border:0;border-radius:10px;background:
       <p id="emailCodeExpiry" class="small">驗證碼 10 分鐘內有效。系統不會自動寄信。</p>
       <button class="login-primary" type="submit">驗證並繼續</button>
       <div style="display:flex;flex-wrap:wrap;gap:16px">
-        <button id="emailCodeEdit" class="login-text-link" type="button">更改 Email</button>
+        <button id="emailCodeEdit" class="login-text-link" type="button">更改電子郵件</button>
         <button id="emailCodeResend" class="login-text-link" type="button">重新寄送驗證碼</button>
       </div>
     </form>
@@ -211,7 +211,7 @@ button{margin-top:14px;padding:12px 16px;border:0;border-radius:10px;background:
       </span>
     </label>
     <p id="consentHint" class="login-hint" hidden></p>
-    <p id="noticeBox" class="login-hint" hidden>本站保存驗證後的 Email、手機與驗證紀錄，用於登入與會員服務。第三方登入不接收對方密碼。簽約與入住資料可稍後補齊。登入後可至會員中心綁定其他方式。</p>
+    <p id="noticeBox" class="login-hint" hidden>本站保存驗證後的電子郵件、手機與驗證紀錄，用於登入與會員服務。第三方登入不接收對方密碼。簽約資料可稍後補齊。</p>
 
     <button id="showPassword" class="login-text-link" type="button" style="margin-top:22px">使用密碼登入</button>
   </div>
@@ -222,7 +222,7 @@ button{margin-top:14px;padding:12px 16px;border:0;border-radius:10px;background:
     <p class="login-lead">歡迎回來，請輸入您的會員帳號。</p>
     <p id="resetLoginNotice" class="ok hidden" role="status">密碼已重設，請使用新密碼登入</p>
     <form id="loginForm" class="login-stack">
-      <label for="loginIdentifier" style="font-size:18px;margin:0">電話號碼或 Email</label>
+      <label for="loginIdentifier" style="font-size:18px;margin:0">電話號碼或電子郵件</label>
       <input id="loginIdentifier" class="login-field" name="identifier" type="text" autocomplete="username" maxlength="190" required>
       <label for="loginPassword" style="font-size:18px;margin:0">密碼</label>
       <input id="loginPassword" class="login-field" name="password" type="password" autocomplete="current-password" required>
@@ -230,7 +230,7 @@ button{margin-top:14px;padding:12px 16px;border:0;border-radius:10px;background:
       <p id="loginFormMessage" class="login-hint" hidden role="status"></p>
       <button class="login-primary" type="submit">登入</button>
     </form>
-    <button id="backToOtp" class="login-text-link" type="button">返回簡訊／Email 登入</button>
+    <button id="backToOtp" class="login-text-link" type="button">返回簡訊／電子郵件登入</button>
   </div>
 </section>
 </main>
@@ -241,7 +241,7 @@ button{margin-top:14px;padding:12px 16px;border:0;border-radius:10px;background:
   <div class="card"><h2 id="hello">會員您好</h2><div id="memberState" class="note"></div><a href="pm_member_center_v17.php" style="display:inline-block;margin:8px 0;color:#2E5E73;font-weight:800">進入會員中心 →</a><button id="logoutBtn" class="secondary">登出</button></div>
   <div class="card" id="phoneCard">
     <h2>驗證我的手機</h2>
-    <p class="small">已登入會員可在此補綁台灣手機（與登入簡訊同一套 SMS Go）。</p>
+    <p class="small">已登入會員可在此補綁台灣手機。</p>
     <p id="phoneSummary" class="note" aria-live="polite"></p>
     <div id="phoneVerification">
       <section aria-labelledby="phone-title" class="phone-verification">
@@ -258,7 +258,7 @@ button{margin-top:14px;padding:12px 16px;border:0;border-radius:10px;background:
     </div>
   </div>
   <div class="card">
-    <h2>提出入住申請</h2>
+    <h2>提出體驗／月租安排</h2>
     <div id="applyNote" class="note"></div>
     <form id="applyForm">
       <div class="grid">
@@ -277,10 +277,10 @@ button{margin-top:14px;padding:12px 16px;border:0;border-radius:10px;background:
       <div id="trialPeriod" class="small hidden">體驗方案可自行選擇入住期間；30 天以上請改用正式會員月住。</div>
       <div id="monthlyModeNote" class="small hidden"></div>
       <label>其他入住需求</label><textarea name="request_note"></textarea>
-      <button type="submit">送出入住申請</button>
+      <button type="submit">送出安排申請</button>
     </form>
   </div>
-  <div class="card"><h2>我的入住申請</h2><div id="apps"></div></div>
+  <div class="card"><h2>我的申請</h2><div id="apps"></div></div>
 </section>
 </main>
 
@@ -291,6 +291,7 @@ window.PM_MEMBER_PORTAL = document.body.getAttribute('data-portal') || 'pm_membe
 <?php if (is_file(__DIR__ . '/pm_member_client.js')): ?>
 <script src="pm_member_client.js"></script>
 <?php endif; ?>
+<script src="pm_guest_errors.js"></script>
 <script src="pm_member_client_v18.js"></script>
 <script src="pm_member_entry_v18.js"></script>
 <script>
@@ -339,7 +340,7 @@ async function refresh(){
   try{
     const j=await call('status');
     statusBox.classList.add('hidden');
-    if(!j.installed){showStatus('warn','會員資料庫尚未初始化，請管理員先執行一次安裝。');guestView.classList.add('hidden');memberView.classList.add('hidden');return;}
+    if(!j.installed){showStatus('warn','會員服務暫時無法使用，請稍後再試。');guestView.classList.add('hidden');memberView.classList.add('hidden');return;}
     if(!j.logged_in){guestView.classList.remove('hidden');memberView.classList.add('hidden');document.body.classList.add('pm-guest');document.getElementById('guestWrap').classList.remove('hidden');return;}
     guestView.classList.add('hidden');memberView.classList.remove('hidden');document.body.classList.remove('pm-guest');document.getElementById('guestWrap').classList.add('hidden');
     document.getElementById('hello').textContent=(j.member.name||'會員')+'，您好';
@@ -359,7 +360,7 @@ async function refresh(){
     }
     const sel=document.getElementById('roomType'); sel.innerHTML=''; (j.rooms&&j.rooms.length?j.rooms:['海景房']).forEach(x=>{const o=document.createElement('option');o.value=x;o.textContent=x;sel.appendChild(o)});
     document.getElementById('apps').innerHTML=(j.applications&&j.applications.length)?j.applications.map(a=>'<div class="app"><b>'+esc(a.application_no)+'</b><br><span style="display:inline-block;margin:6px 0;padding:5px 10px;border-radius:999px;background:#eef7f5;font-weight:900">'+esc(appStateText(a.application_state))+'</span><br>'+esc(a.stay_start)+' ～ '+esc(a.stay_end)+'｜'+esc(a.room_type_name)+'｜'+esc(({experience:'體驗方案',monthly:'月住',seasonal:'季租',yearly:'年租'}[a.plan]||a.plan))+'</div>').join(''):'<p class="small">目前沒有申請。</p>';
-  }catch(e){showStatus('err','會員系統連線失敗：'+e.message+'。');guestView.classList.add('hidden');memberView.classList.add('hidden');}
+  }catch(e){showStatus('err',(window.pmGuestSafeError?window.pmGuestSafeError(e.message,'會員服務暫時無法使用，請稍後再試。'):'會員服務暫時無法使用，請稍後再試。'));guestView.classList.add('hidden');memberView.classList.add('hidden');}
 }
 document.getElementById('loginForm').addEventListener('submit',async e=>{
   e.preventDefault();
@@ -383,13 +384,14 @@ refresh();
 function chineseError(msg){
   msg=String(msg||'');
   const rules=[
-    [/Unknown column/i,'系統資料尚未更新完整，請聯絡管理員。'],
-    [/Duplicate entry/i,'這個 Email 或會員資料已經註冊過，請直接登入或更換資料。'],
-    [/SQLSTATE|SQL syntax|MariaDB|MySQL/i,'系統資料處理發生問題，請聯絡管理員。'],
+    [/Unknown column/i,'系統資料處理發生問題，請稍後再試或聯絡莊園。'],
+    [/Duplicate entry/i,'這個電子郵件或會員資料已經註冊過，請直接登入或更換資料。'],
+    [/SQLSTATE|SQL syntax|MariaDB|MySQL/i,'系統資料處理發生問題，請稍後再試或聯絡莊園。'],
     [/Failed to fetch|NetworkError|Load failed/i,'目前無法連線到系統，請稍後再試。'],
     [/Internal Server Error|HTTP 500/i,'系統暫時發生錯誤，請稍後再試。']
   ];
   for(const [re,text] of rules)if(re.test(msg))return text;
+  if(window.pmGuestSafeError)return window.pmGuestSafeError(msg,'這次沒有完成，請再試一次，或改用另一種方式。');
   return msg||'這次沒有完成，請再試一次，或改用另一種方式。';
 }
 </script>

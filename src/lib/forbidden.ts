@@ -5,6 +5,12 @@ export const FORBIDDEN_GUEST_WORDS = [
   "訂房訂單",
   "每晚",
   "日租價",
+  "依方案報價",
+  "價格由後台管理",
+  "未修改 QoApps",
+  "未修改 QloApps",
+  "QoApps",
+  "QloApps",
 ] as const;
 
 export function findForbiddenWords(text: string): string[] {

@@ -60,10 +60,10 @@ export function SiteHeader() {
             </Link>
           ))}
           <Link
-            href={session?.isMember ? "/member/experience" : "/member"}
+            href={session?.authVerified ? (session.isMember ? "/member/experience" : "/member") : "/membership/verify"}
             className="rounded-full bg-deep px-3 py-2 text-base text-white"
           >
-            會員專區
+            {session?.isMember ? "會員專區" : "登入或註冊"}
           </Link>
         </nav>
       </div>
@@ -82,11 +82,11 @@ export function SiteHeader() {
               </Link>
             ))}
             <Link
-              href={session?.isMember ? "/member/experience" : "/member"}
+              href={session?.authVerified ? (session.isMember ? "/member/experience" : "/member") : "/membership/verify"}
               onClick={() => setOpen(false)}
               className="min-h-12 rounded-2xl bg-deep px-4 py-3 text-lg text-white"
             >
-              會員專區
+              {session?.isMember ? "會員專區" : "登入或註冊"}
             </Link>
           </div>
         </nav>

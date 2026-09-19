@@ -60,13 +60,13 @@ document.addEventListener('DOMContentLoaded', () => {
     card.classList.remove('hidden');
     if (name === 'phone') {
       title.textContent = '登入或註冊';
-      lead.textContent = '用手機簡訊最快；也可 Google、LINE、Apple 或 Email。不用記密碼，選一種方式即可。';
+      lead.textContent = '用手機簡訊最快；也可 Google、LINE、Apple 或電子郵件驗證碼。不用記密碼，選一種方式即可。';
     } else if (name === 'phoneCode') {
       title.textContent = '輸入驗證碼';
       lead.textContent = '請查看手機簡訊，輸入 6 位數字。';
     } else if (name === 'email') {
       title.textContent = '登入或註冊';
-      lead.textContent = '用 Email 收取驗證碼，不用記密碼。';
+      lead.textContent = '用電子郵件收取驗證碼，不用記密碼。';
     } else if (name === 'emailCode') {
       title.textContent = '輸入驗證碼';
       lead.textContent = '請查看信箱，輸入信中的 6 位數字。';
@@ -92,8 +92,11 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (_) {
       throw new Error('目前無法完成，請稍後再試。');
     }
+    if (window.pmGuestSanitizePayload) window.pmGuestSanitizePayload(result);
     if (!response.ok || !result.ok) {
-      const error = new Error(result.error || result.message || '這次沒有完成，請再試一次，或改用另一種方式。');
+      const raw = result.error || result.message || '這次沒有完成，請再試一次，或改用另一種方式。';
+      const safe = window.pmGuestSafeError ? window.pmGuestSafeError(raw) : raw;
+      const error = new Error(safe);
       error.nextStep = result.next_step;
       error.payload = result;
       throw error;
@@ -116,7 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
       byId('phoneCode').value = '';
       showPanel('phoneCode');
       say(result.message || '驗證碼已送到手機。');
-      if (result.preview_code) {
+      if (result.preview_code && !/seasideresort\.com\.tw$/i.test(location.hostname)) {
         say((result.message || '') + ' 預覽碼：' + result.preview_code);
       }
       clearInterval(timer);
@@ -200,7 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
         title.textContent = emailNext === 'signup_consent' ? '完成註冊' : '確認舊會員身分';
         lead.textContent = emailNext === 'signup_consent'
           ? '信箱驗證碼正確。請閱讀資料使用說明，同意後即可建立會員。'
-          : '請完成這一步，啟用此帳戶的 Email 驗證碼登入。';
+          : '請完成這一步，啟用此帳戶的電子郵件驗證碼登入。';
         say(emailNext === error.nextStep ? error.message : '', !!error.message);
       } else {
         showPanel('emailCode');
@@ -387,7 +390,7 @@ document.addEventListener('DOMContentLoaded', () => {
         button.classList.add('login-soon');
       });
       bindSocialButton(byId('appleSignIn'), 'apple');
-      socialMessage.textContent = 'Google／LINE 暫時無法連線。Apple 仍可點，或改用手機簡訊／Email。';
+      socialMessage.textContent = 'Google／LINE 暫時無法連線。Apple 仍可點，或改用手機簡訊／電子郵件。';
     });
 
   if (location.hash === '#socialLogin' || location.hash === '#passwordLogin') {

@@ -47,7 +47,8 @@ export function ExperienceForm() {
       }}
     >
       <p className="rounded-2xl bg-cream px-4 py-3 leading-8">
-        最小體驗單位可依三天兩夜的生活節奏來想，但這是會員權益確認，不是免費住房促銷，也沒有可單賣的體驗商品。
+        這是月租會員的體驗安排，不是一般住房申請。請先確認您已完成月租簽約。了解問卷與體驗申請以 50
+        歲以上、生活可自理為原則；長住入住原則年滿 60 歲。
       </p>
       <label className="grid gap-2">
         <span>姓名</span>
@@ -58,7 +59,7 @@ export function ExperienceForm() {
         <input className="field" required inputMode="tel" value={phone} onChange={(event) => setPhone(event.target.value)} />
       </label>
       <label className="grid gap-2">
-        <span>入住人</span>
+        <span>體驗人數</span>
         <input
           className="field"
           type="number"

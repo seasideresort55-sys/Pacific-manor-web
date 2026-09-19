@@ -26,8 +26,15 @@ https://seasideresort.com.tw/booking/pm_roomboard/pm_member_portal_v17.php
 | `pm_phone_host_v18.php` | 補上 live v17 已呼叫但缺失的 `pm_phone_host_dispatch()` |
 | `pm_phone_lib_v18.php` | 電話正規化、OTP hash、SMS Go 解析 |
 | `pm_member_client_v18.js` | CSRF 握手改打 v18 |
-| `pm_member_entry_v18.js` | 手機 → Email → 社群 → 密碼文字連結 |
+| `pm_member_entry_v18.js` | 手機 → 電子郵件驗證碼 → 社群 → 密碼文字連結 |
+| `pm_guest_errors.php` / `pm_guest_errors.js` | 客人看不到金鑰／路徑／索引設定錯誤 |
+| `pm_member_center_guest.js` | 會員中心未登入改走同一驗證碼入口 |
 | `pm_retire_social_login.js` | 可選：把舊 `#socialLogin` 導向 v18 |
+| `pm_front/index.html` | 覆蓋 `/booking/pm_front/`：會員旅程而非「安排入住」 |
+| `wordpress/pm-legacy-member-redirects.php` | `page_id=11240/2107/901` 改指到會員頁 |
+| `www/pm_eligibility.js` | 官網體驗表拿掉 1960 預設年 |
+
+簡訊金鑰與 Email 唯一索引的主機步驟見 [`OPERATOR_OTP.md`](OPERATOR_OTP.md)。這些說明不可出現在瀏覽器。
 
 **不要覆蓋** live 的 `pm_member_social.php`（Google／LINE 正式 OAuth）。
 

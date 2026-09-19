@@ -10,10 +10,13 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/pm_phone_host_v18.php';
+require_once __DIR__ . '/pm_guest_errors.php';
 
 $v17 = __DIR__ . '/pm_member_api_v17.php';
-if (is_file($v17)) {
+if (is_file($v17) && realpath($v17) !== realpath(__FILE__)) {
+    ob_start();
     require $v17;
+    echo pm_guest_sanitize_json_output((string)ob_get_clean());
     return;
 }
 
@@ -73,7 +76,7 @@ if ($action === 'logout') {
 if ($action === 'request_email_code') {
     $email = strtolower(trim((string)($input['email'] ?? '')));
     if (!pm_phone_is_valid_email($email)) {
-        pm_api_v18_json(['ok' => false, 'error' => '請輸入有效 Email']);
+        pm_api_v18_json(['ok' => false, 'error' => '請輸入有效電子郵件']);
     }
     $code = pm_phone_random_otp();
     $_SESSION['pm_email_otp'] = pm_phone_issue_otp($email, $code);
@@ -112,7 +115,7 @@ if ($action === 'verify_email_code') {
 }
 
 if ($action === 'login') {
-    pm_api_v18_json(['ok' => false, 'error' => '本機預覽請用手機簡訊或 Email 驗證碼。正式密碼登入由 v17 處理。']);
+    pm_api_v18_json(['ok' => false, 'error' => '本機預覽請用手機簡訊或電子郵件驗證碼。']);
 }
 
 pm_api_v18_json(['ok' => false, 'error' => '未知操作']);
@@ -123,6 +126,6 @@ function pm_api_v18_json(array $payload): never
         header('Content-Type: application/json; charset=utf-8');
         header('Cache-Control: no-store');
     }
-    echo json_encode($payload, JSON_UNESCAPED_UNICODE);
+    echo json_encode(pm_guest_sanitize_payload($payload), JSON_UNESCAPED_UNICODE);
     exit;
 }

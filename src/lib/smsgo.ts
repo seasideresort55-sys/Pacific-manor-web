@@ -121,18 +121,9 @@ export function smsGoConfig(): SmsGoConfig {
 export function smsGoPublicStatus() {
   const config = smsGoConfig();
   return {
-    wired: true,
-    provider: "smsgo" as const,
-    protocol: "sendsms.aspx",
-    alignedWith: "pm_smsgo_adapter.php",
+    available: config.authorizedToSend,
     configured: config.configured,
-    enabled: config.enabled,
-    authorizedToSend: config.authorizedToSend,
     otpLength: 6 as const,
-    missing: config.missing,
-    blockedGates: config.blockedGates,
-    requiredEnv: [...SMSGO_REQUIRED_ENV],
-    optionalEnv: [...SMSGO_OPTIONAL_ENV],
   };
 }
 
@@ -173,19 +164,11 @@ export function parseSmsGoSendResponse(http: number, body: string): SmsGoParseRe
   return { state: "unknown", message_id: messageId, statuscode: Number.isFinite(statuscode) ? statuscode : -10, statusstr };
 }
 
-export function smsGoUserMessage(statuscode: number, fallback = "簡訊閘道暫時無法完成，請稍後再試。") {
+export function smsGoUserMessage(statuscode: number, fallback = "暫時無法寄送驗證碼，請稍後再試或改用其他方式") {
   const messages: Record<number, string> = {
     0: "成功",
-    [-1]: "簡訊閘道參數格式不正確。",
-    [-2]: "SMS Go 帳號、API Key 或來源 IP 驗證失敗。",
-    [-3]: "尚未設定 SMS Go 帳號或 API Key。",
-    [-5]: "手機號碼格式不被簡訊閘道接受。",
-    [-8]: "SMS Go 點數不足，請先加值。",
-    [-10]: "簡訊發送失敗。",
-    [-15]: "此伺服器 IP 尚未加入 SMS Go 允許清單。",
-    [-16]: "SMS Go 尚未開通 API。",
+    [-5]: "請輸入台灣手機號碼，例如 09 開頭的十位數字。",
     [-21]: "已達發送上限，請稍後再試。",
-    [-23]: "簡訊缺少 NCC 署名。請在後台或 SMSGO_APPROVED_TEMPLATE 補上署名。",
   };
   return messages[statuscode] || fallback;
 }
@@ -205,25 +188,20 @@ export async function sendSmsGoOtp(
 ): Promise<{ messageId: string; state: SmsGoSendState }> {
   const config = smsGoConfig();
   if (!config.configured) {
-    throw new SmsGoError(
-      `SMS Go 已接正式 adapter（sendsms.aspx），但尚未設定金鑰。請提供 ${config.missing.join("、")}。主機金鑰在 /home/tdwhhyfe/pm_member_private/smsgo-api-key.txt，勿寫進 git。`,
-      -3,
-    );
+    // Operator setup is documented in deploy/OPERATOR_OTP.md — never tell guests.
+    throw new SmsGoError("暫時無法寄送驗證碼，請稍後再試或改用其他方式", -3);
   }
   if (!config.authorizedToSend) {
-    throw new SmsGoError(
-      `SMS Go 呼叫介面已接上，但啟用旗標尚未打開：${config.blockedGates.join("、")}。正式 runtime.php 預設 enabled=false、controlled_test_authorized=false。`,
-      -16,
-    );
+    throw new SmsGoError("暫時無法寄送驗證碼，請稍後再試或改用其他方式", -16);
   }
   const e164 = toE164TwMobile(localPhone);
   if (!e164) throw new SmsGoError("請輸入台灣手機號碼，例如 09 開頭的十位數字。", -5);
   if (!authorizedPhone(config, e164)) {
-    throw new SmsGoError("此手機不在 SMS Go 受控測試允許清單（SMSGO_ALLOWED_PHONES）。", -5);
+    throw new SmsGoError("暫時無法寄送驗證碼，請稍後再試或改用其他方式", -5);
   }
   if (!/^\d{6}$/.test(code)) throw new SmsGoError("驗證碼格式不正確。", -1);
   if ((config.template.match(/\{code\}/g) || []).length !== 1) {
-    throw new SmsGoError("SMSGO_APPROVED_TEMPLATE 必須恰好包含一個 {code}。", -1);
+    throw new SmsGoError("暫時無法寄送驗證碼，請稍後再試或改用其他方式", -1);
   }
   const smbody = config.template.replace("{code}", code);
   if ([...smbody].length > 70) throw new SmsGoError("簡訊內容超過 70 字。", -1);
