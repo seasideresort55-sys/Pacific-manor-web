@@ -1,145 +1,335 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
+<html lang="zh-Hant"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>太平洋莊園｜成為月租會員</title>
-<meta name="theme-color" content="#2E5E73">
+<title>太平洋莊園｜體驗與入住安排</title>
 <style>
-:root{--cream:#F6F1E7;--ocean:#2E5E73;--deep:#1C3D4C;--line:#d7e0e4;--muted:#5a6f78}
+:root{
+  --ink:#163554;--ink2:#244b70;--gold:#b99662;--soft:#f7f4ee;--line:#e7e1d7;
+  --green:#55745f;--paper:#fff;--shadow:0 14px 40px rgba(24,42,61,.10);
+}
 *{box-sizing:border-box}
-body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;background:var(--cream);color:var(--deep)}
-a{color:var(--ocean)}
-.topbar{height:72px;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 20px;border-bottom:1px solid #eadfce;position:sticky;top:0;z-index:20}
-.brand{text-align:center;line-height:1.15;text-decoration:none;color:var(--deep)}
-.brand strong{display:block;letter-spacing:.12em;font-size:22px}
-.brand span{font-size:12px;color:var(--muted)}
-.nav a{margin-left:10px;display:inline-flex;min-height:40px;align-items:center;padding:0 12px;border-radius:999px;text-decoration:none;font-weight:800;border:2px solid var(--deep);color:var(--deep);background:#fff}
-.nav a.primary{background:var(--ocean);border-color:var(--ocean);color:#fff}
-.hero{padding:48px 20px 36px;background:linear-gradient(180deg,#e8f1f4 0%,var(--cream) 100%)}
-.hero-inner{max-width:960px;margin:auto}
-.hero h1{font-size:36px;line-height:1.3;margin:0 0 12px}
-.hero p{font-size:18px;line-height:1.7;color:#3d5a66;margin:0 0 18px}
-.chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{background:#fff;border:1px solid var(--line);padding:8px 12px;border-radius:999px;font-size:13px}
-.wrap{max-width:960px;margin:0 auto 48px;padding:0 16px}
-.panel{background:#fff;border:1px solid #ece8e2;border-radius:20px;box-shadow:0 12px 36px rgba(28,61,76,.08);padding:22px;margin-bottom:16px}
-h2{margin:0 0 8px;font-size:26px}
-.lead{color:var(--muted);line-height:1.65;margin:0 0 16px}
-.steps{display:grid;gap:12px}
-.step{display:grid;grid-template-columns:48px 1fr auto;gap:12px;align-items:center;border:1px solid var(--line);border-radius:16px;padding:14px}
-.step b{font-size:20px;color:var(--ocean)}
-.step a,.cta{display:inline-flex;min-height:44px;align-items:center;justify-content:center;padding:0 14px;border-radius:12px;background:var(--ocean);color:#fff;text-decoration:none;font-weight:800}
-.cta.secondary{background:#fff;color:var(--deep);border:2px solid var(--deep)}
-.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.plan{border:1px solid var(--line);border-radius:16px;padding:16px;background:#fbfaf7}
-.plan .name{font-weight:800;font-size:20px}
-.plan .price{margin-top:8px;font-size:22px;font-weight:800}
-.plan .sub{margin-top:8px;color:var(--muted);line-height:1.5}
-.note{color:var(--muted);line-height:1.65}
-.gate{background:#eef4f6;border-radius:14px;padding:14px;line-height:1.65}
-@media(max-width:760px){
-  .plans{grid-template-columns:1fr}
-  .step{grid-template-columns:1fr}
-  .hero h1{font-size:28px}
-  .nav{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
-  .nav a{margin:0}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;background:#f6f7f8;color:#24364a}
+button,input,select,textarea{font:inherit}
+.topbar{height:74px;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 22px;border-bottom:1px solid #edf0f3;position:sticky;top:0;z-index:20}
+.brand{text-align:center;line-height:1.15;text-decoration:none;color:inherit}
+.brand strong{display:block;font-family:Georgia,"Noto Serif TC",serif;letter-spacing:.18em;font-size:26px;color:var(--ink)}
+.brand span{font-size:12px;color:#777}
+.member-entry{display:flex;gap:8px;flex-wrap:wrap}
+.member-entry a{display:inline-flex;min-height:40px;align-items:center;padding:0 12px;border-radius:999px;border:2px solid #173f50;color:#173f50;text-decoration:none;font-weight:800;font-size:14px;background:#fff}
+.member-entry a.primary{background:#2E5E73;border-color:#2E5E73;color:#fff}
+.hero{min-height:340px;padding:52px 26px 82px;background:
+linear-gradient(90deg,rgba(249,252,253,.96) 0%,rgba(249,252,253,.80) 43%,rgba(249,252,253,.12) 74%),
+radial-gradient(circle at 76% 18%,rgba(255,255,255,.75),rgba(255,255,255,0) 22%),
+linear-gradient(180deg,#cbe8f3 0 33%,#75b0c7 33% 52%,#397187 52% 58%,#dacbb5 58% 72%,#f6f1e9 72% 100%);
+position:relative;overflow:hidden}
+.hero:after{content:"";position:absolute;right:-3%;bottom:-28px;width:58%;height:220px;border-radius:46% 0 0 0;background:
+linear-gradient(160deg,#ede0cf 0 24%,#d5c1a8 24% 43%,#b5c9c1 43% 57%,#fff 57%);opacity:.92}
+.hero-inner{max-width:1180px;margin:auto;position:relative;z-index:2}
+.hero h1{font-family:Georgia,"Noto Serif TC",serif;font-weight:600;font-size:42px;letter-spacing:.08em;margin:0 0 12px;color:var(--ink)}
+.hero p{font-size:20px;color:#365b78;margin:0 0 20px}
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip{background:rgba(255,255,255,.72);border:1px solid rgba(39,78,104,.14);padding:8px 12px;border-radius:999px;font-size:13px;color:#35566f}
+.wrap{max-width:1180px;margin:-48px auto 40px;padding:0 16px;position:relative;z-index:5}
+.panel{background:#fff;border:1px solid #ece8e2;border-radius:20px;box-shadow:var(--shadow);padding:22px;margin-bottom:18px}
+.section-title{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}
+.section-title h2{font-family:Georgia,"Noto Serif TC",serif;color:var(--ink);font-size:28px;margin:0}
+.section-title small{color:#7f7b73}
+.plans{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.plan{border:1px solid #ded8cd;border-radius:16px;background:#fffaf4;padding:24px 14px;text-align:center;cursor:pointer;transition:.18s;min-height:190px;display:flex;flex-direction:column;justify-content:center}
+.plan.active{border:2px solid var(--ink);background:#f7fbff;box-shadow:0 8px 22px rgba(27,71,106,.10)}
+.plan .name{font-family:Georgia,"Noto Serif TC",serif;font-size:22px;font-weight:700;margin-bottom:10px;color:#4a4238}
+.plan.active .name{color:var(--ink)}
+.plan .price{font-family:Georgia,serif;font-size:28px;color:var(--ink);font-weight:700}
+.plan .unit{font-size:14px;color:#777;margin-left:4px}
+.plan .sub{font-size:12px;color:#827a6e;margin-top:10px;line-height:1.5}
+.note{text-align:center;color:#6f746f;font-size:13px;margin-top:12px}
+.rooms{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.room{border:1px solid #e4e0d8;border-radius:16px;overflow:hidden;background:#fff;cursor:pointer;transition:.18s}
+.room.active{outline:2px solid var(--ink);box-shadow:0 8px 20px rgba(22,53,84,.10)}
+.photo{height:150px;position:relative;background:
+linear-gradient(180deg,#d9edf3 0 35%,#6fa8bc 35% 48%,#f4eee3 48% 100%)}
+.photo:after{content:"";position:absolute;right:18px;bottom:0;width:48%;height:55%;background:#d1bda2;border-radius:14px 14px 0 0}
+.photo:before{content:"";position:absolute;left:20px;bottom:14px;width:42%;height:30%;background:#fff;border:7px solid #e9e2d9;border-radius:6px}
+.room-body{padding:14px}
+.room-name{font-weight:800;font-size:18px;color:#283f55}
+.room-meta{font-size:12px;color:#7d7f82;margin-top:4px}
+.room-price{margin-top:10px;color:var(--ink);font-weight:800;font-size:18px}
+.grid{display:grid;grid-template-columns:1.35fr .65fr;gap:18px}
+.formgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.field label{display:block;font-size:12px;color:#64748b;font-weight:700;margin-bottom:5px}
+.field input,.field select,.field textarea{width:100%;border:1px solid #d9dfe5;border-radius:11px;padding:12px;background:#fff}
+.field textarea{min-height:82px;resize:vertical}
+.full{grid-column:1/-1}
+.summary{background:#fbfaf7;border:1px solid #e9e4da;border-radius:18px;padding:18px;position:sticky;top:90px;height:max-content}
+.summary h3{font-family:Georgia,"Noto Serif TC",serif;color:var(--ink);font-size:22px;margin:0 0 14px}
+.srow{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px dashed #dedad3;font-size:13px}
+.srow strong{color:var(--ink)}
+.total{padding-top:16px;font-size:13px;color:#6b7280}
+.total b{display:block;font-size:32px;color:var(--ink);font-family:Georgia,serif;margin-top:4px}
+.cta{width:100%;border:0;border-radius:14px;background:var(--ink);color:#fff;font-weight:800;font-size:20px;padding:16px;margin-top:14px}
+.helper{font-size:13px;color:#7b7f84;margin-top:10px;text-align:center;line-height:1.6}
+.bottom-strip{display:flex;gap:18px;justify-content:center;flex-wrap:wrap;color:#66717d;font-size:12px;margin-top:14px}
+@media(max-width:820px){
+  .hero{min-height:270px;padding:36px 20px 70px}
+  .hero h1{font-size:31px}.hero p{font-size:16px}
+  .plans{grid-template-columns:repeat(2,1fr)}
+  .rooms{grid-template-columns:1fr}
+  .grid{grid-template-columns:1fr}
+  .summary{position:static}
+}
+@media(max-width:520px){
+  .topbar{height:auto;padding:10px 14px;flex-wrap:wrap;gap:8px}
+  .brand strong{font-size:21px}
+  .wrap{padding:0 10px;margin-top:-34px}
+  .panel{padding:16px;border-radius:16px}
+  .section-title{align-items:flex-start;flex-direction:column}
+  .section-title h2{font-size:24px}
+  .plans{grid-template-columns:1fr;gap:11px}
+  .plan{padding:18px 14px;min-height:138px}
+  .plan .name{font-size:20px}.plan .price{font-size:28px}
+  .plan .sub{font-size:13px}
+  .hero{padding-left:18px;padding-right:18px}
+  .hero h1{font-size:29px;line-height:1.28}
+  .hero p{font-size:16px;line-height:1.5}
+  .chips{gap:8px}
+  .chip{font-size:12px;padding:7px 10px}
+  .formgrid{grid-template-columns:1fr}
+  .full{grid-column:auto}
 }
 </style>
+<meta name="theme-color" content="#163f35">
 </head>
 <body>
 <header class="topbar">
-  <a class="brand" href="https://seasideresort.com.tw/"><strong>太平洋莊園</strong><span>月租會員旅程</span></a>
-  <nav class="nav">
-    <a href="../pm_roomboard/pm_member_portal_v17.php" class="primary">登入或註冊</a>
-    <a href="../pm_roomboard/pm_member_center_v17.php">會員狀態</a>
+  <a class="brand" href="https://seasideresort.com.tw/"><strong>太平洋莊園</strong><span>海景長住・生活體驗</span></a>
+  <nav class="member-entry" aria-label="會員入口">
+    <a class="primary" href="../pm_roomboard/pm_member_portal_v17.php">登入或註冊</a>
+    <a href="../pm_roomboard/pm_member_center_v17.php">會員中心</a>
   </nav>
 </header>
 
 <section class="hero">
   <div class="hero-inner">
-    <h1>先成為月租會員，再安排體驗</h1>
-    <p>這不是一般住房預訂。請依序：了解問卷 → 申請／簽約月租方案 → 查看會員狀態 → 進入會員專區體驗。正式簽約與收款由莊園專人確認，本頁不進行線上付款。</p>
+    <h1>選擇適合您的入住方案</h1>
+    <p>海景生活・自在長住・像家一樣生活</p>
     <div class="chips">
-      <span class="chip">了解問卷 50 歲以上或遠端工作</span>
-      <span class="chip">長住原則年滿 60 歲</span>
-      <span class="chip">體驗僅限月租會員</span>
+      <span class="chip">長住方案為主</span>
+      <span class="chip">月租價格透明</span>
+      <span class="chip">生活機能完整</span>
+      <span class="chip">入住期間可彈性安排</span>
     </div>
   </div>
 </section>
 
 <main class="wrap">
   <section class="panel">
-    <h2>會員旅程</h2>
-    <p class="lead">請依這四步走完，不必先選房或填入住申請。</p>
-    <div class="steps">
-      <div class="step">
-        <b>01</b>
-        <div>
-          <strong>了解問卷</strong>
-          <p class="note">確認生活節奏是否適合長住／月租。通過後才邀請簽約。</p>
-        </div>
-        <a href="https://seasideresort.com.tw/#experience">前往了解</a>
-      </div>
-      <div class="step">
-        <b>02</b>
-        <div>
-          <strong>月租方案申請／簽約</strong>
-          <p class="note">用手機簡訊或電子郵件驗證碼登入後，送出月租申請。不做線上分期付款。</p>
-        </div>
-        <a href="../pm_roomboard/pm_member_portal_v17.php">登入或註冊</a>
-      </div>
-      <div class="step">
-        <b>03</b>
-        <div>
-          <strong>會員狀態</strong>
-          <p class="note">查看是否已完成驗證與申請。專人確認簽約後，才會開啟會員專區。</p>
-        </div>
-        <a class="cta secondary" href="../pm_roomboard/pm_member_center_v17.php">查看狀態</a>
-      </div>
-      <div class="step">
-        <b>04</b>
-        <div>
-          <strong>會員專區體驗</strong>
-          <p class="note">成為月租會員後，才能提出體驗日期。這不是可單獨購買的住宿。</p>
-        </div>
-        <a class="cta secondary" href="../pm_roomboard/pm_member_center_v17.php">會員專區</a>
-      </div>
+    <div class="section-title">
+      <h2>住宿方案</h2>
+      <small>先選方案，再安排入住期間與房型</small>
     </div>
-  </section>
-
-  <section class="panel">
-    <h2>月租方案參考</h2>
-    <p class="lead">以下為官網公開月租價格，供了解與簽約討論。實際合約由莊園確認。</p>
-    <div class="plans">
-      <article class="plan">
+    <div class="plans" id="plans">
+      <div class="plan" data-plan="short" data-price="0">
+        <div class="name">短期體驗</div>
+        <div class="price">專人確認</div>
+        <div class="sub">體驗海景生活</div>
+      </div>
+      <div class="plan active" data-plan="monthly" data-price="59800">
         <div class="name">月租方案</div>
-        <div class="price">NT$59,800／月</div>
-        <div class="sub">適合一個月以上長住節奏。</div>
-      </article>
-      <article class="plan">
+        <div class="price">NT$59,800<span class="unit">／月</span></div>
+        <div class="sub">適合一個月以上長住</div>
+      </div>
+      <div class="plan" data-plan="seasonal" data-price="45000">
         <div class="name">季租方案</div>
-        <div class="price">NT$45,000／月</div>
-        <div class="sub">連續居住三個月。</div>
-      </article>
-      <article class="plan">
+        <div class="price">NT$45,000<span class="unit">／月</span></div>
+        <div class="sub">連續居住三個月</div>
+      </div>
+      <div class="plan" data-plan="yearly" data-price="33000">
         <div class="name">年租方案</div>
-        <div class="price">NT$33,000／月</div>
-        <div class="sub">長期生活方案。</div>
-      </article>
+        <div class="price">NT$33,000<span class="unit">／月</span></div>
+        <div class="sub">長期生活方案</div>
+      </div>
     </div>
-    <p class="gate" style="margin-top:14px">短期／一個月體驗不是可單獨選購的方案。須先完成月租會員申請與簽約，再由專人安排體驗日期。</p>
+    <div class="note">實際安排與優惠由莊園依需求確認。成為會員請走上方「登入或註冊」。</div>
   </section>
 
   <section class="panel">
-    <h2>年齡與資格</h2>
-    <p class="note">了解問卷與體驗申請：50 歲以上、生活可自理，或遠端工作者。長住入住：原則年滿 60 歲；未滿 60 歲者可陪同 60 歲以上住戶一起生活。</p>
-    <p class="note">送出申請前請親自選擇出生年，不要沿用預設年份。</p>
-    <p style="margin:18px 0 0;display:flex;gap:10px;flex-wrap:wrap">
-      <a class="cta" href="../pm_roomboard/pm_member_portal_v17.php">開始登入或註冊</a>
-      <a class="cta secondary" href="https://seasideresort.com.tw/#contact">聯絡莊園</a>
-    </p>
+    <div class="section-title">
+      <h2>選擇房型</h2>
+      <small>可依需求安排多房型入住</small>
+    </div>
+    <div class="note" style="text-align:left;margin:0 0 12px">以下價格會依您選擇的住宿方案同步切換，不以一般飯店短期停留計價為主。</div>
+    <div class="rooms">
+      <div class="room" data-room="17坪三床海景房">
+        <div class="photo"></div>
+        <div class="room-body">
+          <div class="room-name">17坪三床海景房</div>
+          <div class="room-meta">海景・三床配置・寬敞空間</div>
+          <div class="room-price">月租 NT$59,800／月</div>
+        </div>
+      </div>
+      <div class="room active" data-room="16坪觀海二床房">
+        <div class="photo"></div>
+        <div class="room-body">
+          <div class="room-name">16坪觀海二床房</div>
+          <div class="room-meta">觀海・二床配置・長住舒適</div>
+          <div class="room-price">月租 NT$59,800／月</div>
+        </div>
+      </div>
+      <div class="room" data-room="15坪晨曦海景房">
+        <div class="photo"></div>
+        <div class="room-body">
+          <div class="room-name">15坪晨曦海景房</div>
+          <div class="room-meta">晨曦海景・自在生活</div>
+          <div class="room-price">月租 NT$59,800／月</div>
+        </div>
+      </div>
+    </div>
   </section>
+
+  <section class="grid">
+    <div class="panel">
+      <div class="section-title"><h2>安排入住</h2><small>選擇方案、房型與入住期間後，再進入預約系統完成資料</small></div>
+      <div class="formgrid">
+        <div class="field"><label>入住日期</label><input type="date" id="start"></div>
+        <div class="field"><label>退房日期</label><input type="date" id="end"></div>
+        <div class="field"><label>住宿方案</label><select id="planSelect">
+          <option value="short">短期體驗</option>
+          <option value="monthly" selected="">月租方案</option>
+          <option value="seasonal">季租方案</option>
+          <option value="yearly">年租方案</option>
+        </select></div>
+        <div class="field"><label>房型</label><select id="roomSelect">
+          <option>17坪三床海景房</option>
+          <option selected="">16坪觀海二床房</option>
+          <option>15坪晨曦海景房</option>
+        </select></div>
+        <div class="field"><label>房間數量</label><select id="qty"><option>1</option><option>2</option><option>3</option></select></div>
+        <div class="field"><label>入住人姓名</label><input placeholder="請輸入住人姓名"></div>
+        <div class="field"><label>聯絡電話</label><input placeholder="請輸入聯絡電話"></div>
+        <div class="field full"><label>備註</label><textarea placeholder="如有特殊需求，請留言告訴我們"></textarea></div>
+      </div>
+    </div>
+
+    <aside class="summary">
+      <h3>本次方案</h3>
+      <div class="srow"><span>住宿方案</span><strong id="sumPlan">月租方案</strong></div>
+      <div class="srow"><span>房型</span><strong id="sumRoom">16坪觀海二床房</strong></div>
+      <div class="srow"><span>房數</span><strong id="sumQty">1 間</strong></div>
+      <div class="srow"><span>入住期間</span><strong id="sumDate">尚未選擇</strong></div>
+      <div class="srow"><span>方案價格</span><strong id="sumPrice">NT$59,800／月</strong></div>
+      <div class="total">預估總額<b id="total">NT$59,800</b></div>
+      <button class="cta" id="handoffBtn">繼續安排入住</button>
+      <div class="helper">送出後由專人協助接續安排。要加入會員請先登入或註冊。</div>
+    </aside>
+  </section>
+
+  <div class="bottom-strip">
+    <span>✓ 月租與長住價格公開透明</span>
+    <span>✓ 專人協助安排入住</span>
+    <span>✓ 可依需求洽詢專屬安排</span>
+  </div>
 </main>
-</body>
-</html>
+
+<script>
+const plans = {
+  short:{label:'短期體驗', price:0, months:0, priceText:'專人確認'},
+  monthly:{label:'月租方案', price:59800, months:1, priceText:'NT$59,800／月'},
+  seasonal:{label:'季租方案', price:45000, months:3, priceText:'NT$45,000／月'},
+  yearly:{label:'年租方案', price:33000, months:12, priceText:'NT$33,000／月'}
+};
+let selectedPlan='monthly';
+
+function ymd(d){
+  const y=d.getFullYear();
+  const m=String(d.getMonth()+1).padStart(2,'0');
+  const day=String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+function addMonths(dateStr, months){
+  if(!dateStr) return '';
+  const d=new Date(dateStr+'T00:00:00');
+  const day=d.getDate();
+  d.setDate(1); d.setMonth(d.getMonth()+months);
+  const last=new Date(d.getFullYear(),d.getMonth()+1,0).getDate();
+  d.setDate(Math.min(day,last));
+  return ymd(d);
+}
+function money(n){return Number(n||0).toLocaleString('zh-TW')}
+
+function syncPlan(plan){
+  selectedPlan=plan;
+  document.querySelectorAll('.plan').forEach(x=>x.classList.toggle('active',x.dataset.plan===plan));
+  document.getElementById('planSelect').value=plan;
+  document.querySelectorAll('.room-price').forEach(el=>{
+    const p=plans[plan];
+    el.textContent=plan==='short'?'短期體驗｜專人確認':`${p.label.replace('方案','')} ${p.priceText}`;
+  });
+  const start=document.getElementById('start').value;
+  if(start && plans[plan].months) document.getElementById('end').value=addMonths(start,plans[plan].months);
+  refresh();
+}
+
+function refresh(){
+  const p=plans[selectedPlan];
+  const room=document.getElementById('roomSelect').value;
+  const qty=Number(document.getElementById('qty').value||1);
+  const s=document.getElementById('start').value;
+  const e=document.getElementById('end').value;
+  document.getElementById('sumPlan').textContent=p.label;
+  document.getElementById('sumRoom').textContent=room;
+  document.getElementById('sumQty').textContent=qty+' 間';
+  document.getElementById('sumDate').textContent=s&&e?`${s} ～ ${e}`:'尚未選擇';
+  document.getElementById('sumPrice').textContent=p.priceText;
+  let total=0;
+  if(selectedPlan==='monthly') total=p.price*qty;
+  if(selectedPlan==='seasonal') total=p.price*3*qty;
+  if(selectedPlan==='yearly') total=p.price*12*qty;
+  document.getElementById('total').textContent=total?`NT$${money(total)}`:'待確認';
+}
+document.querySelectorAll('.plan').forEach(x=>x.onclick=()=>syncPlan(x.dataset.plan));
+document.getElementById('planSelect').onchange=e=>syncPlan(e.target.value);
+document.querySelectorAll('.room').forEach(x=>x.onclick=()=>{
+  document.querySelectorAll('.room').forEach(r=>r.classList.remove('active'));
+  x.classList.add('active');
+  document.getElementById('roomSelect').value=x.dataset.room;
+  refresh();
+});
+document.getElementById('roomSelect').onchange=refresh;
+document.getElementById('qty').onchange=refresh;
+document.getElementById('start').onchange=e=>{
+  if(plans[selectedPlan].months) document.getElementById('end').value=addMonths(e.target.value,plans[selectedPlan].months);
+  refresh();
+};
+document.getElementById('end').onchange=refresh;
+
+function buildHandoffUrl(){
+  const p=plans[selectedPlan];
+  const params=new URLSearchParams();
+  params.set('pm_plan', selectedPlan);
+  params.set('pm_plan_label', p.label);
+  params.set('pm_room_type', document.getElementById('roomSelect').value);
+  params.set('pm_qty', document.getElementById('qty').value);
+  params.set('pm_start', document.getElementById('start').value);
+  params.set('pm_end', document.getElementById('end').value);
+  params.set('pm_unit_price', String(p.price||0));
+  params.set('pm_source', 'official_frontend_v2');
+  return 'pm_booking_handoff.php?'+params.toString();
+}
+document.getElementById('handoffBtn').onclick=()=>{
+  const s=document.getElementById('start').value;
+  const e=document.getElementById('end').value;
+  if(!s||!e){
+    alert('請先選擇入住日期與退房日期');
+    return;
+  }
+  if(e<=s){
+    alert('退房日期必須晚於入住日期');
+    return;
+  }
+  location.href=buildHandoffUrl();
+};
+
+refresh();
+</script>
+</body></html>

@@ -96,7 +96,7 @@ expect(pm_guest_safe_error('請輸入有效手機號碼') === '請輸入有效�
 $wrapped = pm_guest_sanitize_json_output('{"ok":false,"error":"會員 Email 唯一索引尚未準備完成","gap":"email_index"}');
 expect(str_contains($wrapped, PM_GUEST_OTP_UNAVAILABLE) && !str_contains($wrapped, '唯一索引') && !str_contains($wrapped, 'gap'), 'JSON sanitizer strips setup hints');
 $front = file_get_contents(dirname(__DIR__) . '/pm_front/index.html');
-expect(str_contains($front, '先成為月租會員') && !str_contains($front, '依方案報價') && !str_contains($front, '價格由後台管理') && !str_contains($front, 'QloApps'), 'pm_front is a membership funnel');
+expect(str_contains($front, '繼續安排入住') && str_contains($front, 'pm_member_portal_v17.php') && !str_contains($front, '依方案報價') && !str_contains($front, '價格由後台管理') && !str_contains($front, 'QloApps'), 'pm_front stays lodging handoff without ops jargon');
 $portal = file_get_contents(dirname(__DIR__) . '/pm_member_portal_v17.php');
 expect(str_contains($portal, 'pm_guest_errors.js'), 'portal loads guest error sanitizer');
 expect(!str_contains($portal, '簡訊金鑰') && !str_contains($portal, 'pm_member_private'), 'portal has no key-setup copy');

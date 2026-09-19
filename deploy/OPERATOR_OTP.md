@@ -1,44 +1,51 @@
-# 會員驗證碼主機設定（僅內部）
+# 會員驗證碼：主機／產品決策（僅內部）
 
-這份文件給站務／主機操作，**不要**把路徑、金鑰檔名或資料表指令顯示在瀏覽器。
+**不要**把這份內容、路徑或金鑰檔名顯示給客人。
 
 客人看到的失敗文案應只有：
 
 > 暫時無法寄送驗證碼，請稍後再試或改用其他方式
 
-程式已把內部錯誤洗成這句。驗證碼**不會**在未完成下列設定時真的寄出。
+正式 v17 檔以 cPanel FTPS／Drive 鏡像為準，不是本 repo 的完整拷貝。
 
 ## 簡訊（SMS Go）
 
-1. 在主機私密目錄放入金鑰（勿進 git）：
-   - `/home/tdwhhyfe/pm_member_private/smsgo-api-key.txt`
-   - 可選 `smsgo-username.txt`、`runtime.php`
-2. 環境變數（800+ Next 預覽）或 `runtime.php` 旗標：
-   - `SMSGO_USERNAME`
-   - `SMSGO_API_KEY`（也可用 `SMSGO_PASSWORD`）
-   - 正式發送還要 `SMSGO_ENABLED=true`、受控測試旗標與允許手機清單
-3. SMS Go 後台：開通 API，並把本站出站 IP 加入允許清單。
-4. 上傳 `pm_phone_host_v18.php`，補上 live v17 已呼叫但缺失的 `pm_phone_host_dispatch()`。
+Live 金鑰路徑外洩來自 `pm_smsgo_identity.php`（及類似檢查）。本包用 `pm_guest_errors.*` 把該類字串洗掉。
 
-沒有金鑰時，API 必須回客人友善句，不可出現「簡訊金鑰尚未設定」或 `pm_member_private`。
+主機私密目錄（勿進 git、勿寫進客人頁）：
 
-## 電子郵件唯一索引
+- `/home/tdwhhyfe/pm_member_private/runtime.php`
+- `smsgo-api-key.txt`
+- `smsgo-username.txt`
 
-live `request_email_code` 目前會回「會員 Email 唯一索引尚未準備完成」。
+沒有金鑰時驗證碼不會寄出。這是預期；只需對客人友善、對站務 log。
 
-請在會員資料表（`qlo_pm_member` 或實際使用的會員表）為電子郵件欄位補上 **UNIQUE** 索引；空值策略依現有資料清理後再加。具體欄位名以主機 `SHOW COLUMNS` 為準。
+**不要覆蓋** live `pm_smsgo_adapter.php`（身分包複本不可取代正式 adapter）。
 
-完成前，前端只顯示「暫時無法寄送驗證碼…」，不提示索引或資料表名稱。
+上傳 `pm_phone_host_v18.php` 可補 live 已呼叫但缺失的 `pm_phone_host_dispatch()`。
 
-## 建議上傳（客人頁）
+## 產品衝突：Email UNIQUE（需人工決策，本 PR 不改 schema）
 
-| 檔案 | 用途 |
-| --- | --- |
-| `pm_guest_errors.php` / `pm_guest_errors.js` | 洗掉內部錯誤 |
-| `pm_member_portal_v17.php` + `pm_member_entry_v18.js` | 驗證碼登入文案 |
-| `pm_member_center_guest.js` | 會員中心未登入改走同一入口 |
-| `pm_front/index.html` | 會員旅程，不再是「安排入住」 |
-| `wordpress/pm-legacy-member-redirects.php` | `page_id=11240/2107/901` 改指到會員／方案頁 |
-| `www/pm_eligibility.js` | 官網體驗表拿掉 1960 預設年 |
+兩條正式路徑互相打架，**本 PR 不 ADD 也不 DROP 索引**：
 
-可選：把現有 `pm_member_api_v17.php` 改名為 `pm_member_api_v17.core.php`，再上傳 `pm_member_api_v17.wrapper.php` 作為同名檔，從伺服器端洗 JSON。
+| 路徑 | 檔案 | 對 `qlo_pm_member.email` 的假設 |
+| --- | --- | --- |
+| Email OTP | live `pm_member_email_code.php`（`pm_code_schema`） | **必須**已有只含 `email` 的 UNIQUE，否則丟「會員 Email 唯一索引尚未準備完成」 |
+| 安裝／舊 schema | live `pm_member_install.php` | 建表時帶 `UNIQUE KEY uk_email (email)` |
+| 身分綁定（Apple Hide My Email） | PR #3 `pm_member_identity_*` | **刻意拿掉** Email UNIQUE（`email` 只當輔助聯絡；認人用 `apple_sub`／`user_id`） |
+
+在未做產品決策前：
+
+- Email OTP 在沒有 UNIQUE 時會失敗；客人只看到友善句。
+- 若為 OTP 補上 `uk_email`，Apple 隱藏信箱／同一聯絡信箱綁多身分可能衝突。
+- 若依身分包 DROP UNIQUE，Email OTP 會繼續被 `pm_member_email_code.php` 擋住。
+
+請產品／站務擇一（或改 Email OTP 不再依賴 UNIQUE），再動資料表。
+
+## page_id 11240／2107／901
+
+WordPress 已 301 到首頁。這是內容／SEO 決策，不是 `pm_roomboard` PHP bug。本包不改 WP 轉向；只要本 repo 的 CTA 不要再連這些舊網址。
+
+## `pm_front`
+
+維持體驗／入住交接（handoff）。會員註冊／登入請連 portal／center，不要把 `pm_front` 假裝成入會漏斗。只拿掉客人可見的內部用語。

@@ -30,13 +30,13 @@ https://seasideresort.com.tw/booking/pm_roomboard/pm_member_portal_v17.php
 | `pm_guest_errors.php` / `pm_guest_errors.js` | 客人看不到金鑰／路徑／索引設定錯誤 |
 | `pm_member_center_guest.js` | 會員中心未登入改走同一驗證碼入口 |
 | `pm_retire_social_login.js` | 可選：把舊 `#socialLogin` 導向 v18 |
-| `pm_front/index.html` | 覆蓋 `/booking/pm_front/`：會員旅程而非「安排入住」 |
-| `wordpress/pm-legacy-member-redirects.php` | `page_id=11240/2107/901` 改指到會員頁 |
+| `pm_front/index.html` | 覆蓋 `/booking/pm_front/`：仍是體驗／入住交接；會員入口連 portal／center |
 | `www/pm_eligibility.js` | 官網體驗表拿掉 1960 預設年 |
 
-簡訊金鑰與 Email 唯一索引的主機步驟見 [`OPERATOR_OTP.md`](OPERATOR_OTP.md)。這些說明不可出現在瀏覽器。
+簡訊金鑰、Email UNIQUE 與身分綁定的**產品衝突**見 [`OPERATOR_OTP.md`](OPERATOR_OTP.md)。這些說明不可出現在瀏覽器。
 
 **不要覆蓋** live 的 `pm_member_social.php`（Google／LINE 正式 OAuth）。
+**不要覆蓋** live 的 `pm_smsgo_adapter.php`（身分包複本不可取代正式 adapter）。
 
 現有 live `pm_member_api_v18.php` 是較舊的 stub（無 CSRF、未知操作）。請用本目錄檔案覆蓋。
 
@@ -90,7 +90,7 @@ Live 探測結果：v17 對 `phone_*`（含 `phone_login_request`）已路由到
 | `qlo_pm_member_write` | 驗證碼對了，但 `qlo_pm_member` 無法自動 INSERT（欄位與假設不符） |
 | `pm_member_session` | 會員列已對齊，但 v17 session 鍵無法寫入；請改用 Email 碼登入，並把 v17 的 `pm_member_set_session` 類函式名告訴我們 |
 
-Email 與密碼不依賴這層，應維持可用。
+電子郵件 OTP 是否可用，取決於產品對 Email UNIQUE 的決策（見 OPERATOR_OTP.md），本包不改 schema。
 
 ## 本機預覽（無 v17）
 

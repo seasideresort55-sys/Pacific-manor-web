@@ -3,7 +3,9 @@
  * Guest-safe API / OTP error copy.
  *
  * Operators: never echo host paths, key filenames, or index/setup hints
- * to the browser. Setup steps live in OPERATOR_OTP.md only.
+ * to the browser. Live leaks come from pm_smsgo_identity.php (SMS key path)
+ * and pm_member_email_code.php (email unique-index). Setup + product
+ * conflict live in OPERATOR_OTP.md only. Do not overwrite pm_smsgo_adapter.php.
  */
 declare(strict_types=1);
 
