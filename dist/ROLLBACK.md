@@ -6,7 +6,7 @@
 data/garden.sqlite.bak-YYYYmmddHHMMSS
 ```
 
-回復就是把該檔蓋回 `data/garden.sqlite`，然後重新啟動 PHP。遷移本身不刪列，所以這份備份是回復手段。
+回復就是把該檔蓋回 `data/garden.sqlite`，然後重新啟動 PHP。遷移本身不刪列，所以這份備份是回復手段。備份裡含代賣可售棵數與「可售棵數依平台庫存設定」這句註記；蓋回去會回到跑遷移之前的棵數。
 
 ```bash
 cp data/garden.sqlite.bak-YYYYmmddHHMMSS data/garden.sqlite

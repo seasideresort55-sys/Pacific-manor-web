@@ -14,5 +14,6 @@
 - `dist/screenshots/product.png`
 - `dist/screenshots/filtered-list.png`
 - `dist/screenshots/cart-shipping.png`
+- `dist/screenshots/product-filled.png`
 
 購物車截圖含運費 NT$200、標成不計入免運的商品，以及還差多少才免運。帳號只寫在 `dist/VERIFY.md`。

@@ -1,7 +1,8 @@
 <?php
-$specs = json_decode((string) ($product['specs_json'] ?? '{}'), true) ?: [];
-if (!$specs && !empty($product['class_main'])) {
+if (!empty($product['name_zh']) || !empty($product['class_main'])) {
     $specs = public_specs($product, ['seedling' => $product['offer_seedling'] ?? PENDING]);
+} else {
+    $specs = json_decode((string) ($product['specs_json'] ?? '{}'), true) ?: [];
 }
 $photo = $product['photo'] ?? '';
 ?>

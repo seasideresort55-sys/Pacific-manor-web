@@ -1,0 +1,76 @@
+{
+  "before": {
+    "n": 1626,
+    "flower_dia_cm": 54,
+    "petals": 42,
+    "form": 768,
+    "height_cm": 93,
+    "width_cm": 36,
+    "breeder": 377,
+    "breeder_country": 375,
+    "year": 164,
+    "fragrance": 577,
+    "bloom_months": 0,
+    "heat_tw": 0,
+    "heat_flag": 395,
+    "disease_bs": 0,
+    "disease_pm": 0,
+    "flower_size": 853,
+    "doubleness": 162,
+    "scent_type": 10,
+    "bloom_habit": 886,
+    "inflorescence": 192
+  },
+  "after": {
+    "n": 1626,
+    "flower_dia_cm": 130,
+    "petals": 141,
+    "form": 803,
+    "height_cm": 285,
+    "width_cm": 100,
+    "breeder": 452,
+    "breeder_country": 388,
+    "year": 282,
+    "fragrance": 662,
+    "bloom_months": 0,
+    "heat_tw": 0,
+    "heat_flag": 431,
+    "disease_bs": 17,
+    "disease_pm": 18,
+    "flower_size": 917,
+    "doubleness": 236,
+    "scent_type": 97,
+    "bloom_habit": 956,
+    "inflorescence": 249
+  },
+  "filled_fields": {
+    "Kordes": 81,
+    "Meilland": 113,
+    "Tantau": 64,
+    "河本": 136,
+    "rose-collection": 0,
+    "羅莎歐麗": 262,
+    "HelpMeFind": 671
+  },
+  "source_records": {
+    "kordes": 191,
+    "meilland": 305,
+    "tantau": 804,
+    "kawamoto": 136,
+    "rosa_orientis": 82,
+    "rose_collection": 0
+  },
+  "chiffon_photo": "",
+  "hmf_rejected": {
+    "color": 9,
+    "year": 10,
+    "breeder-year": 0
+  },
+  "chiffon_photo_note": "冬冬商品頁沒有照片。HelpMeFind 唯一同名 Chiffon 是 1940 年淺粉雜交茶，和這株已標的杏色衝突，沒有拿它的資料或照片。VIP Roses 的 Chiffon 頁面寫 pale pink，照片也是淺粉，沒有當成這株的圖。",
+  "shops_blocked": {
+    "J&K": "蝦皮賣場，這個環境開啟商品頁會被要求登入，沒有讀到品種數據",
+    "玫瑰天地": "蝦皮賣場 shop 563805315，同樣被擋",
+    "四季有花": "蝦皮賣場 shop 5257351，同樣被擋"
+  },
+  "after_note": "花徑與瓣數若和既有輪徑、重瓣用詞衝突，已改成跟公分或瓣數同一帶；差了兩級的花徑整筆 HelpMeFind 沒有採用。"
+}

@@ -12,7 +12,10 @@
         <?php endforeach; ?>
       </select>
     </label>
-    <label class="f">平台庫存（棵）<input type="number" name="platform_stock" value="<?= (int) $offer['platform_stock'] ?>"></label>
+    <label class="f">平台庫存（棵，選苗上架用）<input type="number" name="platform_stock" value="<?= (int) $offer['platform_stock'] ?>"></label>
+    <label class="f">這品種的代賣可售（空白＝用全站 <?= h(setting('consign_stock_default')) ?>）
+      <input type="number" name="consign_stock" min="0" value="<?= h((string) ($offer['consign_stock'] ?? '')) ?>">
+    </label>
     <label class="f">成本<input type="number" name="cost_twd" value="<?= h((string) ($offer['cost_twd'] ?? '')) ?>"></label>
     <label class="f">預估出貨日<input type="text" name="eta" value="<?= h($offer['eta']) ?>"></label>
   </div>

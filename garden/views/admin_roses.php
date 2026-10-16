@@ -15,6 +15,17 @@
     <button class="btn" type="submit">儲存倍數</button>
   </div>
 </form>
+<form method="post" action="/admin/consign-stock" class="card pad" style="margin-bottom:16px">
+  <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
+  <p class="lede">冬冬頁面沒有公布棵數。代賣出去的可售棵數用這個平台設定，預設 5。單品種要改，進該苗批把「這品種的代賣可售」填上。</p>
+  <div class="filters">
+    <label class="f">代賣可售預設（棵）
+      <input type="number" name="consign_stock_default" min="1" value="<?= h($settings['consign_stock_default'] ?? '5') ?>">
+    </label>
+    <button class="btn" type="submit" name="apply" value="missing">套用到沒有單獨設定的代賣</button>
+    <button class="btn" type="submit" name="apply" value="all">全部改成這個數</button>
+  </div>
+</form>
 <p class="meta">品種 <?= (int) $counts['varieties'] ?> · 已開放 <?= (int) $counts['listed'] ?> · 在售苗批 <?= (int) $counts['offers'] ?></p>
 <form class="filters" method="get" action="/admin/roses">
   <label class="f">搜尋<input type="text" name="q" value="<?= h($q) ?>"></label>

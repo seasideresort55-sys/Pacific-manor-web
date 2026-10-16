@@ -253,11 +253,73 @@ SQL);
         'retail_divisor' => '0.7',
         'round_to' => '10',
         'min_batch' => '1',
+        'consign_stock_default' => '5',
     ];
     $ins = $pdo->prepare('INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)');
     foreach ($defaults as $k => $v) {
         $ins->execute([$k, $v]);
     }
+    $cols = array_column($pdo->query('PRAGMA table_info(rose_varieties)')->fetchAll(), 'name');
+    if (!in_array('consign_stock', $cols, true)) {
+        $pdo->exec('ALTER TABLE rose_varieties ADD COLUMN consign_stock INTEGER');
+    }
+}
+
+function consign_stock_default(): int
+{
+    $n = (int) setting('consign_stock_default');
+    return $n > 0 ? $n : 5;
+}
+
+function consign_stock_for(array $variety): int
+{
+    if (array_key_exists('consign_stock', $variety) && $variety['consign_stock'] !== null && $variety['consign_stock'] !== '') {
+        return max(0, (int) $variety['consign_stock']);
+    }
+    return consign_stock_default();
+}
+
+function apply_consign_stock(PDO $pdo, ?int $varietyId, bool $clearOverrides, bool $onlyUnset = false): void
+{
+    if ($clearOverrides) {
+        if ($varietyId) {
+            $pdo->prepare('UPDATE rose_varieties SET consign_stock = NULL WHERE id = ?')->execute([$varietyId]);
+        } else {
+            $pdo->exec('UPDATE rose_varieties SET consign_stock = NULL');
+        }
+    }
+    $default = consign_stock_default();
+    $sql = <<<'SQL'
+UPDATE products
+SET stock = COALESCE(
+  (SELECT rv.consign_stock FROM rose_offers ro JOIN rose_varieties rv ON rv.id = ro.variety_id WHERE ro.id = products.rose_offer_id),
+  ?
+)
+WHERE listing_kind = 'rose'
+  AND vendor_id = 1
+  AND rose_offer_id IN (
+    SELECT ro.id FROM rose_offers ro
+    JOIN rose_varieties rv ON rv.id = ro.variety_id
+    WHERE ro.instock_at_import = 1
+SQL;
+    $args = [$default];
+    if ($varietyId) {
+        $sql .= ' AND rv.id = ?';
+        $args[] = $varietyId;
+    }
+    if ($onlyUnset) {
+        $sql .= ' AND rv.consign_stock IS NULL';
+    }
+    $sql .= ')';
+    $pdo->prepare($sql)->execute($args);
+    $note = '冬冬目錄目前可購買；頁面未公布棵數，可售棵數依平台庫存設定';
+    $noteSql = "UPDATE rose_offers SET stock_note = ? WHERE instock_at_import = 1 AND supplier_sku NOT LIKE 'lot-%'";
+    $noteArgs = [$note];
+    if ($varietyId) {
+        $noteSql .= ' AND variety_id = ?';
+        $noteArgs[] = $varietyId;
+    }
+    $pdo->prepare($noteSql)->execute($noteArgs);
 }
 
 function setting(string $key): string
@@ -343,7 +405,7 @@ function public_specs(array $variety, array $offer): array
 {
     $heat = $variety['heat_tw'];
     if ($heat === PENDING && ($variety['heat_flag'] ?? '') === '1') {
-        $heat = '賣家標示耐熱（未分級）';
+        $heat = '標示耐熱（未分級）';
     }
     $class = $variety['class_main'];
     $classLabel = $class === PENDING ? PENDING : category_name($class);

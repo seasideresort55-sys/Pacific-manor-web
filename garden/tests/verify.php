@@ -80,6 +80,17 @@ foreach ([$views, $pub, garden_root() . '/src'] as $dir) {
 }
 check(!preg_match('/測試|展示/u', $blob), '介面文案沒有測試或展示');
 
+$defaultStock = (int) $pdo->query("SELECT value FROM settings WHERE key = 'consign_stock_default'")->fetchColumn();
+check($defaultStock === 5, '代賣庫存預設 5', 'value=' . $defaultStock);
+$stillOne = (int) $pdo->query("SELECT COUNT(*) FROM products p JOIN rose_offers ro ON ro.id = p.rose_offer_id WHERE p.vendor_id = 1 AND p.listing_kind = 'rose' AND ro.instock_at_import = 1 AND p.stock = 1 AND ro.stock_note LIKE '%平台庫存記 1%'")->fetchColumn();
+check($stillOne === 0, '代賣不再以 1 棵為未公布棵數的占位');
+$stock5 = (int) $pdo->query("SELECT COUNT(*) FROM products p JOIN rose_offers ro ON ro.id = p.rose_offer_id WHERE p.vendor_id = 1 AND p.listing_kind = 'rose' AND ro.instock_at_import = 1 AND p.stock = 5")->fetchColumn();
+check($stock5 >= 280, '代賣可售棵數用平台設定', 'count=' . $stock5);
+$preStock = (int) $pdo->query("SELECT COUNT(*) FROM products WHERE status = '新苗預購' AND stock = 20")->fetchColumn();
+check($preStock === 47, '新苗預購庫存維持 20', 'count=' . $preStock);
+$note = (string) $pdo->query("SELECT stock_note FROM rose_offers WHERE instock_at_import = 1 AND supplier_sku NOT LIKE 'lot-%' LIMIT 1")->fetchColumn();
+check(str_contains($note, '未公布棵數') && str_contains($note, '平台庫存設定'), '保留冬冬可買、棵數未公布的註記');
+
 if ($fail > 0) {
     fwrite(STDOUT, "FAILED $fail\n");
     exit(1);

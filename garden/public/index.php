@@ -144,6 +144,7 @@ SQL;
         'settings' => [
             'multiplier_a' => setting('multiplier_a'),
             'retail_divisor' => setting('retail_divisor'),
+            'consign_stock_default' => setting('consign_stock_default'),
         ],
     ]);
     exit;
@@ -158,6 +159,21 @@ if ($path === '/admin/settings' && $method === 'POST') {
     }
     if (is_numeric($d) && (float) $d > 0) {
         db()->prepare('UPDATE settings SET value = ? WHERE key = ?')->execute([$d, 'retail_divisor']);
+    }
+    redirect('/admin/roses');
+}
+if ($path === '/admin/consign-stock' && $method === 'POST') {
+    require_admin();
+    csrf_check();
+    $n = (int) ($_POST['consign_stock_default'] ?? 0);
+    if ($n > 0) {
+        db()->prepare('UPDATE settings SET value = ? WHERE key = ?')->execute([(string) $n, 'consign_stock_default']);
+    }
+    $apply = (string) ($_POST['apply'] ?? '');
+    if ($apply === 'missing') {
+        apply_consign_stock(db(), null, false, true);
+    } elseif ($apply === 'all') {
+        apply_consign_stock(db(), null, true, false);
     }
     redirect('/admin/roses');
 }
@@ -186,14 +202,17 @@ if (preg_match('#^/admin/rose/(\d+)$#', $path, $m) && $method === 'POST') {
     $offer->execute([$id]);
     $varietyId = (int) $offer->fetchColumn();
     if ($varietyId) {
-        $pdo->prepare('UPDATE rose_varieties SET listed = ?, multiplier_a = ?, retail_divisor = ?, updated_at = ? WHERE id = ?')
+        $consign = trim((string) ($_POST['consign_stock'] ?? ''));
+        $pdo->prepare('UPDATE rose_varieties SET listed = ?, multiplier_a = ?, retail_divisor = ?, consign_stock = ?, updated_at = ? WHERE id = ?')
             ->execute([
                 isset($_POST['listed']) ? 1 : 0,
                 ($_POST['multiplier_a'] ?? '') === '' ? null : (float) $_POST['multiplier_a'],
                 ($_POST['retail_divisor'] ?? '') === '' ? null : (float) $_POST['retail_divisor'],
+                $consign === '' ? null : max(0, (int) $consign),
                 gmdate('c'),
                 $varietyId,
             ]);
+        apply_consign_stock($pdo, $varietyId, false);
         $state = (string) ($_POST['offer_state'] ?? '有貨');
         if (!in_array($state, ['有貨', '扦插預購', '完售', '停止'], true)) {
             $state = '有貨';

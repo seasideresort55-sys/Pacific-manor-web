@@ -58,10 +58,39 @@ if (!function_exists('garden_migrate_v14')) {
                 $sets = [];
                 $args = [];
                 foreach ($values as $col => $val) {
+                    if ($col === 'sources_json') {
+                        continue;
+                    }
                     $old = (string) ($existing[$col] ?? '');
                     if (($old === '' || $old === PENDING) && $val !== PENDING && $val !== '') {
                         $sets[] = $col . ' = ?';
                         $args[] = $val;
+                    }
+                }
+                $newSources = (string) ($values['sources_json'] ?? '{}');
+                if ($newSources !== '' && $newSources !== (string) ($existing['sources_json'] ?? '')) {
+                    $sets[] = 'sources_json = ?';
+                    $args[] = $newSources;
+                }
+                foreach (['breeder', 'year', 'flower_size', 'doubleness'] as $col) {
+                    $new = (string) ($values[$col] ?? '');
+                    $old = (string) ($existing[$col] ?? '');
+                    if ($new === '' || $new === PENDING || $new === $old || $old === '' || $old === PENDING) {
+                        continue;
+                    }
+                    $ok = false;
+                    if ($col === 'breeder') {
+                        $a = function_exists('mb_strtolower') ? mb_strtolower($old) : strtolower($old);
+                        $b = function_exists('mb_strtolower') ? mb_strtolower($new) : strtolower($new);
+                        $ok = str_contains($b, $a) || str_contains($a, $b);
+                    } elseif ($col === 'year' && preg_match('/^(19|20)\d{2}$/', $old) && preg_match('/^(19|20)\d{2}$/', $new)) {
+                        $ok = abs((int) $old - (int) $new) <= 2;
+                    } elseif ($col === 'flower_size' || $col === 'doubleness') {
+                        $ok = true;
+                    }
+                    if ($ok) {
+                        $sets[] = $col . ' = ?';
+                        $args[] = $new;
                     }
                 }
                 if ($hasInstock && (int) $existing['listed'] === 0) {
@@ -128,6 +157,8 @@ SQL)->execute([
         add_platform_lots($pdo, $now);
         $pdo->prepare('UPDATE vendors SET shipping_fee_twd = 200, free_shipping_min_twd = 2000 WHERE id = 1')
             ->execute();
+        sync_existing_consign_stock($pdo);
+        refresh_consigned_specs($pdo);
         $pdo->commit();
         $pre = (int) $pdo->query("SELECT COUNT(*) FROM products WHERE status = '新苗預購'")->fetchColumn();
         fwrite(STDOUT, "varieties_inserted $insertedV\nvarieties_updated $updatedV\noffers_inserted $offers\nconsigned $consigned\npreorder_kept $pre\n");
@@ -217,10 +248,11 @@ SQL)->execute([
         }
         $div = (float) (setting('retail_divisor') ?: 0.7);
         $price = round10(((int) $cost) / $div);
-        $qty = (int) $offer['platform_stock'];
-        if ($qty < 1) {
+        $placeholder = (int) $offer['platform_stock'];
+        if ($placeholder < 1) {
             return false;
         }
+        $qty = consign_stock_for($variety);
         $name = $variety['name_zh'];
         $seedling = (string) $offer['seedling'];
         if ($seedling !== '' && $seedling !== PENDING && $seedling !== '自根') {
@@ -245,9 +277,50 @@ SQL)->execute([
             $now,
         ]);
         $pid = (int) $pdo->lastInsertId();
-        $pdo->prepare('UPDATE rose_offers SET platform_stock = platform_stock - ?, consigned_product_id = ? WHERE id = ? AND platform_stock >= ?')
-            ->execute([$qty, $pid, (int) $offer['id'], $qty]);
+        $pdo->prepare('UPDATE rose_offers SET platform_stock = platform_stock - ?, consigned_product_id = ?, stock_note = ? WHERE id = ? AND platform_stock >= ?')
+            ->execute([
+                $placeholder,
+                $pid,
+                '冬冬目錄目前可購買；頁面未公布棵數，可售棵數依平台庫存設定',
+                (int) $offer['id'],
+                $placeholder,
+            ]);
         return true;
+    }
+
+    function sync_existing_consign_stock(PDO $pdo): void
+    {
+        $default = consign_stock_default();
+        $note = '冬冬目錄目前可購買；頁面未公布棵數，可售棵數依平台庫存設定';
+        $pdo->prepare(<<<'SQL'
+UPDATE products
+SET stock = ?
+WHERE listing_kind = 'rose'
+  AND vendor_id = 1
+  AND stock = 1
+  AND rose_offer_id IN (
+    SELECT id FROM rose_offers WHERE stock_note LIKE '%平台庫存記 1%'
+  )
+SQL)->execute([$default]);
+        $pdo->prepare("UPDATE rose_offers SET stock_note = ? WHERE stock_note LIKE '%平台庫存記 1%'")
+            ->execute([$note]);
+    }
+
+    function refresh_consigned_specs(PDO $pdo): void
+    {
+        $rows = $pdo->query(<<<'SQL'
+SELECT p.id, ro.seedling, ro.photo AS offer_photo, rv.*
+FROM products p
+JOIN rose_offers ro ON ro.id = p.rose_offer_id
+JOIN rose_varieties rv ON rv.id = ro.variety_id
+WHERE p.listing_kind = 'rose' AND p.vendor_edited = 0
+SQL)->fetchAll();
+        $upd = $pdo->prepare("UPDATE products SET specs_json = ?, photo = CASE WHEN photo = '' AND ? <> '' THEN ? ELSE photo END WHERE id = ?");
+        foreach ($rows as $row) {
+            $specs = public_specs($row, ['seedling' => $row['seedling']]);
+            $photo = (string) ($row['offer_photo'] ?? '');
+            $upd->execute([json_encode($specs, JSON_UNESCAPED_UNICODE), $photo, $photo, (int) $row['id']]);
+        }
     }
 
     function add_platform_lots(PDO $pdo, string $now): void
