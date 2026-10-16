@@ -15,7 +15,7 @@ if ($exists > 0 && getenv('GARDEN_RESET') !== '1') {
     exit(0);
 }
 if (getenv('GARDEN_RESET') === '1') {
-    foreach (['orders', 'shipping_exclusions', 'products', 'rose_offers', 'rose_varieties', 'vendors', 'admins'] as $t) {
+    foreach (['order_lines', 'orders', 'shipping_exclusions', 'products', 'rose_offers', 'rose_varieties', 'vendors', 'admins'] as $t) {
         $pdo->exec('DELETE FROM ' . $t);
     }
 }
@@ -77,3 +77,4 @@ if ($top) {
         ->execute([1, 'product', (int) $top['id'], '', gmdate('c')]);
     fwrite(STDOUT, "vendor1_exclusion_product " . (int) $top['id'] . "\n");
 }
+seed_vendor_consign_sample();

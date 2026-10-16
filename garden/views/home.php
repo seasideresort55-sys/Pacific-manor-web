@@ -14,7 +14,7 @@
         </div>
         <div class="pad">
           <h2 class="name"><?= h($p['name']) ?></h2>
-          <div class="meta"><?= h($p['vendor_name']) ?></div>
+          <div class="meta"><?php $credit = product_credit($p); echo h($credit !== '' ? $credit : $p['vendor_name']); ?></div>
           <div class="price"><?= money((int) $p['price_twd']) ?></div>
         </div>
       </a>

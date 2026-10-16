@@ -62,7 +62,8 @@ $filters = $filters ?? [];
         </div>
         <div class="pad">
           <h2 class="name"><?= h($p['name']) ?></h2>
-          <div class="meta"><?= h($p['vendor_name']) ?> · <?= h(category_name((string) ($p['class_main'] ?: $p['category_code']))) ?></div>
+          <?php $credit = product_credit($p); ?>
+          <div class="meta"><?= h($credit !== '' ? $credit : ($p['vendor_name'] . ' · ' . category_name((string) ($p['class_main'] ?: $p['category_code'])))) ?></div>
           <div class="price"><?= money((int) $p['price_twd']) ?></div>
         </div>
       </a>

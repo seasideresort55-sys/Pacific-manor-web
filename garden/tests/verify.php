@@ -20,8 +20,10 @@ function check(bool $ok, string $label, string $detail = ''): void
 $pdo = db();
 $pre = $pdo->query("SELECT id, sku, name, price_twd, stock, status, vendor_id FROM products WHERE status = '新苗預購' ORDER BY id")->fetchAll();
 check(count($pre) === 47, '47 新苗預購', 'count=' . count($pre));
-check((int) $pdo->query('SELECT COUNT(*) FROM products WHERE vendor_id = 2')->fetchColumn() === 3, 'vendor 2 products stay');
-check((int) $pdo->query('SELECT COUNT(*) FROM products WHERE vendor_id = 3')->fetchColumn() === 2, 'vendor 3 products stay');
+$shop2 = (int) $pdo->query("SELECT COUNT(*) FROM products WHERE sku IN ('SHOP-2-01','SHOP-2-02','SHOP-2-03')")->fetchColumn();
+check($shop2 === 3, 'vendor 2 original products stay', 'count=' . $shop2);
+$shop3 = (int) $pdo->query("SELECT COUNT(*) FROM products WHERE sku IN ('SHOP-3-01','SHOP-3-02')")->fetchColumn();
+check($shop3 === 2, 'vendor 3 original products stay', 'count=' . $shop3);
 $v1 = $pdo->query('SELECT shipping_fee_twd, free_shipping_min_twd FROM vendors WHERE id = 1')->fetch();
 check((int) $v1['shipping_fee_twd'] === 200 && (int) $v1['free_shipping_min_twd'] === 2000, '太平洋莊園運費 200 / 2000');
 $v2 = $pdo->query('SELECT shipping_fee_twd, free_shipping_min_twd FROM vendors WHERE id = 2')->fetch();
@@ -90,6 +92,53 @@ $preStock = (int) $pdo->query("SELECT COUNT(*) FROM products WHERE status = '新
 check($preStock === 47, '新苗預購庫存維持 20', 'count=' . $preStock);
 $note = (string) $pdo->query("SELECT stock_note FROM rose_offers WHERE instock_at_import = 1 AND supplier_sku NOT LIKE 'lot-%' LIMIT 1")->fetchColumn();
 check(str_contains($note, '未公布棵數') && str_contains($note, '平台庫存設定'), '保留冬冬可買、棵數未公布的註記');
+
+$split = consign_split(100);
+check($split['origin'] === 70 && $split['seller'] === 30 && $split['platform'] === 0, '代賣售價 100 拆成原店 70、代賣店 30、平台 0');
+$openN = (int) $pdo->query("SELECT COUNT(*) FROM products WHERE sku IN ('SHOP-3-01','SHOP-3-02') AND consign_open = 1 AND origin_product_id IS NULL")->fetchColumn();
+check($openN === 2, '河岸開放左手香與檸檬香茅代賣');
+$mirror = $pdo->query("SELECT m.id, m.name, m.price_twd, m.stock, m.description, m.status, m.stock_gate, m.listing_kind, o.stock AS origin_stock, o.name AS origin_name, o.price_twd AS origin_price, o.description AS origin_desc FROM products m JOIN products o ON o.id = m.origin_product_id WHERE m.sku LIKE 'CONSIGN-2-%' AND o.sku = 'SHOP-3-02'")->fetch();
+check($mirror && $mirror['name'] === $mirror['origin_name'] && (int) $mirror['price_twd'] === (int) $mirror['origin_price'] && $mirror['description'] === $mirror['origin_desc'], '代賣商品繼承原店名稱售價說明');
+check($mirror && (int) $mirror['stock'] === (int) $mirror['origin_stock'] && (int) $mirror['stock'] === 18, '左手香共用庫存，賣出 2 棵後兩邊都是 18', 'stock=' . (int) ($mirror['stock'] ?? -1));
+check($mirror && $mirror['status'] === '上架' && $mirror['stock_gate'] === 'released' && $mirror['listing_kind'] === 'consign', '代賣立刻上架、不用審核');
+$line = $pdo->query("SELECT * FROM order_lines WHERE seller_vendor_id = 2 AND origin_vendor_id = 3 AND name = '左手香'")->fetch();
+check($line && (int) $line['qty'] === 2 && (int) $line['line_twd'] === 100 && (int) $line['origin_share_twd'] === 70 && (int) $line['seller_share_twd'] === 30 && (int) $line['platform_share_twd'] === 0, '帳上記到平台 0、原店 70、代賣店 30');
+$order = $line ? $pdo->query('SELECT vendor_id, shipping_twd FROM orders WHERE id = ' . (int) $line['order_id'])->fetch() : null;
+check($order && (int) $order['vendor_id'] === 3 && (int) $order['shipping_twd'] === 180, '代賣出貨與運費歸原店');
+$pdo->beginTransaction();
+$pdo->prepare("UPDATE products SET name = '左手香改名', price_twd = 80, description = '原店新說明' WHERE sku = 'SHOP-3-02'")->execute();
+$originId = (int) $pdo->query("SELECT id FROM products WHERE sku = 'SHOP-3-02'")->fetchColumn();
+sync_consign_mirrors($pdo, $originId);
+$copied = $pdo->prepare('SELECT name, price_twd, description, stock FROM products WHERE origin_product_id = ?');
+$copied->execute([$originId]);
+$copiedRow = $copied->fetch();
+check($copiedRow && $copiedRow['name'] === '左手香改名' && (int) $copiedRow['price_twd'] === 80 && $copiedRow['description'] === '原店新說明', '原店一改，代賣店跟著改');
+$pdo->rollBack();
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
+$_SESSION['cart'] = [];
+$originLeft = (int) $pdo->query("SELECT id, stock FROM products WHERE sku = 'SHOP-3-02'")->fetch()['stock'];
+$mirrorId = (int) $mirror['id'];
+$originPid = (int) $pdo->query("SELECT id FROM products WHERE sku = 'SHOP-3-02'")->fetchColumn();
+$addAll = cart_add($originPid, $originLeft);
+$over = cart_add($mirrorId, 1);
+check($addAll === null && $over !== null, '同一份庫存不能從兩家一起超賣');
+$_SESSION['cart'] = [$mirrorId => $originLeft + 5];
+$before = (int) $pdo->query("SELECT stock FROM products WHERE sku = 'SHOP-3-02'")->fetchColumn();
+$threw = false;
+try {
+    place_orders();
+} catch (Throwable $e) {
+    $threw = true;
+}
+$after = (int) $pdo->query("SELECT stock FROM products WHERE sku = 'SHOP-3-02'")->fetchColumn();
+check($threw && $after === $before, '結帳超賣會整筆退回，庫存不變');
+$_SESSION['cart'] = [];
+$chiffon = (string) $pdo->query("SELECT photo FROM products WHERE sku = 'ROSE-1-1357'")->fetchColumn();
+check($chiffon === '', '薄紗沒有別人的照片', 'photo=' . $chiffon);
+$shopDirty = (int) $pdo->query("SELECT COUNT(*) FROM products WHERE sku LIKE 'SHOP-%' AND (photo != '' OR specs_json != '{}')")->fetchColumn();
+check($shopDirty === 0, '店家自有商品沒有被寫成玫瑰規格', 'hits=' . $shopDirty);
 
 if ($fail > 0) {
     fwrite(STDOUT, "FAILED $fail\n");

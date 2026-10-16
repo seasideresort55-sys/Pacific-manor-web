@@ -14,7 +14,12 @@ $photo = $product['photo'] ?? '';
   </div>
   <div>
     <h1><?= h($product['name']) ?></h1>
-    <p class="lede"><?= h($product['vendor_name']) ?> · <?= h(category_name((string) $product['category_code'])) ?></p>
+    <?php $credit = product_credit($product); ?>
+    <?php if ($credit !== ''): ?>
+      <p class="lede"><?= h($credit) ?></p>
+    <?php else: ?>
+      <p class="lede"><?= h($product['vendor_name']) ?> · <?= h(category_name((string) $product['category_code'])) ?></p>
+    <?php endif; ?>
     <?php $blurb = category_blurb((string) ($product['class_main'] ?? '')); ?>
     <?php if ($blurb): ?><p class="note"><?= h($blurb) ?></p><?php endif; ?>
     <p class="price"><?= money((int) $product['price_twd']) ?></p>

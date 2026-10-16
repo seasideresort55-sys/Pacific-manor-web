@@ -304,14 +304,16 @@ if ($path === '/vendor/products' && $method === 'POST') {
     $own = db()->prepare('SELECT * FROM products WHERE id = ? AND vendor_id = ?');
     $own->execute([$pid, (int) $u['vendor_id']]);
     $p = $own->fetch();
-    if ($p) {
-        db()->prepare('UPDATE products SET name = ?, description = ?, price_twd = ?, vendor_edited = 1 WHERE id = ?')
+    if ($p && empty($p['origin_product_id'])) {
+        db()->prepare('UPDATE products SET name = ?, description = ?, price_twd = ?, vendor_edited = 1, consign_open = ? WHERE id = ?')
             ->execute([
                 trim((string) ($_POST['name'] ?? $p['name'])),
                 redact(trim((string) ($_POST['description'] ?? ''))),
                 max(0, (int) ($_POST['price_twd'] ?? 0)),
+                isset($_POST['consign_open']) ? 1 : 0,
                 $pid,
             ]);
+        sync_consign_mirrors(db(), $pid);
         if (isset($_POST['exclude_ship'])) {
             db()->prepare('INSERT OR IGNORE INTO shipping_exclusions (vendor_id, scope, product_id, category_code, created_at) VALUES (?,?,?,?,?)')
                 ->execute([(int) $u['vendor_id'], 'product', $pid, '', gmdate('c')]);
@@ -321,6 +323,38 @@ if ($path === '/vendor/products' && $method === 'POST') {
         }
     }
     redirect('/vendor/products');
+}
+if ($path === '/vendor/consign' && $method === 'GET') {
+    $u = require_vendor();
+    render('vendor_consign', [
+        'title' => '可代賣商品',
+        'products' => consignable_products((int) $u['vendor_id']),
+        'message' => $_SESSION['consign_ok'] ?? '',
+        'error' => $_SESSION['consign_err'] ?? '',
+    ]);
+    unset($_SESSION['consign_ok'], $_SESSION['consign_err']);
+    exit;
+}
+if ($path === '/vendor/consign' && $method === 'POST') {
+    $u = require_vendor();
+    csrf_check();
+    $res = vendor_consign_take((int) $u['vendor_id'], (int) ($_POST['origin_product_id'] ?? 0));
+    if ($res['ok'] && !empty($res['already'])) {
+        $_SESSION['consign_ok'] = '這株已經在你的店裡。';
+    } elseif ($res['ok']) {
+        $_SESSION['consign_ok'] = '已上架，前台現在就買得到。';
+    } else {
+        $_SESSION['consign_err'] = $res['error'];
+    }
+    redirect('/vendor/consign');
+}
+if ($path === '/vendor/report' && $method === 'GET') {
+    $u = require_vendor();
+    render('vendor_report', [
+        'title' => '銷售分潤',
+        'report' => vendor_report((int) $u['vendor_id']),
+    ]);
+    exit;
 }
 if ($path === '/vendor/shipping' && $method === 'GET') {
     $u = require_vendor();

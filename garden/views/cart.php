@@ -12,6 +12,7 @@
         <div>
           <strong><?= h($line['name']) ?></strong>
           <?php if (!empty($line['excluded'])): ?><span class="badge">不計入免運</span><?php endif; ?>
+          <?php $credit = product_credit($line); if ($credit !== ''): ?><div class="meta"><?= h($credit) ?>，由原店出貨</div><?php endif; ?>
           <div class="meta"><?= money((int) $line['price_twd']) ?></div>
         </div>
         <div>

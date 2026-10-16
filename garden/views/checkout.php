@@ -4,7 +4,7 @@
     <h2><?= h($group['vendor']['name']) ?></h2>
     <?php foreach ($group['lines'] as $line): ?>
       <div class="sum-row">
-        <span><?= h($line['name']) ?> × <?= (int) $line['qty'] ?><?php if (!empty($line['excluded'])): ?> <span class="badge">不計入免運</span><?php endif; ?></span>
+        <span><?= h($line['name']) ?> × <?= (int) $line['qty'] ?><?php $credit = product_credit($line); if ($credit !== ''): ?>（<?= h($credit) ?>）<?php endif; ?><?php if (!empty($line['excluded'])): ?> <span class="badge">不計入免運</span><?php endif; ?></span>
         <span><?= money((int) $line['line_total']) ?></span>
       </div>
     <?php endforeach; ?>

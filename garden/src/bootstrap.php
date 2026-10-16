@@ -31,6 +31,7 @@ function db(): PDO
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
     ]);
     $pdo->exec('PRAGMA foreign_keys = ON');
+    ensure_schema($pdo);
     return $pdo;
 }
 
@@ -241,6 +242,22 @@ CREATE TABLE IF NOT EXISTS orders (
   eligible_twd INTEGER NOT NULL,
   created_at TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS order_lines (
+  id INTEGER PRIMARY KEY,
+  order_id INTEGER NOT NULL,
+  product_id INTEGER NOT NULL,
+  origin_product_id INTEGER NOT NULL,
+  seller_vendor_id INTEGER NOT NULL,
+  origin_vendor_id INTEGER NOT NULL,
+  name TEXT NOT NULL,
+  qty INTEGER NOT NULL,
+  price_twd INTEGER NOT NULL,
+  line_twd INTEGER NOT NULL,
+  origin_share_twd INTEGER NOT NULL,
+  seller_share_twd INTEGER NOT NULL,
+  platform_share_twd INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL
+);
 CREATE TABLE IF NOT EXISTS admins (
   id INTEGER PRIMARY KEY,
   login TEXT NOT NULL UNIQUE,
@@ -262,6 +279,13 @@ SQL);
     $cols = array_column($pdo->query('PRAGMA table_info(rose_varieties)')->fetchAll(), 'name');
     if (!in_array('consign_stock', $cols, true)) {
         $pdo->exec('ALTER TABLE rose_varieties ADD COLUMN consign_stock INTEGER');
+    }
+    $pcols = array_column($pdo->query('PRAGMA table_info(products)')->fetchAll(), 'name');
+    if (!in_array('consign_open', $pcols, true)) {
+        $pdo->exec('ALTER TABLE products ADD COLUMN consign_open INTEGER NOT NULL DEFAULT 0');
+    }
+    if (!in_array('origin_product_id', $pcols, true)) {
+        $pdo->exec('ALTER TABLE products ADD COLUMN origin_product_id INTEGER');
     }
 }
 
@@ -320,6 +344,239 @@ SQL;
         $noteArgs[] = $varietyId;
     }
     $pdo->prepare($noteSql)->execute($noteArgs);
+}
+
+function consign_split(int $lineTwd): array
+{
+    $origin = (int) round($lineTwd * 0.7);
+    if ($origin > $lineTwd) {
+        $origin = $lineTwd;
+    }
+    if ($origin < 0) {
+        $origin = 0;
+    }
+    return ['origin' => $origin, 'seller' => $lineTwd - $origin, 'platform' => 0];
+}
+
+function origin_product_id_of(array $product): int
+{
+    $oid = $product['origin_product_id'] ?? null;
+    if ($oid === null || $oid === '' || (int) $oid === 0) {
+        return (int) $product['id'];
+    }
+    return (int) $oid;
+}
+
+function product_credit(array $product): string
+{
+    if (empty($product['origin_product_id'])) {
+        return '';
+    }
+    $grower = (string) ($product['origin_vendor_name'] ?? '');
+    $seller = (string) ($product['vendor_name'] ?? '');
+    return $grower . '種植・' . $seller . '販售';
+}
+
+function sync_consign_mirrors(PDO $pdo, int $originId): void
+{
+    $stmt = $pdo->prepare('SELECT * FROM products WHERE id = ?');
+    $stmt->execute([$originId]);
+    $origin = $stmt->fetch();
+    if (!$origin || !empty($origin['origin_product_id'])) {
+        return;
+    }
+    $open = (int) $origin['consign_open'] === 1
+        && $origin['status'] === '上架'
+        && $origin['stock_gate'] === 'released';
+    $pdo->prepare(<<<'SQL'
+UPDATE products
+SET name = ?, description = ?, price_twd = ?, photo = ?, specs_json = ?, category_code = ?, stock = ?, stock_gate = ?
+WHERE origin_product_id = ?
+SQL)->execute([
+        $origin['name'],
+        $origin['description'],
+        (int) $origin['price_twd'],
+        $origin['photo'],
+        $origin['specs_json'],
+        $origin['category_code'],
+        (int) $origin['stock'],
+        $open ? 'released' : 'held',
+        $originId,
+    ]);
+}
+
+function consignable_products(int $sellerVendorId): array
+{
+    $stmt = db()->prepare(<<<'SQL'
+SELECT p.*, v.name AS vendor_name,
+       (SELECT m.id FROM products m WHERE m.origin_product_id = p.id AND m.vendor_id = ? LIMIT 1) AS mine_id
+FROM products p
+JOIN vendors v ON v.id = p.vendor_id
+WHERE p.consign_open = 1
+  AND (p.origin_product_id IS NULL OR p.origin_product_id = 0)
+  AND p.vendor_id != ?
+  AND p.status = '上架'
+ORDER BY v.name, p.name
+SQL);
+    $stmt->execute([$sellerVendorId, $sellerVendorId]);
+    return $stmt->fetchAll();
+}
+
+function vendor_consign_take(int $sellerVendorId, int $originProductId): array
+{
+    $pdo = db();
+    $stmt = $pdo->prepare('SELECT * FROM products WHERE id = ?');
+    $stmt->execute([$originProductId]);
+    $origin = $stmt->fetch();
+    if (!$origin || (int) $origin['consign_open'] !== 1 || !empty($origin['origin_product_id'])) {
+        return ['ok' => false, 'error' => '這株沒有開放代賣。'];
+    }
+    if ((int) $origin['vendor_id'] === $sellerVendorId) {
+        return ['ok' => false, 'error' => '這是自己的商品。'];
+    }
+    if ($origin['status'] !== '上架') {
+        return ['ok' => false, 'error' => '原店目前沒有上架。'];
+    }
+    $existing = $pdo->prepare('SELECT id FROM products WHERE vendor_id = ? AND origin_product_id = ?');
+    $existing->execute([$sellerVendorId, $originProductId]);
+    $already = $existing->fetchColumn();
+    if ($already) {
+        return ['ok' => true, 'product_id' => (int) $already, 'already' => true];
+    }
+    $sku = 'CONSIGN-' . $sellerVendorId . '-' . $originProductId;
+    $gate = $origin['stock_gate'] === 'released' ? 'released' : 'held';
+    $pdo->beginTransaction();
+    try {
+        $pdo->prepare(<<<'SQL'
+INSERT INTO products
+(vendor_id, sku, name, description, price_twd, stock, status, category_code, listing_kind, rose_offer_id, stock_gate, vendor_edited, photo, specs_json, created_at, consign_open, origin_product_id)
+VALUES (?,?,?,?,?,?, '上架', ?, 'consign', NULL, ?, 0, ?, ?, ?, 0, ?)
+SQL)->execute([
+            $sellerVendorId,
+            $sku,
+            $origin['name'],
+            $origin['description'],
+            (int) $origin['price_twd'],
+            (int) $origin['stock'],
+            (string) $origin['category_code'],
+            $gate,
+            $origin['photo'],
+            $origin['specs_json'],
+            gmdate('c'),
+            $originProductId,
+        ]);
+        $pid = (int) $pdo->lastInsertId();
+        $pdo->commit();
+    } catch (Throwable $e) {
+        $pdo->rollBack();
+        $again = $pdo->prepare('SELECT id FROM products WHERE vendor_id = ? AND origin_product_id = ?');
+        $again->execute([$sellerVendorId, $originProductId]);
+        $found = $again->fetchColumn();
+        if ($found) {
+            return ['ok' => true, 'product_id' => (int) $found, 'already' => true];
+        }
+        return ['ok' => false, 'error' => '上架沒有完成，請再試一次。'];
+    }
+    return ['ok' => true, 'product_id' => $pid, 'already' => false];
+}
+
+function seed_vendor_consign_sample(): void
+{
+    $pdo = db();
+    $left = $pdo->query("SELECT id, stock FROM products WHERE sku = 'SHOP-3-02'")->fetch();
+    $lem = $pdo->query("SELECT id FROM products WHERE sku = 'SHOP-3-01'")->fetch();
+    if (!$left || !$lem) {
+        return;
+    }
+    $pdo->prepare('UPDATE products SET consign_open = 1 WHERE id IN (?, ?) AND (origin_product_id IS NULL OR origin_product_id = 0)')
+        ->execute([(int) $left['id'], (int) $lem['id']]);
+    vendor_consign_take(2, (int) $left['id']);
+    $has = (int) $pdo->query("SELECT COUNT(*) FROM order_lines WHERE seller_vendor_id = 2 AND origin_vendor_id = 3 AND name = '左手香'")->fetchColumn();
+    if ($has > 0) {
+        sync_consign_mirrors($pdo, (int) $left['id']);
+        return;
+    }
+    $qty = 2;
+    $price = 50;
+    $line = $price * $qty;
+    $split = consign_split($line);
+    $pdo->beginTransaction();
+    try {
+        $upd = $pdo->prepare('UPDATE products SET stock = stock - ? WHERE id = ? AND stock >= ?');
+        $upd->execute([$qty, (int) $left['id'], $qty]);
+        if ($upd->rowCount() !== 1) {
+            throw new RuntimeException('庫存不足');
+        }
+        sync_consign_mirrors($pdo, (int) $left['id']);
+        $mirror = $pdo->prepare('SELECT id FROM products WHERE vendor_id = 2 AND origin_product_id = ?');
+        $mirror->execute([(int) $left['id']]);
+        $mirrorId = (int) $mirror->fetchColumn();
+        $goods = $line;
+        $ship = 180;
+        $pdo->prepare('INSERT INTO orders (vendor_id, total_twd, shipping_twd, eligible_twd, created_at) VALUES (?,?,?,?,?)')
+            ->execute([3, $goods + $ship, $ship, $goods, gmdate('c')]);
+        $orderId = (int) $pdo->lastInsertId();
+        $pdo->prepare(<<<'SQL'
+INSERT INTO order_lines
+(order_id, product_id, origin_product_id, seller_vendor_id, origin_vendor_id, name, qty, price_twd, line_twd, origin_share_twd, seller_share_twd, platform_share_twd, created_at)
+VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
+SQL)->execute([
+            $orderId,
+            $mirrorId,
+            (int) $left['id'],
+            2,
+            3,
+            '左手香',
+            $qty,
+            $price,
+            $line,
+            $split['origin'],
+            $split['seller'],
+            0,
+            gmdate('c'),
+        ]);
+        $pdo->commit();
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+    }
+}
+
+function vendor_report(int $vendorId): array
+{
+    $stmt = db()->prepare(<<<'SQL'
+SELECT ol.*, sv.name AS seller_name, ov.name AS origin_name, o.shipping_twd, o.vendor_id AS ship_vendor_id
+FROM order_lines ol
+JOIN orders o ON o.id = ol.order_id
+JOIN vendors sv ON sv.id = ol.seller_vendor_id
+JOIN vendors ov ON ov.id = ol.origin_vendor_id
+WHERE ol.seller_vendor_id = ? OR ol.origin_vendor_id = ?
+ORDER BY ol.id DESC
+SQL);
+    $stmt->execute([$vendorId, $vendorId]);
+    $direct = [];
+    $selling = [];
+    $sourced = [];
+    foreach ($stmt->fetchAll() as $row) {
+        $seller = (int) $row['seller_vendor_id'];
+        $origin = (int) $row['origin_vendor_id'];
+        if ($seller === $vendorId && $origin === $vendorId) {
+            $direct[] = $row;
+        } elseif ($seller === $vendorId && $origin !== $vendorId) {
+            $selling[] = $row;
+        } elseif ($origin === $vendorId && $seller !== $vendorId) {
+            $sourced[] = $row;
+        }
+    }
+    $ship = db()->prepare('SELECT COALESCE(SUM(shipping_twd), 0) FROM orders WHERE vendor_id = ? AND shipping_twd IS NOT NULL');
+    $ship->execute([$vendorId]);
+    return [
+        'direct' => $direct,
+        'selling' => $selling,
+        'sourced' => $sourced,
+        'shipping_twd' => (int) $ship->fetchColumn(),
+    ];
 }
 
 function setting(string $key): string
@@ -441,10 +698,13 @@ function public_specs(array $variety, array $offer): array
 function catalog(array $filters): array
 {
     $sql = <<<'SQL'
-SELECT p.*, v.name AS vendor_name, rv.class_main, rv.color_group, rv.fragrance,
+SELECT p.*, v.name AS vendor_name, ov.name AS origin_vendor_name,
+       rv.class_main, rv.color_group, rv.fragrance,
        rv.bloom_habit, rv.bloom_months, rv.heat_tw, rv.heat_flag, rv.breeder, rv.name_zh
 FROM products p
 JOIN vendors v ON v.id = p.vendor_id
+LEFT JOIN products op ON op.id = p.origin_product_id
+LEFT JOIN vendors ov ON ov.id = op.vendor_id
 LEFT JOIN rose_offers ro ON ro.id = p.rose_offer_id
 LEFT JOIN rose_varieties rv ON rv.id = ro.variety_id
 WHERE p.status = '上架' AND p.stock_gate = 'released' AND p.stock > 0
@@ -480,8 +740,8 @@ function product_by_id(int $id): ?array
     $stmt = db()->prepare(<<<'SQL'
 SELECT p.id, p.vendor_id, p.sku, p.name, p.description, p.price_twd, p.stock, p.status,
        p.category_code, p.listing_kind, p.rose_offer_id, p.stock_gate, p.vendor_edited,
-       p.photo, p.specs_json, p.created_at,
-       v.name AS vendor_name,
+       p.photo, p.specs_json, p.created_at, p.consign_open, p.origin_product_id,
+       v.name AS vendor_name, ov.name AS origin_vendor_name,
        ro.seedling AS offer_seedling, ro.variety_id, ro.platform_stock, ro.offer_state, ro.photo AS offer_photo,
        rv.name_zh, rv.name_orig, rv.aliases, rv.reg_name, rv.class_main, rv.class_intl, rv.ogr_class,
        rv.series, rv.breeder, rv.breeder_country, rv.year, rv.color_group, rv.color_desc, rv.fragrance,
@@ -491,6 +751,8 @@ SELECT p.id, p.vendor_id, p.sku, p.name, p.description, p.price_twd, p.stock, p.
        rv.description AS variety_description, rv.listed
 FROM products p
 JOIN vendors v ON v.id = p.vendor_id
+LEFT JOIN products op ON op.id = p.origin_product_id
+LEFT JOIN vendors ov ON ov.id = op.vendor_id
 LEFT JOIN rose_offers ro ON ro.id = p.rose_offer_id
 LEFT JOIN rose_varieties rv ON rv.id = ro.variety_id
 WHERE p.id = ?
@@ -511,6 +773,23 @@ function cart_items(): array
     return $_SESSION['cart'] ?? [];
 }
 
+function shared_stock_left(array $product, int $exceptProductId): int
+{
+    $originId = origin_product_id_of($product);
+    $origin = $originId === (int) $product['id'] ? $product : product_by_id($originId);
+    $stock = $origin ? (int) $origin['stock'] : 0;
+    foreach (cart_items() as $pid => $qty) {
+        if ((int) $pid === $exceptProductId) {
+            continue;
+        }
+        $other = product_by_id((int) $pid);
+        if ($other && origin_product_id_of($other) === $originId) {
+            $stock -= (int) $qty;
+        }
+    }
+    return $stock;
+}
+
 function cart_add(int $productId, int $qty): ?string
 {
     $p = product_by_id($productId);
@@ -520,8 +799,9 @@ function cart_add(int $productId, int $qty): ?string
     $qty = max(1, $qty);
     $cart = cart_items();
     $have = (int) ($cart[$productId] ?? 0);
-    if ($have + $qty > (int) $p['stock']) {
-        return '庫存只剩 ' . (int) $p['stock'] . ' 棵。';
+    $left = shared_stock_left($p, $productId);
+    if ($have + $qty > $left) {
+        return '庫存只剩 ' . max(0, $left) . ' 棵。';
     }
     $cart[$productId] = $have + $qty;
     $_SESSION['cart'] = $cart;
@@ -533,11 +813,13 @@ function cart_set(int $productId, int $qty): void
     $cart = cart_items();
     if ($qty <= 0) {
         unset($cart[$productId]);
-    } else {
-        $p = product_by_id($productId);
-        if ($p) {
-            $cart[$productId] = min($qty, (int) $p['stock']);
-        }
+        $_SESSION['cart'] = $cart;
+        return;
+    }
+    $p = product_by_id($productId);
+    if ($p) {
+        $left = shared_stock_left($p, $productId);
+        $cart[$productId] = min($qty, max(0, $left));
     }
     $_SESSION['cart'] = $cart;
 }
@@ -565,14 +847,19 @@ function cart_groups(): array
         if (!$p) {
             continue;
         }
-        $vid = (int) $p['vendor_id'];
+        $originId = origin_product_id_of($p);
+        $origin = $originId === (int) $p['id'] ? $p : product_by_id($originId);
+        if (!$origin) {
+            $origin = $p;
+        }
+        $vid = (int) $origin['vendor_id'];
         if (!isset($groups[$vid])) {
             $v = db()->prepare('SELECT * FROM vendors WHERE id = ?');
             $v->execute([$vid]);
             $groups[$vid] = ['vendor' => $v->fetch(), 'lines' => []];
         }
         $p['qty'] = (int) $qty;
-        $p['excluded'] = is_excluded($vid, $p);
+        $p['excluded'] = is_excluded($vid, $origin);
         $p['line_total'] = (int) $p['price_twd'] * (int) $qty;
         $groups[$vid]['lines'][] = $p;
     }
@@ -645,12 +932,41 @@ function place_orders(): array
             ]);
             $orderId = (int) $pdo->lastInsertId();
             $ids[] = $orderId;
-            $upd = $pdo->prepare('UPDATE products SET stock = stock - ? WHERE id = ? AND stock >= ?');
+            $lineIns = $pdo->prepare(<<<'SQL'
+INSERT INTO order_lines
+(order_id, product_id, origin_product_id, seller_vendor_id, origin_vendor_id, name, qty, price_twd, line_twd, origin_share_twd, seller_share_twd, platform_share_twd, created_at)
+VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
+SQL);
+            $need = [];
             foreach ($group['lines'] as $line) {
-                $upd->execute([(int) $line['qty'], (int) $line['id'], (int) $line['qty']]);
+                $originId = origin_product_id_of($line);
+                $isMirror = $originId !== (int) $line['id'];
+                $lineTwd = (int) $line['line_total'];
+                $split = $isMirror ? consign_split($lineTwd) : ['origin' => $lineTwd, 'seller' => 0, 'platform' => 0];
+                $lineIns->execute([
+                    $orderId,
+                    (int) $line['id'],
+                    $originId,
+                    (int) $line['vendor_id'],
+                    (int) $group['vendor']['id'],
+                    (string) $line['name'],
+                    (int) $line['qty'],
+                    (int) $line['price_twd'],
+                    $lineTwd,
+                    $split['origin'],
+                    $split['seller'],
+                    0,
+                    gmdate('c'),
+                ]);
+                $need[$originId] = ($need[$originId] ?? 0) + (int) $line['qty'];
+            }
+            $upd = $pdo->prepare('UPDATE products SET stock = stock - ? WHERE id = ? AND (origin_product_id IS NULL OR origin_product_id = 0) AND stock >= ?');
+            foreach ($need as $originId => $qty) {
+                $upd->execute([$qty, $originId, $qty]);
                 if ($upd->rowCount() !== 1) {
                     throw new RuntimeException('庫存不足');
                 }
+                sync_consign_mirrors($pdo, (int) $originId);
             }
         }
         $pdo->commit();

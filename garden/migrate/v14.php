@@ -309,7 +309,7 @@ SQL)->execute([$default]);
     function refresh_consigned_specs(PDO $pdo): void
     {
         $rows = $pdo->query(<<<'SQL'
-SELECT p.id, ro.seedling, ro.photo AS offer_photo, rv.*
+SELECT ro.seedling, ro.photo AS offer_photo, rv.*, p.id AS product_id
 FROM products p
 JOIN rose_offers ro ON ro.id = p.rose_offer_id
 JOIN rose_varieties rv ON rv.id = ro.variety_id
@@ -319,7 +319,7 @@ SQL)->fetchAll();
         foreach ($rows as $row) {
             $specs = public_specs($row, ['seedling' => $row['seedling']]);
             $photo = (string) ($row['offer_photo'] ?? '');
-            $upd->execute([json_encode($specs, JSON_UNESCAPED_UNICODE), $photo, $photo, (int) $row['id']]);
+            $upd->execute([json_encode($specs, JSON_UNESCAPED_UNICODE), $photo, $photo, (int) $row['product_id']]);
         }
     }
 

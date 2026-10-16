@@ -15,5 +15,8 @@
 - `dist/screenshots/filtered-list.png`
 - `dist/screenshots/cart-shipping.png`
 - `dist/screenshots/product-filled.png`
+- `dist/screenshots/consign-list-mobile.png`
+- `dist/screenshots/consign-product.png`
+- `dist/screenshots/consign-report.png`
 
-購物車截圖含運費 NT$200、標成不計入免運的商品，以及還差多少才免運。帳號只寫在 `dist/VERIFY.md`。
+購物車截圖含運費 NT$200、標成不計入免運的商品，以及還差多少才免運。店對店代賣的三張圖是：手機上的可代賣商品、商品頁「河岸苗園種植・山風花圃販售」、山風花圃的銷售分潤（本店 NT$30、原店 NT$70、平台 NT$0）。帳號只寫在 `dist/VERIFY.md`。
