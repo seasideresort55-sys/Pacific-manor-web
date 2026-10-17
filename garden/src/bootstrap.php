@@ -30,10 +30,19 @@ function garden_config(): array
     if (is_file($path)) {
         $loaded = require $path;
         if (is_array($loaded)) {
-            foreach (['db', 'payment', 'base_path', 'phone', 'line', 'host'] as $key) {
+            foreach (['payment', 'base_path', 'phone', 'line', 'host'] as $key) {
                 if (isset($loaded[$key]) && is_string($loaded[$key]) && $loaded[$key] !== '') {
                     $cfg[$key] = $loaded[$key];
                 }
+            }
+            $dbKey = '';
+            if (isset($loaded['db']) && is_string($loaded['db']) && $loaded['db'] !== '') {
+                $dbKey = $loaded['db'];
+            } elseif (isset($loaded['database']) && is_string($loaded['database']) && $loaded['database'] !== '') {
+                $dbKey = $loaded['database'];
+            }
+            if ($dbKey !== '') {
+                $cfg['db'] = $dbKey;
             }
         }
     }

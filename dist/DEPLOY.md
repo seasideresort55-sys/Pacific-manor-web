@@ -29,7 +29,7 @@ return [
 ];
 ```
 
-程式會讀這個檔。環境變數 `GARDEN_CONFIG` 可以改路徑。`GARDEN_DB` 可以改資料庫路徑。
+程式會讀這個檔。資料庫路徑的鍵名 `db` 和 `database` 都認；正式站現有的 `database` 不用改檔。環境變數 `GARDEN_CONFIG` 可以改路徑。`GARDEN_DB` 可以改資料庫路徑。沒讀到路徑時才用 `garden/data/garden.sqlite`。
 
 zip 不含 `garden/data/`，沒有檢視庫 `garden.sqlite`，也沒有玫瑰庫的 json、csv。檢視庫仍在版本庫的 `garden/data/garden.sqlite`，不要把它覆蓋 `/home/irihvsuu/garden_private/garden.sqlite`。不要執行 `GARDEN_RESET=1`。`bin/setup.php` 與 `tests/` 不在 zip 裡。
 

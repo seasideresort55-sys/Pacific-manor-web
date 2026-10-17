@@ -17,8 +17,16 @@ if ($config === false || $config === '') {
 }
 if (is_file($config)) {
     $loaded = require $config;
-    if (is_array($loaded) && isset($loaded['db']) && is_string($loaded['db']) && $loaded['db'] !== '') {
-        $dirs[] = dirname($loaded['db']) . '/media';
+    $dbPath = '';
+    if (is_array($loaded)) {
+        if (isset($loaded['db']) && is_string($loaded['db']) && $loaded['db'] !== '') {
+            $dbPath = $loaded['db'];
+        } elseif (isset($loaded['database']) && is_string($loaded['database']) && $loaded['database'] !== '') {
+            $dbPath = $loaded['database'];
+        }
+    }
+    if ($dbPath !== '') {
+        $dirs[] = dirname($dbPath) . '/media';
     }
 }
 $dirs[] = dirname(__DIR__, 2) . '/garden_private/media';
