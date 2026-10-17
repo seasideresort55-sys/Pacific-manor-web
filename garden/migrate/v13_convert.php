@@ -10,9 +10,21 @@ declare(strict_types=1);
  * php migrate/v13_convert.php --apply --db=/home/irihvsuu/garden_private/garden.sqlite
  */
 
-if (PHP_SAPI !== 'cli') {
-    fwrite(STDERR, "請在命令列執行。\n");
-    exit(1);
+class V13Stop extends RuntimeException
+{
+    public function __construct(string $message, public string $log = '', int $code = 2, ?Throwable $previous = null)
+    {
+        parent::__construct($message, $code, $previous);
+    }
+}
+
+function v13_out(string $text): void
+{
+    if (isset($GLOBALS['v13_capture']) && is_array($GLOBALS['v13_capture'])) {
+        $GLOBALS['v13_capture'][] = $text;
+        return;
+    }
+    v13_out( $text);
 }
 
 require dirname(__DIR__) . '/src/bootstrap.php';
@@ -32,8 +44,7 @@ function v13_args(array $argv): array
         } elseif (str_starts_with($arg, '--map=')) {
             $map = substr($arg, 6);
         } else {
-            fwrite(STDERR, "不認識的參數 $arg\n");
-            exit(1);
+            throw new RuntimeException("不認識的參數 $arg");
         }
     }
     if ($db === '') {
@@ -58,8 +69,7 @@ function v13_schema(PDO $pdo): array
 function v13_load_map(string $path): array
 {
     if (!is_file($path)) {
-        fwrite(STDERR, "找不到對應檔 $path\n");
-        exit(1);
+        throw new RuntimeException("找不到對應檔 $path");
     }
     $map = require $path;
     return is_array($map) ? $map : [];
@@ -154,14 +164,14 @@ function v13_targets_missing_legacy(array $map): array
 
 function v13_print_schema(array $schema): void
 {
-    fwrite(STDOUT, 'tables ' . count($schema) . "\n");
+    v13_out( 'tables ' . count($schema) . "\n");
     foreach ($schema as $table => $info) {
-        fwrite(STDOUT, 'TABLE ' . $table . ' rows=' . $info['rows'] . "\n");
+        v13_out( 'TABLE ' . $table . ' rows=' . $info['rows'] . "\n");
         foreach ($info['columns'] as $col) {
             $pk = (int) $col['pk'] === 1 ? ' pk' : '';
             $nn = (int) $col['notnull'] === 1 ? ' notnull' : '';
             $type = (string) $col['type'];
-            fwrite(STDOUT, '  ' . $col['name'] . ' ' . $type . $pk . $nn . "\n");
+            v13_out( '  ' . $col['name'] . ' ' . $type . $pk . $nn . "\n");
         }
     }
 }
@@ -181,9 +191,9 @@ function v13_apply(PDO $pdo, array $schema, array $map): void
         }
     }
     if ($found === 0) {
-        fwrite(STDERR, "這不是 v13 資料庫（沒有 vendor_product、plant_master、parent_order、rose_variety），沒有改動。\n");
-        exit(2);
+        throw new V13Stop("這不是 v13 資料庫（沒有 vendor_product、plant_master、parent_order、rose_variety），沒有改動。\n");
     }
+    set_time_limit(0);
     $pdo->beginTransaction();
     try {
         foreach (array_keys($map) as $table) {
@@ -192,11 +202,11 @@ function v13_apply(PDO $pdo, array $schema, array $map): void
             }
             $legacy = 'legacy_' . $table;
             if (isset($schema[$legacy])) {
-                fwrite(STDOUT, "keep $legacy\n");
+                v13_out( "keep $legacy\n");
                 continue;
             }
             $pdo->exec('ALTER TABLE ' . v13_quote($table) . ' RENAME TO ' . v13_quote($legacy));
-            fwrite(STDOUT, "rename $table $legacy\n");
+            v13_out( "rename $table $legacy\n");
         }
         ensure_schema($pdo);
         $copied = v13_copy($pdo, $map);
@@ -204,20 +214,19 @@ function v13_apply(PDO $pdo, array $schema, array $map): void
         if ($named) {
             $pdo->prepare('UPDATE vendors SET shipping_fee_twd = 200, free_shipping_min_twd = 2000 WHERE id = ?')
                 ->execute([(int) $named['id']]);
-            fwrite(STDOUT, "shipping 太平洋莊園 200 2000\n");
+            v13_out( "shipping 太平洋莊園 200 2000\n");
         } else {
-            fwrite(STDOUT, "shipping 找不到名稱剛好是太平洋莊園的店，沒有改運費\n");
+            v13_out( "shipping 找不到名稱剛好是太平洋莊園的店，沒有改運費\n");
         }
         v13_finish($pdo);
         v13_report($pdo);
         $pdo->commit();
-        fwrite(STDOUT, 'copied ' . $copied . "\n");
+        v13_out( 'copied ' . $copied . "\n");
     } catch (Throwable $e) {
         if ($pdo->inTransaction()) {
             $pdo->rollBack();
         }
-        fwrite(STDERR, '轉換沒有寫入：' . $e->getMessage() . "\n");
-        exit(2);
+        throw $e;
     }
 }
 
@@ -323,7 +332,7 @@ function v13_report(PDO $pdo): void
         ['legacy_order_item', 'order_lines', '訂單明細'],
         ['legacy_shipment', 'shipment', '出貨'],
     ];
-    fwrite(STDOUT, "COUNTS\n");
+    v13_out( "COUNTS\n");
     foreach ($pairs as [$from, $to, $label]) {
         $tables = array_column($pdo->query("SELECT name FROM sqlite_master WHERE type = 'table'")->fetchAll(), 'name');
         if (!in_array($from, $tables, true) || !in_array($to, $tables, true)) {
@@ -331,7 +340,7 @@ function v13_report(PDO $pdo): void
         }
         $a = (int) $pdo->query('SELECT COUNT(*) FROM ' . v13_quote($from))->fetchColumn();
         $b = (int) $pdo->query('SELECT COUNT(*) FROM ' . v13_quote($to))->fetchColumn();
-        fwrite(STDOUT, "COUNT $label $from=$a $to=$b\n");
+        v13_out( "COUNT $label $from=$a $to=$b\n");
     }
     if (in_array('legacy_vendor_product', array_column($pdo->query("SELECT name FROM sqlite_master WHERE type = 'table'")->fetchAll(), 'name'), true)) {
         $sql = <<<'SQL'
@@ -343,23 +352,23 @@ WHERE v.legacy_id IS NOT NULL
 ORDER BY v.legacy_id
 SQL;
         foreach ($pdo->query($sql) as $row) {
-            fwrite(STDOUT, 'VENDOR ' . $row['legacy_id'] . ' ' . $row['name'] . ' enabled=' . $row['enabled'] . ' login=' . $row['login'] . ' before=' . $row['before_n'] . ' after=' . $row['after_n'] . "\n");
+            v13_out( 'VENDOR ' . $row['legacy_id'] . ' ' . $row['name'] . ' enabled=' . $row['enabled'] . ' login=' . $row['login'] . ' before=' . $row['before_n'] . ' after=' . $row['after_n'] . "\n");
         }
         $status = $pdo->query("SELECT legacy_status, status, COUNT(*) AS c FROM products GROUP BY legacy_status, status ORDER BY legacy_status, status");
         foreach ($status as $row) {
-            fwrite(STDOUT, 'STATUS ' . $row['legacy_status'] . ' -> ' . $row['status'] . ' ' . $row['c'] . "\n");
+            v13_out( 'STATUS ' . $row['legacy_status'] . ' -> ' . $row['status'] . ' ' . $row['c'] . "\n");
         }
         $sample = $pdo->query("SELECT price_twd, photo FROM products WHERE legacy_id = 135")->fetch();
         $vendor = $pdo->query("SELECT shipping_fee_twd, free_shipping_min_twd, pay_days, default_service, shop_status, enabled FROM vendors WHERE legacy_id = 1")->fetch();
         if ($sample) {
-            fwrite(STDOUT, 'PRICE 大遊行 v13_cents=36000 v13_display=NT$360 converted=' . (int) $sample['price_twd'] . ' photo=' . $sample['photo'] . "\n");
+            v13_out( 'PRICE 大遊行 v13_cents=36000 v13_display=NT$360 converted=' . (int) $sample['price_twd'] . ' photo=' . $sample['photo'] . "\n");
         }
         if ($vendor) {
-            fwrite(STDOUT, 'SHIP vendor1 service=' . $vendor['default_service'] . ' shipping_fee_twd=' . $vendor['shipping_fee_twd'] . ' free=' . $vendor['free_shipping_min_twd'] . ' pay_days=' . $vendor['pay_days'] . "\n");
+            v13_out( 'SHIP vendor1 service=' . $vendor['default_service'] . ' shipping_fee_twd=' . $vendor['shipping_fee_twd'] . ' free=' . $vendor['free_shipping_min_twd'] . ' pay_days=' . $vendor['pay_days'] . "\n");
         }
         $hidden = $pdo->query("SELECT name, shop_status, enabled FROM vendors WHERE legacy_id = 8")->fetch();
         if ($hidden) {
-            fwrite(STDOUT, 'SHOP8 ' . $hidden['name'] . ' shop_status=' . $hidden['shop_status'] . ' enabled=' . $hidden['enabled'] . "\n");
+            v13_out( 'SHOP8 ' . $hidden['name'] . ' shop_status=' . $hidden['shop_status'] . ' enabled=' . $hidden['enabled'] . "\n");
         }
     }
 }
@@ -487,69 +496,122 @@ function v13_finish(PDO $pdo): void
     }
 }
 
-[$mode, $db, $mapPath] = v13_args($argv);
-if (!is_file($db)) {
-    fwrite(STDERR, "找不到資料庫 $db\n");
-    exit(1);
+function v13_execute(string $mode, string $db, string $mapPath): string
+{
+    set_time_limit(0);
+    $GLOBALS['v13_capture'] = [];
+    try {
+        if (!is_file($db)) {
+            throw new RuntimeException("找不到資料庫 $db");
+        }
+        if ($mode === 'dry-run') {
+            $pdo = new PDO('sqlite:file:' . $db . '?mode=ro', null, null, [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            ]);
+            $pdo->setAttribute(PDO::ATTR_TIMEOUT, 1);
+            $before = filemtime($db);
+            $schema = v13_schema($pdo);
+            $map = v13_load_map($mapPath);
+            v13_print_schema($schema);
+            $missing = v13_unmapped($schema, $map);
+            foreach ($missing as $item) {
+                v13_out("UNMAPPED $item\n");
+            }
+            $need = v13_targets_missing_legacy($map);
+            foreach ($need as $item) {
+                v13_out("NEED $item\n");
+            }
+            clearstatcache(true, $db);
+            if (filemtime($db) !== $before) {
+                throw new RuntimeException('dry-run 改到檔案了，這不該發生。');
+            }
+            $line = $missing === [] ? "DRY-RUN MAP COMPLETE\n" : 'DRY-RUN STOP unmapped=' . count($missing) . "\n";
+            v13_out($line);
+            $log = implode('', $GLOBALS['v13_capture']);
+            $GLOBALS['v13_capture'] = null;
+            if ($missing !== []) {
+                throw new V13Stop(trim($line), $log, 2);
+            }
+            return $log;
+        }
+        if ($mode !== 'apply') {
+            throw new RuntimeException("不認識的模式 $mode");
+        }
+        $map = v13_load_map($mapPath);
+        $read = new PDO('sqlite:' . $db, null, null, [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        ]);
+        $schema = v13_schema($read);
+        $missing = v13_unmapped($schema, $map);
+        $need = v13_targets_missing_legacy($map);
+        if ($missing !== [] || $need !== []) {
+            v13_print_schema($schema);
+            foreach ($missing as $item) {
+                v13_out("UNMAPPED $item\n");
+            }
+            foreach ($need as $item) {
+                v13_out("NEED $item\n");
+            }
+            $log = implode('', $GLOBALS['v13_capture']);
+            $GLOBALS['v13_capture'] = null;
+            throw new V13Stop("還有對不到的欄位，沒有備份，也沒有改資料庫。", $log, 2);
+        }
+        unset($read);
+        $bak = $db . '.bak-' . gmdate('YmdHis');
+        if (!copy($db, $bak)) {
+            throw new RuntimeException('備份失敗');
+        }
+        v13_out("backup $bak\n");
+        $pdo = new PDO('sqlite:' . $db, null, null, [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        ]);
+        $pdo->exec('PRAGMA foreign_keys = OFF');
+        $pdo->exec('PRAGMA busy_timeout = 5000');
+        v13_apply($pdo, $schema, $map);
+        v13_out("APPLY DONE\n");
+        $log = implode('', $GLOBALS['v13_capture']);
+        $GLOBALS['v13_capture'] = null;
+        return $log;
+    } catch (V13Stop $e) {
+        if (is_array($GLOBALS['v13_capture'] ?? null)) {
+            $log = implode('', $GLOBALS['v13_capture']);
+            $GLOBALS['v13_capture'] = null;
+            if ($e->log === '') {
+                throw new V13Stop($e->getMessage(), $log, $e->getCode() ?: 2, $e);
+            }
+        }
+        throw $e;
+    } catch (Throwable $e) {
+        $log = '';
+        if (is_array($GLOBALS['v13_capture'] ?? null)) {
+            $log = implode('', $GLOBALS['v13_capture']);
+            $GLOBALS['v13_capture'] = null;
+        }
+        throw new RuntimeException($e->getMessage() . ($log !== '' ? "\n" . $log : ''), 0, $e);
+    }
 }
 
-if ($mode === 'dry-run') {
-    $pdo = new PDO('sqlite:file:' . $db . '?mode=ro', null, null, [
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    ]);
-    $pdo->setAttribute(PDO::ATTR_TIMEOUT, 1);
-    $before = filemtime($db);
-    $schema = v13_schema($pdo);
-    $map = v13_load_map($mapPath);
-    v13_print_schema($schema);
-    $missing = v13_unmapped($schema, $map);
-    foreach ($missing as $item) {
-        fwrite(STDOUT, "UNMAPPED $item\n");
-    }
-    $need = v13_targets_missing_legacy($map);
-    foreach ($need as $item) {
-        fwrite(STDOUT, "NEED $item\n");
-    }
-    clearstatcache(true, $db);
-    if (filemtime($db) !== $before) {
-        fwrite(STDERR, "dry-run 改到檔案了，這不該發生。\n");
+$v13Main = isset($_SERVER['SCRIPT_FILENAME']) && realpath((string) $_SERVER['SCRIPT_FILENAME']) === realpath(__FILE__);
+if ($v13Main && PHP_SAPI !== 'cli') {
+    fwrite(STDERR, "請在命令列執行。\n");
+    exit(1);
+}
+if ($v13Main) {
+    try {
+        [$mode, $db, $mapPath] = v13_args($argv);
+        $log = v13_execute($mode, $db, $mapPath);
+        fwrite(STDOUT, $log);
+        exit(0);
+    } catch (V13Stop $e) {
+        fwrite(STDOUT, $e->log);
+        fwrite(STDERR, $e->getMessage() . "\n");
+        exit($e->getCode() > 0 ? $e->getCode() : 2);
+    } catch (Throwable $e) {
+        $previous = $e->getPrevious();
+        fwrite(STDERR, ($previous ? $previous->getMessage() : $e->getMessage()) . "\n");
         exit(1);
     }
-    fwrite(STDOUT, $missing === [] ? "DRY-RUN MAP COMPLETE\n" : 'DRY-RUN STOP unmapped=' . count($missing) . "\n");
-    exit($missing === [] ? 0 : 2);
 }
-
-$map = v13_load_map($mapPath);
-$read = new PDO('sqlite:' . $db, null, null, [
-    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-]);
-$schema = v13_schema($read);
-$missing = v13_unmapped($schema, $map);
-$need = v13_targets_missing_legacy($map);
-if ($missing !== [] || $need !== []) {
-    v13_print_schema($schema);
-    foreach ($missing as $item) {
-        fwrite(STDOUT, "UNMAPPED $item\n");
-    }
-    foreach ($need as $item) {
-        fwrite(STDOUT, "NEED $item\n");
-    }
-    fwrite(STDERR, "還有對不到的欄位，沒有備份，也沒有改資料庫。\n");
-    exit(2);
-}
-unset($read);
-$bak = $db . '.bak-' . gmdate('YmdHis');
-if (!copy($db, $bak)) {
-    fwrite(STDERR, "備份失敗\n");
-    exit(1);
-}
-fwrite(STDOUT, "backup $bak\n");
-$pdo = new PDO('sqlite:' . $db, null, null, [
-    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-]);
-$pdo->exec('PRAGMA foreign_keys = OFF');
-v13_apply($pdo, $schema, $map);
-fwrite(STDOUT, "APPLY DONE\n");

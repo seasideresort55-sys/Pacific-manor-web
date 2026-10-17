@@ -35,7 +35,9 @@ zip 不含 `garden/data/`，也沒有檢視庫。不要另找 `garden/data/garde
 
 ## 程式檔與部署備份
 
-一次性腳本在改任何檔之前，會把當時的 `public_html/garden` 與 `garden_private` 複製到：
+`mode=rollback`，以及 `mode=apply` 失敗時，會從最新的目錄備份把 `public_html/garden` 與 `garden_private` 蓋回去。`_deploy_*.php` 留在原位，不會被刪。apply 不會另外做一份新備份，避免把寫到一半的資料庫又存成最新備份。
+
+先前那次部署已經把當時的 `public_html/garden` 與 `garden_private` 複製到：
 
 ```text
 /home/irihvsuu/garden_backup_YYYYmmddHHMMSS/

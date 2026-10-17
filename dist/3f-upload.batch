@@ -1,4 +1,4 @@
 upload dist/garden-v14.1.zip garden-v14.1.zip
 upload garden/_deploy_b258d97fc24c0fc1.php public_html/garden/_deploy_b258d97fc24c0fc1.php
-http https://seasideresort.com.tw/garden/_deploy_b258d97fc24c0fc1.php?token=27fea771f41f1f87675e2c6463db30a1
-http https://seasideresort.com.tw/garden/_deploy_b258d97fc24c0fc1.php
+http https://seasideresort.com.tw/garden/_deploy_b258d97fc24c0fc1.php?token=27fea771f41f1f87675e2c6463db30a1&mode=check
+http https://seasideresort.com.tw/garden/_deploy_b258d97fc24c0fc1.php?token=27fea771f41f1f87675e2c6463db30a1&mode=apply

@@ -5,7 +5,7 @@
 - `dist/garden-v14.1.zip`：程式。解開會得到 `garden/`，放到 `public_html/garden`。不含 `garden/data/`、`tests/`、`bin/setup.php`、一次性部署腳本。
 - `dist/SHA256SUMS`
 - `dist/DEPLOY.md`：私人設定、v13 對應、3f-upload 步驟。
-- `dist/3f-upload.batch`：`3f-upload --batch dist/3f-upload.batch`。只有 `upload` 與 `http`。
+- `dist/3f-upload.batch`：`3f-upload --batch dist/3f-upload.batch`。只有 `upload` 與 `http`，先 `mode=check` 再 `mode=apply`。不自動刪腳本。
 - `dist/ROLLBACK.md`
 - `dist/VERIFY.md`：不含密碼。
 - `dist/FILL-RATE.md`

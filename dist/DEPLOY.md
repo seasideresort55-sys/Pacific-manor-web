@@ -122,20 +122,21 @@ v13 前台 `assets/app.js` 的實品照片是 `media.php?name=<32位雜湊>.webp
 3f-upload --batch dist/3f-upload.batch
 ```
 
-四行依序是：
+這次正式站解壓已經完成，轉換在網頁裡失敗。同一支腳本改為四種 mode，轉換在這個 PHP 程序裡做，不呼叫 exec。`set_time_limit(0)`，寫入包在交易裡。失敗會印出例外訊息、檔案、行號，以及 PHP 版本、`memory_limit`、`disable_functions`。
 
 1. `upload dist/garden-v14.1.zip garden-v14.1.zip`  
    zip 放到家目錄 `/home/irihvsuu/garden-v14.1.zip`，不放進 `public_html`。
 2. `upload garden/_deploy_b258d97fc24c0fc1.php public_html/garden/_deploy_b258d97fc24c0fc1.php`  
-   一次性網頁腳本。token 寫在腳本與步驟檔的網址裡，對不上就回 403，不改檔、不刪自己。
-3. `http` 打開帶 token 的網址。腳本依序做完才印筆數。任一步失敗就停下，不刪 zip、不刪自己：
-   - 把 `public_html/garden` 與 `/home/irihvsuu/garden_private` 整份複製到 `/home/irihvsuu/garden_backup_YYYYmmddHHMMSS/`。時間戳是亞洲台北時間。這個目錄不在公開網站裡。
-   - 解壓家目錄的 zip。最外層是 `garden/`，寫進 `public_html/garden/`。`garden/data/` 一律跳過，伺服器上原有的照片與 data 維持不動。
-   - 執行 `php migrate/v13_convert.php --apply --db=/home/irihvsuu/garden_private/garden.sqlite`。
-   - 只印 `COUNT` 與 `VENDOR` 筆數，然後刪掉 zip 和腳本自己。
-4. 再 `http` 同一個網址、不帶 token。腳本已刪。`.htaccess` 讓這個網址回 404，不會進到商城首頁。
+   蓋過先前留下的腳本。token 不對就回 403，不改檔。
+3. `http` `mode=check`。只看環境，並對最新的 `garden_backup_*` 做 dry-run。不改網站、不刪腳本。
+4. `http` `mode=apply`。先把該備份的 `garden.sqlite` 蓋回 `/home/irihvsuu/garden_private/garden.sqlite`（先前若只寫了一半，從這裡重來），解壓時跳過 `garden/data/`，再在同一個程序裡轉換。成功只印筆數，zip 和腳本都留著。失敗就在同一個請求裡從該備份還原 `garden/` 和 `garden_private/`，網站回到備份裡的 v13，然後印出錯誤。腳本自己不會被蓋掉。
 
-zip 不含 `_deploy_*.php`，解壓不會把腳本再放回來。不要另解進已經存在的 `garden/` 裡面，也不要刪 `garden/data`。
+另外兩個網址不在步驟檔裡，要手動開：
+
+- `mode=rollback`：從最新的 `/home/irihvsuu/garden_backup_YYYYmmddHHMMSS/` 還原 garden 與 garden_private。
+- `mode=cleanup`：刪掉家目錄的 zip 和這支腳本。刪完後同一個網址應為 404。
+
+check、apply、rollback 不論成敗都不刪腳本。zip 不含 `_deploy_*.php`。不要刪 `garden/data`。
 
 ## 河岸苗園、山風花圃
 
