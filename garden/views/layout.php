@@ -1,36 +1,60 @@
 <?php
-$title = $title ?? '園藝商城';
+$title = $title ?? '太平洋莊園';
+$toast = $_SESSION['toast'] ?? '';
+unset($_SESSION['toast']);
+$flash = $_SESSION['flash'] ?? '';
+unset($_SESSION['flash']);
 ?>
 <!doctype html>
 <html lang="zh-Hant">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title><?= h($title) ?> · 園藝商城</title>
-  <link rel="stylesheet" href="/assets/app.css">
+  <title><?= h($title) ?> · 太平洋莊園</title>
+  <link rel="stylesheet" href="<?= h(url('/assets/app.css')) ?>">
+  <?= $headExtra ?? '' ?>
 </head>
 <body>
 <header class="top">
   <div class="wrap">
-    <a class="brand" href="/">園藝商城</a>
+    <a class="brand" href="<?= h(url('/')) ?>">太平洋莊園</a>
     <nav class="nav">
-      <a href="/roses">玫瑰</a>
-      <a href="/cart">購物車<?php if (!empty($cartCount)): ?>（<?= (int) $cartCount ?>）<?php endif; ?></a>
+      <a href="<?= h(url('/roses')) ?>">玫瑰</a>
+      <a href="<?= h(url('/rules')) ?>">購物說明</a>
+      <a href="<?= h(url('/cart')) ?>">購物車<?php if (!empty($cartCount)): ?>（<?= (int) $cartCount ?>）<?php endif; ?></a>
       <?php if (!empty($user) && $user['role'] === 'vendor'): ?>
-        <a href="/vendor">店家</a>
+        <a href="<?= h(url('/vendor')) ?>">店家</a>
       <?php elseif (!empty($user) && $user['role'] === 'admin'): ?>
-        <a href="/admin/roses">玫瑰庫</a>
+        <a href="<?= h(url('/admin/roses')) ?>">玫瑰庫</a>
       <?php else: ?>
-        <a href="/login">登入</a>
+        <a href="<?= h(url('/login')) ?>">登入</a>
       <?php endif; ?>
     </nav>
   </div>
 </header>
 <main>
   <div class="wrap">
+    <?php if ($flash !== ''): ?><p class="warn"><?= h($flash) ?></p><?php endif; ?>
     <?= $body ?>
   </div>
 </main>
-<p class="foot wrap">運費與免運由各店自己設定。平台不代填。</p>
+<footer class="foot">
+  <div class="wrap foot-links">
+    <a href="<?= h(url('/about')) ?>">關於我們</a>
+    <a href="<?= h(url('/contact')) ?>">客服電話與 LINE</a>
+    <a href="<?= h(url('/rules')) ?>">運費與退換貨</a>
+  </div>
+</footer>
+<?php if ($toast !== ''): ?>
+  <div class="toast" id="garden-toast"><?= h($toast) ?></div>
+  <script>
+    setTimeout(function () {
+      var el = document.getElementById('garden-toast');
+      if (!el) return;
+      el.classList.add('out');
+      setTimeout(function () { el.remove(); }, 400);
+    }, 2200);
+  </script>
+<?php endif; ?>
 </body>
 </html>

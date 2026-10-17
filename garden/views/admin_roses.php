@@ -1,6 +1,6 @@
 <h1>玫瑰庫</h1>
 <p class="lede">匯入的品種預設不開放。開放之後，店家才能在「選苗上架」選到。庫存與狀態由平台填。</p>
-<form method="post" action="/admin/settings" class="card pad" style="margin-bottom:16px">
+<form method="post" action="<?= h(url('/admin/settings')) ?>" class="card pad" style="margin-bottom:16px">
   <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
   <div class="filters">
     <label class="f">廠商價倍數 A（廠商價＝成本×A）
@@ -15,7 +15,7 @@
     <button class="btn" type="submit">儲存倍數</button>
   </div>
 </form>
-<form method="post" action="/admin/consign-stock" class="card pad" style="margin-bottom:16px">
+<form method="post" action="<?= h(url('/admin/consign-stock')) ?>" class="card pad" style="margin-bottom:16px">
   <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
   <p class="lede">冬冬頁面沒有公布棵數。代賣出去的可售棵數用這個平台設定，預設 5。單品種要改，進該苗批把「這品種的代賣可售」填上。</p>
   <div class="filters">
@@ -27,7 +27,7 @@
   </div>
 </form>
 <p class="meta">品種 <?= (int) $counts['varieties'] ?> · 已開放 <?= (int) $counts['listed'] ?> · 在售苗批 <?= (int) $counts['offers'] ?></p>
-<form class="filters" method="get" action="/admin/roses">
+<form class="filters" method="get" action="<?= h(url('/admin/roses')) ?>">
   <label class="f">搜尋<input type="text" name="q" value="<?= h($q) ?>"></label>
   <label class="f">開放
     <select name="listed">
@@ -52,7 +52,7 @@
       <td><?= h($row['offer_state']) ?></td>
       <td><?= (int) $row['platform_stock'] ?></td>
       <td><?= $row['cost_twd'] === null ? PENDING : money((int) $row['cost_twd']) ?></td>
-      <td><a href="/admin/rose/<?= (int) $row['offer_id'] ?>">編輯</a></td>
+      <td><a href="<?= h(url('/admin/rose/' . (int) $row['offer_id'])) ?>">編輯</a></td>
     </tr>
   <?php endforeach; ?>
   </tbody>

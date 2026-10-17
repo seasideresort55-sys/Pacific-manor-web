@@ -1,16 +1,99 @@
 <?php
 declare(strict_types=1);
+
+if (PHP_SAPI === 'cli-server') {
+    $uri = urldecode(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/');
+    $base = '/garden';
+    if (str_starts_with($uri, $base . '/')) {
+        $rel = substr($uri, strlen($base) + 1);
+        $file = __DIR__ . '/' . $rel;
+        if ($rel !== '' && is_file($file)) {
+            return false;
+        }
+    }
+}
+
 session_start();
-require dirname(__DIR__) . '/src/bootstrap.php';
+require __DIR__ . '/src/bootstrap.php';
 
 $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
-$path = rtrim($path, '/') ?: '/';
+$base = base_path();
+if ($base !== '' && ($path === $base || str_starts_with($path, $base . '/'))) {
+    $path = substr($path, strlen($base)) ?: '/';
+}
+$path = '/' . trim($path, '/');
+if ($path !== '/') {
+    $path = rtrim($path, '/');
+}
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
+if ($path === '/robots.txt') {
+    header('Content-Type: text/plain; charset=UTF-8');
+    $host = $_SERVER['HTTP_HOST'] ?? garden_config()['host'];
+    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'https';
+    echo "User-agent: *\nAllow: " . base_path() . "/\nSitemap: " . $scheme . '://' . $host . url('/sitemap.xml') . "\n";
+    exit;
+}
+if ($path === '/sitemap.xml') {
+    header('Content-Type: application/xml; charset=UTF-8');
+    $host = $_SERVER['HTTP_HOST'] ?? garden_config()['host'];
+    $scheme = 'https';
+    echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+    echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+    $rows = db()->query('SELECT variety_key, name_zh, updated_at FROM rose_varieties ORDER BY id');
+    foreach ($rows as $row) {
+        $slug = rose_slug($row);
+        if ($slug === '') {
+            continue;
+        }
+        $loc = $scheme . '://' . $host . url('/rose/' . $slug);
+        echo '  <url><loc>' . h($loc) . '</loc></url>' . "\n";
+    }
+    echo "</urlset>\n";
+    exit;
+}
+
 if ($path === '/') {
-    $products = catalog([]);
-    $products = array_slice($products, 0, 8);
-    render('home', ['title' => '首頁', 'products' => $products]);
+    $preorders = array_values(array_filter(catalog([]), static fn(array $p): bool => is_preorder($p)));
+    render('home', ['title' => '首頁', 'products' => featured_roses(8), 'preorders' => array_slice($preorders, 0, 8)]);
+    exit;
+}
+if ($path === '/about') {
+    render('about', ['title' => '關於我們']);
+    exit;
+}
+if ($path === '/contact') {
+    render('contact', ['title' => '客服']);
+    exit;
+}
+if ($path === '/rules') {
+    render('rules', ['title' => '購物說明']);
+    exit;
+}
+if (preg_match('#^/store/(.+)$#u', $path, $m)) {
+    $name = rawurldecode($m[1]);
+    $vendor = vendor_by_name($name);
+    render('shop', [
+        'title' => $vendor ? $vendor['name'] : '找不到這家店',
+        'products' => $vendor ? catalog(['vendor' => $name]) : [],
+        'filters' => [],
+        'blurb' => '',
+        'store' => $vendor,
+    ]);
+    exit;
+}
+if (preg_match('#^/rose/(.+)$#u', $path, $m)) {
+    $variety = rose_by_slug($m[1]);
+    if (!$variety) {
+        http_response_code(404);
+        render('home', ['title' => '找不到', 'products' => []]);
+        exit;
+    }
+    render('rose', [
+        'title' => $variety['name_zh'],
+        'variety' => $variety,
+        'offers' => rose_products((int) $variety['id']),
+    ]);
     exit;
 }
 
@@ -21,6 +104,7 @@ if ($path === '/roses') {
         'fragrance' => (string) ($_GET['fragrance'] ?? ''),
         'bloom' => (string) ($_GET['bloom'] ?? ''),
         'heat' => (string) ($_GET['heat'] ?? ''),
+        'roses_only' => '1',
     ];
     render('shop', [
         'title' => '玫瑰',
@@ -33,14 +117,15 @@ if ($path === '/roses') {
 
 if (preg_match('#^/product/(\d+)$#', $path, $m)) {
     $product = product_by_id((int) $m[1]);
-    if (!$product || ($product['status'] !== '上架' && ($current = current_user()) && ($current['role'] ?? '') !== 'admin' && (int) ($current['vendor_id'] ?? 0) !== (int) $product['vendor_id'])) {
-        if (!$product || $product['status'] !== '上架') {
+    $publicStatus = is_array($product) && in_array($product['status'], ['上架', '新苗預購'], true);
+    if (!$product || (!$publicStatus && ($current = current_user()) && ($current['role'] ?? '') !== 'admin' && (int) ($current['vendor_id'] ?? 0) !== (int) $product['vendor_id'])) {
+        if (!$product || !$publicStatus) {
             http_response_code(404);
             render('home', ['title' => '找不到', 'products' => []]);
             exit;
         }
     }
-    if ($product['status'] !== '上架' && !current_user()) {
+    if (!$publicStatus && !current_user()) {
         http_response_code(404);
         exit('找不到這個商品。');
     }
@@ -55,10 +140,13 @@ if ($path === '/cart' && $method === 'GET') {
 if ($path === '/cart/add' && $method === 'POST') {
     csrf_check();
     $err = cart_add((int) ($_POST['product_id'] ?? 0), (int) ($_POST['qty'] ?? 1));
+    $back = safe_return_path((string) ($_POST['return'] ?? ''));
     if ($err) {
         $_SESSION['flash'] = $err;
+    } else {
+        $_SESSION['toast'] = '已放入購物車';
     }
-    redirect('/cart');
+    redirect($back === url('/') ? url('/cart') : $back);
 }
 if ($path === '/cart/update' && $method === 'POST') {
     csrf_check();
@@ -75,13 +163,41 @@ if ($path === '/checkout' && $method === 'GET') {
 }
 if ($path === '/checkout' && $method === 'POST') {
     csrf_check();
+    $last5 = [];
+    foreach ((array) ($_POST['last5'] ?? []) as $vid => $digits) {
+        $last5[(int) $vid] = (string) $digits;
+    }
     try {
-        $ids = place_orders();
+        $ids = place_orders([
+            'name' => (string) ($_POST['name'] ?? ''),
+            'phone' => (string) ($_POST['phone'] ?? ''),
+            'address' => (string) ($_POST['address'] ?? ''),
+            'last5' => $last5,
+        ]);
     } catch (Throwable $e) {
         $_SESSION['flash'] = '訂單沒有送出，請再看一次庫存。';
         redirect('/cart');
     }
     render('done', ['title' => '訂單已送出', 'ids' => $ids]);
+    exit;
+}
+if ($path === '/order/last5' && $method === 'POST') {
+    csrf_check();
+    $id = (int) ($_POST['order_id'] ?? 0);
+    $digits = preg_replace('/\D+/', '', (string) ($_POST['last5'] ?? '')) ?? '';
+    $order = order_bundle($id);
+    if ($order && strlen($digits) === 5 && ($order['pay_status'] ?? '') !== '已收款') {
+        db()->prepare("UPDATE orders SET pay_last5 = ?, pay_status = '待店家確認' WHERE id = ?")->execute([$digits, $id]);
+        $_SESSION['toast'] = '末五碼已記下，等店家確認收款。';
+    } else {
+        $_SESSION['flash'] = '末五碼要剛好 5 個數字。';
+    }
+    redirect('/checkout/done?id=' . $id);
+}
+if ($path === '/checkout/done' && $method === 'GET') {
+    $id = (int) ($_GET['id'] ?? 0);
+    $order = $id ? order_bundle($id) : null;
+    render('done', ['title' => '訂單', 'ids' => $order ? [$id] : []]);
     exit;
 }
 
@@ -305,12 +421,13 @@ if ($path === '/vendor/products' && $method === 'POST') {
     $own->execute([$pid, (int) $u['vendor_id']]);
     $p = $own->fetch();
     if ($p && empty($p['origin_product_id'])) {
-        db()->prepare('UPDATE products SET name = ?, description = ?, price_twd = ?, vendor_edited = 1, consign_open = ? WHERE id = ?')
+        db()->prepare('UPDATE products SET name = ?, description = ?, price_twd = ?, vendor_edited = 1, consign_open = ?, ship_month = ? WHERE id = ?')
             ->execute([
                 trim((string) ($_POST['name'] ?? $p['name'])),
                 redact(trim((string) ($_POST['description'] ?? ''))),
                 max(0, (int) ($_POST['price_twd'] ?? 0)),
                 isset($_POST['consign_open']) ? 1 : 0,
+                array_key_exists('ship_month', $_POST) ? trim((string) $_POST['ship_month']) : (string) ($p['ship_month'] ?? ''),
                 $pid,
             ]);
         sync_consign_mirrors(db(), $pid);
@@ -396,6 +513,49 @@ if ($path === '/vendor/shipping' && $method === 'POST') {
         }
     }
     redirect('/vendor/shipping?saved=1');
+}
+if ($path === '/vendor/bank' && $method === 'GET') {
+    $u = require_vendor();
+    $v = db()->prepare('SELECT * FROM vendors WHERE id = ?');
+    $v->execute([(int) $u['vendor_id']]);
+    render('vendor_bank', ['title' => '收款帳號', 'vendor' => $v->fetch(), 'saved' => isset($_GET['saved'])]);
+    exit;
+}
+if ($path === '/vendor/bank' && $method === 'POST') {
+    $u = require_vendor();
+    csrf_check();
+    $days = ($_POST['pay_days'] ?? '') === '' ? null : max(1, (int) $_POST['pay_days']);
+    db()->prepare('UPDATE vendors SET bank_name = ?, bank_code = ?, account_no = ?, account_name = ?, pay_days = ? WHERE id = ?')
+        ->execute([
+            trim((string) ($_POST['bank_name'] ?? '')),
+            trim((string) ($_POST['bank_code'] ?? '')),
+            preg_replace('/\s+/', '', (string) ($_POST['account_no'] ?? '')) ?? '',
+            trim((string) ($_POST['account_name'] ?? '')),
+            $days,
+            (int) $u['vendor_id'],
+        ]);
+    redirect('/vendor/bank?saved=1');
+}
+if ($path === '/vendor/orders' && $method === 'GET') {
+    $u = require_vendor();
+    $stmt = db()->prepare(<<<'SQL'
+SELECT o.*, (SELECT GROUP_CONCAT(name || '×' || qty) FROM order_lines WHERE order_id = o.id) AS summary
+FROM orders o
+WHERE o.vendor_id = ?
+ORDER BY o.id DESC
+LIMIT 40
+SQL);
+    $stmt->execute([(int) $u['vendor_id']]);
+    render('vendor_orders', ['title' => '收款', 'orders' => $stmt->fetchAll()]);
+    exit;
+}
+if ($path === '/vendor/orders' && $method === 'POST') {
+    $u = require_vendor();
+    csrf_check();
+    $id = (int) ($_POST['order_id'] ?? 0);
+    db()->prepare("UPDATE orders SET pay_status = '已收款' WHERE id = ? AND vendor_id = ? AND pay_last5 != ''")
+        ->execute([$id, (int) $u['vendor_id']]);
+    redirect('/vendor/orders');
 }
 
 http_response_code(404);

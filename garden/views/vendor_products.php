@@ -11,7 +11,7 @@
       <p class="meta">庫存 <?= (int) $p['stock'] ?> 棵 · <?= h($p['status']) ?> / <?= $p['stock_gate'] === 'released' ? '已可賣' : '原店已關閉代賣' ?></p>
     </div>
   <?php else: ?>
-    <form method="post" action="/vendor/products" class="card pad" style="margin-bottom:12px">
+    <form method="post" action="<?= h(url('/vendor/products')) ?>" class="card pad" style="margin-bottom:12px">
       <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
       <input type="hidden" name="product_id" value="<?= (int) $p['id'] ?>">
       <label class="f">名稱<input type="text" name="name" value="<?= h($p['name']) ?>"></label>
@@ -23,6 +23,9 @@
         </label>
       </div>
       <p class="meta">庫存 <?= (int) $p['stock'] ?> 棵</p>
+      <?php if (($p['status'] ?? '') === '新苗預購'): ?>
+        <label class="f">預計出貨月份<input type="text" name="ship_month" value="<?= h((string) ($p['ship_month'] ?? '')) ?>" placeholder="還沒有就留空"></label>
+      <?php endif; ?>
       <label class="f"><input type="checkbox" name="consign_open" value="1" <?= !empty($p['consign_open']) ? 'checked' : '' ?>> 開放給其他店代賣</label>
       <label class="f"><input type="checkbox" name="exclude_ship" value="1" <?= !empty($p['excluded']) ? 'checked' : '' ?>> 這項不計入免運</label>
       <p><button class="btn" type="submit">儲存</button></p>

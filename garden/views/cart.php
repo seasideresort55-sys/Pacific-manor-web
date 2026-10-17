@@ -1,18 +1,23 @@
 <h1>購物車</h1>
 <?php if (!$groups): ?>
-  <p class="note">購物車是空的。<a href="/roses">去看玫瑰</a></p>
+  <div class="empty">
+    <h2>購物車是空的</h2>
+    <p>挑好玫瑰再回來結帳。</p>
+    <p><a class="btn" href="<?= h(url('/roses')) ?>">去看玫瑰</a></p>
+  </div>
 <?php endif; ?>
 <?php foreach ($groups as $group): $q = $group['quote']; $v = $group['vendor']; ?>
   <h2><?= h($v['name']) ?></h2>
   <div class="card pad">
     <?php foreach ($group['lines'] as $line): ?>
-      <form method="post" action="/cart/update" class="cart-line">
+      <form method="post" action="<?= h(url('/cart/update')) ?>" class="cart-line">
         <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
         <input type="hidden" name="product_id" value="<?= (int) $line['id'] ?>">
         <div>
-          <strong><?= h($line['name']) ?></strong>
+          <strong><?= h(public_product_name($line)) ?></strong>
           <?php if (!empty($line['excluded'])): ?><span class="badge">不計入免運</span><?php endif; ?>
-          <?php $credit = product_credit($line); if ($credit !== ''): ?><div class="meta"><?= h($credit) ?>，由原店出貨</div><?php endif; ?>
+          <?php if (is_preorder($line)): ?><div class="meta"><?= h(preorder_spec()) ?> · <?= h(ship_month_text($line)) ?></div><?php endif; ?>
+          <?php $credit = product_credit($line); if ($credit !== ''): ?><div class="meta"><?= h($credit) ?><?php if (!empty($line['origin_product_id'])): ?>，由原店出貨<?php endif; ?></div><?php endif; ?>
           <div class="meta"><?= money((int) $line['price_twd']) ?></div>
         </div>
         <div>
@@ -34,7 +39,7 @@
       </ul>
     <?php endif; ?>
     <?php if ($q['fee_set'] === null): ?>
-      <p>這家店還沒有設定運費。結帳前請先跟店家確認，平台不會代填。</p>
+      <p>這家店還沒有設定運費。請先跟店家確認，再結帳。</p>
     <?php elseif ($q['free']): ?>
       <div class="sum-row"><span>運費</span><strong><?= money(0) ?>（已達免運）</strong></div>
     <?php else: ?>
@@ -49,5 +54,5 @@
   </div>
 <?php endforeach; ?>
 <?php if ($groups): ?>
-  <p style="margin-top:18px"><a class="btn" href="/checkout">前往結帳</a></p>
+  <p style="margin-top:18px"><a class="btn" href="<?= h(url('/checkout')) ?>">前往結帳</a></p>
 <?php endif; ?>

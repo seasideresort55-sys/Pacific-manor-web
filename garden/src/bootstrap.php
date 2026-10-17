@@ -9,10 +9,67 @@ function garden_root(): string
     return dirname(__DIR__);
 }
 
+function garden_config(): array
+{
+    static $cfg = null;
+    if (is_array($cfg)) {
+        return $cfg;
+    }
+    $cfg = [
+        'db' => garden_root() . '/data/garden.sqlite',
+        'payment' => 'mock',
+        'base_path' => '/garden',
+        'phone' => '0937667917',
+        'line' => '@a0937667917',
+        'host' => 'seasideresort.com.tw',
+    ];
+    $path = getenv('GARDEN_CONFIG');
+    if ($path === false || $path === '') {
+        $path = '/home/irihvsuu/garden_private/config.php';
+    }
+    if (is_file($path)) {
+        $loaded = require $path;
+        if (is_array($loaded)) {
+            foreach (['db', 'payment', 'base_path', 'phone', 'line', 'host'] as $key) {
+                if (isset($loaded[$key]) && is_string($loaded[$key]) && $loaded[$key] !== '') {
+                    $cfg[$key] = $loaded[$key];
+                }
+            }
+        }
+    }
+    $envDb = getenv('GARDEN_DB');
+    if ($envDb !== false && $envDb !== '') {
+        $cfg['db'] = $envDb;
+    }
+    $cfg['payment'] = 'mock';
+    return $cfg;
+}
+
 function db_path(): string
 {
-    $env = getenv('GARDEN_DB');
-    return $env !== false && $env !== '' ? $env : garden_root() . '/data/garden.sqlite';
+    return garden_config()['db'];
+}
+
+function base_path(): string
+{
+    $base = garden_config()['base_path'];
+    $base = '/' . trim($base, '/');
+    return $base === '/' ? '' : $base;
+}
+
+function url(string $path = '/'): string
+{
+    $path = '/' . ltrim($path, '/');
+    $base = base_path();
+    if ($path === '/') {
+        return $base === '' ? '/' : $base . '/';
+    }
+    return $base . $path;
+}
+
+function media_url(string $photo): string
+{
+    return url(ltrim($photo, '/'));
 }
 
 function db(): PDO
@@ -79,8 +136,38 @@ function csrf_check(): void
 
 function redirect(string $to): never
 {
-    header('Location: ' . $to);
+    if (!preg_match('#^https?://#i', $to)) {
+        $base = base_path();
+        if ($base !== '' && !str_starts_with($to, $base . '/') && $to !== $base && $to !== $base . '/') {
+            $to = url($to);
+        }
+    }
+    header('Location: ' . $to, true, 303);
     exit;
+}
+
+function safe_return_path(string $to): string
+{
+    $base = base_path();
+    $to = trim($to);
+    if ($to === '' || preg_match('#^[a-z][a-z0-9+.-]*:#i', $to) || str_contains($to, '\\') || str_starts_with($to, '//')) {
+        return url('/');
+    }
+    if ($base !== '' && $to !== $base && !str_starts_with($to, $base . '/')) {
+        return url('/');
+    }
+    return $to;
+}
+
+function is_blank_value(?string $value): bool
+{
+    $value = trim((string) $value);
+    return $value === '' || in_array($value, ['待補', '待確認', '未填', '未知', '無資料', 'N/A', 'n/a', '-'], true);
+}
+
+function public_value(?string $value): string
+{
+    return is_blank_value($value) ? PENDING : trim((string) $value);
 }
 
 function categories(): array
@@ -287,6 +374,31 @@ SQL);
     if (!in_array('origin_product_id', $pcols, true)) {
         $pdo->exec('ALTER TABLE products ADD COLUMN origin_product_id INTEGER');
     }
+    garden_add_column($pdo, 'products', 'ship_month', 'ship_month TEXT NOT NULL DEFAULT \'\'');
+    garden_add_column($pdo, 'products', 'legacy_id', 'legacy_id INTEGER');
+    garden_add_column($pdo, 'vendors', 'bank_name', 'bank_name TEXT NOT NULL DEFAULT \'\'');
+    garden_add_column($pdo, 'vendors', 'bank_code', 'bank_code TEXT NOT NULL DEFAULT \'\'');
+    garden_add_column($pdo, 'vendors', 'account_no', 'account_no TEXT NOT NULL DEFAULT \'\'');
+    garden_add_column($pdo, 'vendors', 'account_name', 'account_name TEXT NOT NULL DEFAULT \'\'');
+    garden_add_column($pdo, 'vendors', 'pay_days', 'pay_days INTEGER');
+    garden_add_column($pdo, 'vendors', 'legacy_id', 'legacy_id INTEGER');
+    garden_add_column($pdo, 'orders', 'buyer_name', 'buyer_name TEXT NOT NULL DEFAULT \'\'');
+    garden_add_column($pdo, 'orders', 'buyer_phone', 'buyer_phone TEXT NOT NULL DEFAULT \'\'');
+    garden_add_column($pdo, 'orders', 'buyer_address', 'buyer_address TEXT NOT NULL DEFAULT \'\'');
+    garden_add_column($pdo, 'orders', 'pay_method', 'pay_method TEXT NOT NULL DEFAULT \'\'');
+    garden_add_column($pdo, 'orders', 'pay_last5', 'pay_last5 TEXT NOT NULL DEFAULT \'\'');
+    garden_add_column($pdo, 'orders', 'pay_deadline', 'pay_deadline TEXT NOT NULL DEFAULT \'\'');
+    garden_add_column($pdo, 'orders', 'pay_status', 'pay_status TEXT NOT NULL DEFAULT \'\'');
+    garden_add_column($pdo, 'orders', 'legacy_id', 'legacy_id INTEGER');
+    garden_add_column($pdo, 'rose_varieties', 'legacy_id', 'legacy_id INTEGER');
+}
+
+function garden_add_column(PDO $pdo, string $table, string $column, string $definition): void
+{
+    $cols = array_column($pdo->query('PRAGMA table_info(' . $table . ')')->fetchAll(), 'name');
+    if (!in_array($column, $cols, true)) {
+        $pdo->exec('ALTER TABLE ' . $table . ' ADD COLUMN ' . $definition);
+    }
 }
 
 function consign_stock_default(): int
@@ -369,12 +481,15 @@ function origin_product_id_of(array $product): int
 
 function product_credit(array $product): string
 {
-    if (empty($product['origin_product_id'])) {
+    $seller = (string) ($product['vendor_name'] ?? '');
+    if (!empty($product['origin_product_id'])) {
+        $grower = (string) ($product['origin_vendor_name'] ?? '');
+        return $grower . '種植・' . $seller . '販售';
+    }
+    if ($seller === '') {
         return '';
     }
-    $grower = (string) ($product['origin_vendor_name'] ?? '');
-    $seller = (string) ($product['vendor_name'] ?? '');
-    return $grower . '種植・' . $seller . '販售';
+    return $seller . '種植・' . $seller . '販售';
 }
 
 function sync_consign_mirrors(PDO $pdo, int $originId): void
@@ -390,7 +505,7 @@ function sync_consign_mirrors(PDO $pdo, int $originId): void
         && $origin['stock_gate'] === 'released';
     $pdo->prepare(<<<'SQL'
 UPDATE products
-SET name = ?, description = ?, price_twd = ?, photo = ?, specs_json = ?, category_code = ?, stock = ?, stock_gate = ?
+SET name = ?, description = ?, price_twd = ?, photo = ?, specs_json = ?, category_code = ?, stock = ?, stock_gate = ?, ship_month = ?
 WHERE origin_product_id = ?
 SQL)->execute([
         $origin['name'],
@@ -401,6 +516,7 @@ SQL)->execute([
         $origin['category_code'],
         (int) $origin['stock'],
         $open ? 'released' : 'held',
+        (string) ($origin['ship_month'] ?? ''),
         $originId,
     ]);
 }
@@ -467,6 +583,7 @@ SQL)->execute([
         ]);
         $pid = (int) $pdo->lastInsertId();
         $pdo->commit();
+        sync_consign_mirrors($pdo, $originProductId);
     } catch (Throwable $e) {
         $pdo->rollBack();
         $again = $pdo->prepare('SELECT id FROM products WHERE vendor_id = ? AND origin_product_id = ?');
@@ -478,69 +595,6 @@ SQL)->execute([
         return ['ok' => false, 'error' => '上架沒有完成，請再試一次。'];
     }
     return ['ok' => true, 'product_id' => $pid, 'already' => false];
-}
-
-function seed_vendor_consign_sample(): void
-{
-    $pdo = db();
-    $left = $pdo->query("SELECT id, stock FROM products WHERE sku = 'SHOP-3-02'")->fetch();
-    $lem = $pdo->query("SELECT id FROM products WHERE sku = 'SHOP-3-01'")->fetch();
-    if (!$left || !$lem) {
-        return;
-    }
-    $pdo->prepare('UPDATE products SET consign_open = 1 WHERE id IN (?, ?) AND (origin_product_id IS NULL OR origin_product_id = 0)')
-        ->execute([(int) $left['id'], (int) $lem['id']]);
-    vendor_consign_take(2, (int) $left['id']);
-    $has = (int) $pdo->query("SELECT COUNT(*) FROM order_lines WHERE seller_vendor_id = 2 AND origin_vendor_id = 3 AND name = '左手香'")->fetchColumn();
-    if ($has > 0) {
-        sync_consign_mirrors($pdo, (int) $left['id']);
-        return;
-    }
-    $qty = 2;
-    $price = 50;
-    $line = $price * $qty;
-    $split = consign_split($line);
-    $pdo->beginTransaction();
-    try {
-        $upd = $pdo->prepare('UPDATE products SET stock = stock - ? WHERE id = ? AND stock >= ?');
-        $upd->execute([$qty, (int) $left['id'], $qty]);
-        if ($upd->rowCount() !== 1) {
-            throw new RuntimeException('庫存不足');
-        }
-        sync_consign_mirrors($pdo, (int) $left['id']);
-        $mirror = $pdo->prepare('SELECT id FROM products WHERE vendor_id = 2 AND origin_product_id = ?');
-        $mirror->execute([(int) $left['id']]);
-        $mirrorId = (int) $mirror->fetchColumn();
-        $goods = $line;
-        $ship = 180;
-        $pdo->prepare('INSERT INTO orders (vendor_id, total_twd, shipping_twd, eligible_twd, created_at) VALUES (?,?,?,?,?)')
-            ->execute([3, $goods + $ship, $ship, $goods, gmdate('c')]);
-        $orderId = (int) $pdo->lastInsertId();
-        $pdo->prepare(<<<'SQL'
-INSERT INTO order_lines
-(order_id, product_id, origin_product_id, seller_vendor_id, origin_vendor_id, name, qty, price_twd, line_twd, origin_share_twd, seller_share_twd, platform_share_twd, created_at)
-VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
-SQL)->execute([
-            $orderId,
-            $mirrorId,
-            (int) $left['id'],
-            2,
-            3,
-            '左手香',
-            $qty,
-            $price,
-            $line,
-            $split['origin'],
-            $split['seller'],
-            0,
-            gmdate('c'),
-        ]);
-        $pdo->commit();
-    } catch (Throwable $e) {
-        if ($pdo->inTransaction()) {
-            $pdo->rollBack();
-        }
-    }
 }
 
 function vendor_report(int $vendorId): array
@@ -699,15 +753,15 @@ function catalog(array $filters): array
 {
     $sql = <<<'SQL'
 SELECT p.*, v.name AS vendor_name, ov.name AS origin_vendor_name,
-       rv.class_main, rv.color_group, rv.fragrance,
-       rv.bloom_habit, rv.bloom_months, rv.heat_tw, rv.heat_flag, rv.breeder, rv.name_zh
+       rv.class_main, rv.color_group, rv.fragrance, rv.flower_dia_cm,
+       rv.bloom_habit, rv.bloom_months, rv.heat_tw, rv.heat_flag, rv.breeder, rv.name_zh, rv.variety_key
 FROM products p
 JOIN vendors v ON v.id = p.vendor_id
 LEFT JOIN products op ON op.id = p.origin_product_id
 LEFT JOIN vendors ov ON ov.id = op.vendor_id
 LEFT JOIN rose_offers ro ON ro.id = p.rose_offer_id
 LEFT JOIN rose_varieties rv ON rv.id = ro.variety_id
-WHERE p.status = '上架' AND p.stock_gate = 'released' AND p.stock > 0
+WHERE p.status IN ('上架', '新苗預購') AND p.stock_gate = 'released' AND p.stock > 0
 SQL;
     $args = [];
     if (($filters['class'] ?? '') !== '') {
@@ -727,7 +781,14 @@ SQL;
         $args[] = $filters['bloom'];
     }
     if (($filters['heat'] ?? '') === '1') {
-        $sql .= " AND (rv.heat_flag = '1' OR (rv.heat_tw != '待補' AND CAST(rv.heat_tw AS INTEGER) >= 4))";
+        $sql .= " AND (rv.heat_flag = '1' OR (rv.heat_tw != '待補' AND rv.heat_tw != '待確認' AND rv.heat_tw != '未填' AND CAST(rv.heat_tw AS INTEGER) >= 4))";
+    }
+    if (($filters['vendor'] ?? '') !== '') {
+        $sql .= ' AND v.name = ?';
+        $args[] = $filters['vendor'];
+    }
+    if (($filters['roses_only'] ?? '') === '1') {
+        $sql .= " AND p.listing_kind = 'rose'";
     }
     $sql .= ' ORDER BY p.id DESC';
     $stmt = db()->prepare($sql);
@@ -740,7 +801,7 @@ function product_by_id(int $id): ?array
     $stmt = db()->prepare(<<<'SQL'
 SELECT p.id, p.vendor_id, p.sku, p.name, p.description, p.price_twd, p.stock, p.status,
        p.category_code, p.listing_kind, p.rose_offer_id, p.stock_gate, p.vendor_edited,
-       p.photo, p.specs_json, p.created_at, p.consign_open, p.origin_product_id,
+       p.photo, p.specs_json, p.ship_month, p.created_at, p.consign_open, p.origin_product_id,
        v.name AS vendor_name, ov.name AS origin_vendor_name,
        ro.seedling AS offer_seedling, ro.variety_id, ro.platform_stock, ro.offer_state, ro.photo AS offer_photo,
        rv.name_zh, rv.name_orig, rv.aliases, rv.reg_name, rv.class_main, rv.class_intl, rv.ogr_class,
@@ -793,7 +854,7 @@ function shared_stock_left(array $product, int $exceptProductId): int
 function cart_add(int $productId, int $qty): ?string
 {
     $p = product_by_id($productId);
-    if (!$p || $p['status'] !== '上架' || $p['stock_gate'] !== 'released') {
+    if (!$p || !in_array($p['status'], ['上架', '新苗預購'], true) || $p['stock_gate'] !== 'released') {
         return '這株目前不能購買。';
     }
     $qty = max(1, $qty);
@@ -912,7 +973,155 @@ function shipping_quote(array $vendor, array $lines): array
     ];
 }
 
-function place_orders(): array
+function is_preorder(array $product): bool
+{
+    return ($product['status'] ?? '') === '新苗預購';
+}
+
+function preorder_spec(): string
+{
+    return '3.5 吋扦插苗';
+}
+
+function public_product_name(array $product): string
+{
+    $name = trim((string) ($product['name'] ?? ''));
+    if (is_preorder($product)) {
+        $name = preg_replace('/[（(][^）)]*(?:小盆|中盆|大盆)[^）)]*[）)]/u', '', $name) ?? $name;
+        $name = str_replace(['小盆', '中盆', '大盆'], '', $name);
+        $name = trim(preg_replace('/\s{2,}/u', ' ', $name) ?? $name);
+    }
+    return $name;
+}
+
+function ship_month_text(array $product): string
+{
+    if (!is_preorder($product)) {
+        return '';
+    }
+    $month = trim((string) ($product['ship_month'] ?? ''));
+    return '預計出貨 ' . public_value($month);
+}
+
+function card_facts(array $product): array
+{
+    $facts = [];
+    $class = (string) ($product['class_main'] ?? '');
+    if (!is_blank_value($class)) {
+        $facts['株型'] = category_name($class);
+    }
+    if (!is_blank_value($product['color_group'] ?? null)) {
+        $facts['花色'] = trim((string) $product['color_group']);
+    }
+    if (!is_blank_value($product['flower_dia_cm'] ?? null)) {
+        $facts['花徑'] = trim((string) $product['flower_dia_cm']) . ' 公分';
+    }
+    if (!is_blank_value($product['fragrance'] ?? null)) {
+        $facts['香味'] = trim((string) $product['fragrance']);
+    }
+    return $facts;
+}
+
+function filter_values(string $column): array
+{
+    $allowed = ['class_main' => 'class_main', 'color_group' => 'color_group', 'fragrance' => 'fragrance', 'bloom_habit' => 'bloom_habit'];
+    if (!isset($allowed[$column])) {
+        return [];
+    }
+    $col = $allowed[$column];
+    $rows = db()->query('SELECT DISTINCT ' . $col . ' AS v FROM rose_varieties ORDER BY v')->fetchAll();
+    $out = [];
+    foreach ($rows as $row) {
+        if (!is_blank_value($row['v'] ?? null)) {
+            $out[] = (string) $row['v'];
+        }
+    }
+    return $out;
+}
+
+function featured_roses(int $limit = 8): array
+{
+    $out = [];
+    foreach (catalog(['roses_only' => '1']) as $product) {
+        $out[] = $product;
+        if (count($out) >= $limit) {
+            break;
+        }
+    }
+    return $out;
+}
+
+function vendor_by_name(string $name): ?array
+{
+    $stmt = db()->prepare('SELECT * FROM vendors WHERE name = ?');
+    $stmt->execute([$name]);
+    $row = $stmt->fetch();
+    return $row ?: null;
+}
+
+function rose_by_slug(string $slug): ?array
+{
+    $slug = rawurldecode($slug);
+    $stmt = db()->prepare('SELECT * FROM rose_varieties WHERE variety_key = ? OR name_zh = ?');
+    $stmt->execute([$slug, $slug]);
+    $row = $stmt->fetch();
+    return $row ?: null;
+}
+
+function rose_slug(array $variety): string
+{
+    $key = trim((string) ($variety['variety_key'] ?? ''));
+    if ($key === '') {
+        $key = trim((string) ($variety['name_zh'] ?? ''));
+    }
+    return rawurlencode($key);
+}
+
+function rose_products(int $varietyId): array
+{
+    $stmt = db()->prepare(<<<'SQL'
+SELECT p.*, v.name AS vendor_name, ov.name AS origin_vendor_name
+FROM products p
+JOIN rose_offers ro ON ro.id = p.rose_offer_id
+JOIN vendors v ON v.id = p.vendor_id
+LEFT JOIN products op ON op.id = p.origin_product_id
+LEFT JOIN vendors ov ON ov.id = op.vendor_id
+WHERE ro.variety_id = ? AND p.status = '上架' AND p.stock_gate = 'released' AND p.stock > 0
+ORDER BY p.price_twd
+SQL);
+    $stmt->execute([$varietyId]);
+    return $stmt->fetchAll();
+}
+
+function pay_deadline_text(?int $days): string
+{
+    if ($days === null || $days <= 0) {
+        return '';
+    }
+    $when = new DateTimeImmutable('now', new DateTimeZone('Asia/Taipei'));
+    return $when->modify('+' . $days . ' days')->format('Y-m-d');
+}
+
+function order_bundle(int $orderId): ?array
+{
+    $stmt = db()->prepare(<<<'SQL'
+SELECT o.*, v.name AS vendor_name, v.bank_name, v.bank_code, v.account_no, v.account_name, v.pay_days
+FROM orders o
+JOIN vendors v ON v.id = o.vendor_id
+WHERE o.id = ?
+SQL);
+    $stmt->execute([$orderId]);
+    $order = $stmt->fetch();
+    if (!$order) {
+        return null;
+    }
+    $lines = db()->prepare('SELECT l.*, p.status AS product_status, p.ship_month FROM order_lines l LEFT JOIN products p ON p.id = l.product_id WHERE l.order_id = ? ORDER BY l.id');
+    $lines->execute([$orderId]);
+    $order['lines'] = $lines->fetchAll();
+    return $order;
+}
+
+function place_orders(array $buyer = []): array
 {
     $pdo = db();
     $ids = [];
@@ -922,13 +1131,36 @@ function place_orders(): array
             $quote = $group['quote'];
             $ship = $quote['charge'];
             $total = $quote['goods'] + (int) ($ship ?? 0);
-            $stmt = $pdo->prepare('INSERT INTO orders (vendor_id, total_twd, shipping_twd, eligible_twd, created_at) VALUES (?,?,?,?,?)');
+            $vendorId = (int) $group['vendor']['id'];
+            $last5 = preg_replace('/\D+/', '', (string) ($buyer['last5'][$vendorId] ?? $buyer['last5'] ?? '')) ?? '';
+            if (strlen($last5) > 5) {
+                $last5 = substr($last5, -5);
+            }
+            if (strlen($last5) !== 5) {
+                $last5 = '';
+            }
+            $days = $group['vendor']['pay_days'];
+            $days = $days === null || $days === '' ? null : (int) $days;
+            $deadline = pay_deadline_text($days);
+            $status = $last5 === '' ? '待填末五碼' : '待店家確認';
+            $stmt = $pdo->prepare(<<<'SQL'
+INSERT INTO orders
+(vendor_id, total_twd, shipping_twd, eligible_twd, created_at, buyer_name, buyer_phone, buyer_address, pay_method, pay_last5, pay_deadline, pay_status)
+VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
+SQL);
             $stmt->execute([
-                (int) $group['vendor']['id'],
+                $vendorId,
                 $total,
                 $ship,
                 $quote['eligible'],
                 gmdate('c'),
+                trim((string) ($buyer['name'] ?? '')),
+                trim((string) ($buyer['phone'] ?? '')),
+                trim((string) ($buyer['address'] ?? '')),
+                'bank',
+                $last5,
+                $deadline,
+                $status,
             ]);
             $orderId = (int) $pdo->lastInsertId();
             $ids[] = $orderId;

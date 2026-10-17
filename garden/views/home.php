@@ -1,23 +1,23 @@
-<h1>找一株想種的玫瑰</h1>
-<p class="lede">分類照國際株型。樹玫瑰是苗型（自根、低接、高幹），不是一個分類。</p>
-<div class="chips">
-  <?php foreach (categories() as $cat): ?>
-    <a class="chip" href="/roses?class=<?= h($cat['code']) ?>"><?= h($cat['name']) ?></a>
-  <?php endforeach; ?>
-</div>
+<section class="hero">
+  <div>
+    <h1>挑一株玫瑰</h1>
+    <p class="lede">先看株型、花色、花徑和香味。每一株都有自己的網址。</p>
+    <p><a class="btn big" href="<?= h(url('/roses')) ?>">看全部玫瑰</a></p>
+  </div>
+</section>
+<h2>精選</h2>
 <div class="grid">
   <?php foreach ($products as $p): ?>
-    <article class="card">
-      <a class="hit" href="/product/<?= (int) $p['id'] ?>">
-        <div class="photo" <?php if (!empty($p['photo'])): ?>style="background-image:url('/<?= h(ltrim($p['photo'], '/')) ?>')"<?php endif; ?>>
-          <?php if (empty($p['photo'])) { include __DIR__ . '/icon.php'; } ?>
-        </div>
-        <div class="pad">
-          <h2 class="name"><?= h($p['name']) ?></h2>
-          <div class="meta"><?php $credit = product_credit($p); echo h($credit !== '' ? $credit : $p['vendor_name']); ?></div>
-          <div class="price"><?= money((int) $p['price_twd']) ?></div>
-        </div>
-      </a>
-    </article>
+    <?php include __DIR__ . '/card.php'; ?>
   <?php endforeach; ?>
 </div>
+<?php if (!$products): ?><p class="note">現在沒有可買的玫瑰。</p><?php endif; ?>
+<?php if (!empty($preorders)): ?>
+  <h2>新苗預購</h2>
+  <p class="lede">規格都是 <?= h(preorder_spec()) ?>。每株標預計出貨月份。</p>
+  <div class="grid">
+    <?php foreach ($preorders as $p): ?>
+      <?php include __DIR__ . '/card.php'; ?>
+    <?php endforeach; ?>
+  </div>
+<?php endif; ?>

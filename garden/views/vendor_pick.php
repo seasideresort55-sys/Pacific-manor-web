@@ -3,14 +3,14 @@
 <?php if (!empty($message)): ?><p class="note"><?= h($message) ?></p><?php endif; ?>
 <?php if (!empty($error)): ?><p class="error"><?= h($error) ?></p><?php endif; ?>
 <div class="chips">
-  <a class="chip <?= ($class ?? '') === '' ? 'on' : '' ?>" href="/vendor/pick">全部可選</a>
+  <a class="chip <?= ($class ?? '') === '' ? 'on' : '' ?>" href="<?= h(url('/vendor/pick')) ?>">全部可選</a>
   <?php foreach (categories() as $cat): ?>
-    <a class="chip <?= ($class ?? '') === $cat['code'] ? 'on' : '' ?>" href="/vendor/pick?class=<?= h($cat['code']) ?>"><?= h($cat['name']) ?></a>
+    <a class="chip <?= ($class ?? '') === $cat['code'] ? 'on' : '' ?>" href="<?= h(url('/vendor/pick?class=' . rawurlencode($cat['code']))) ?>"><?= h($cat['name']) ?></a>
   <?php endforeach; ?>
 </div>
 <div class="chips">
   <?php foreach (['白','粉','紅','橘','黃','紫','複色'] as $c): ?>
-    <a class="chip <?= ($color ?? '') === $c ? 'on' : '' ?>" href="/vendor/pick?class=<?= h((string) ($class ?? '')) ?>&color=<?= h($c) ?>"><?= h($c) ?></a>
+    <a class="chip <?= ($color ?? '') === $c ? 'on' : '' ?>" href="<?= h(url('/vendor/pick?class=' . rawurlencode((string) ($class ?? '')) . '&color=' . rawurlencode($c))) ?>"><?= h($c) ?></a>
   <?php endforeach; ?>
 </div>
 <div class="grid">
@@ -19,7 +19,7 @@
     $block = vendor_may_take($offer, $offer, 1);
   ?>
     <article class="card">
-      <div class="photo" <?php if (!empty($offer['photo'])): ?>style="background-image:url('/<?= h(ltrim($offer['photo'], '/')) ?>')"<?php endif; ?>>
+      <div class="photo" <?php if (!empty($offer['photo'])): ?>style="background-image:url('<?= h(media_url($offer['photo'])) ?>')"<?php endif; ?>>
         <?php if (empty($offer['photo'])) { include __DIR__ . '/icon.php'; } ?>
       </div>
       <div class="pad">
@@ -31,7 +31,7 @@
           <p class="warn"><?= h($block) ?></p>
           <button class="btn big block" type="button" disabled>不能上架</button>
         <?php else: ?>
-          <form method="post" action="/vendor/pick">
+          <form method="post" action="<?= h(url('/vendor/pick')) ?>">
             <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
             <input type="hidden" name="offer_id" value="<?= (int) $offer['offer_id'] ?>">
             <label class="f">數量

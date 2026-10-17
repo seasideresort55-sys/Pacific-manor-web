@@ -22,11 +22,11 @@ if (getenv('GARDEN_RESET') === '1') {
 
 $now = gmdate('c');
 $insV = $pdo->prepare('INSERT INTO vendors (id, name, login, password_hash, shipping_fee_twd, free_shipping_min_twd, created_at) VALUES (?,?,?,?,?,?,?)');
-$insV->execute([1, '太平洋莊園', 'taiping', password_hash('garden-taiping', PASSWORD_DEFAULT), null, null, $now]);
-$insV->execute([2, '山風花圃', 'shanfeng', password_hash('garden-shanfeng', PASSWORD_DEFAULT), null, null, $now]);
-$insV->execute([3, '河岸苗園', 'hean', password_hash('garden-hean', PASSWORD_DEFAULT), 180, 1500, $now]);
+$insV->execute([1, '太平洋莊園', 'taiping', password_hash(bin2hex(random_bytes(16)), PASSWORD_DEFAULT), null, null, $now]);
+$insV->execute([2, '山風花圃', 'shanfeng', password_hash(bin2hex(random_bytes(16)), PASSWORD_DEFAULT), null, null, $now]);
+$insV->execute([3, '河岸苗園', 'hean', password_hash(bin2hex(random_bytes(16)), PASSWORD_DEFAULT), 180, 1500, $now]);
 $pdo->prepare('INSERT INTO admins (login, password_hash, name) VALUES (?,?,?)')
-    ->execute(['admin', password_hash('garden-admin-55', PASSWORD_DEFAULT), '平台管理員']);
+    ->execute(['admin', password_hash(bin2hex(random_bytes(16)), PASSWORD_DEFAULT), '平台管理員']);
 
 $preorders = [
     '藍雪花', '茉莉', '梔子花', '桂花', '茶花', '杜鵑', '繡球', '九重葛', '紫薇', '流蘇',
@@ -77,4 +77,3 @@ if ($top) {
         ->execute([1, 'product', (int) $top['id'], '', gmdate('c')]);
     fwrite(STDOUT, "vendor1_exclusion_product " . (int) $top['id'] . "\n");
 }
-seed_vendor_consign_sample();

@@ -1,0 +1,18 @@
+{
+  "stores": [
+    {
+      "name": "河岸苗園",
+      "login": "",
+      "password_hash": "",
+      "shipping_fee_twd": null,
+      "free_shipping_min_twd": null
+    },
+    {
+      "name": "山風花圃",
+      "login": "",
+      "password_hash": "",
+      "shipping_fee_twd": null,
+      "free_shipping_min_twd": null
+    }
+  ]
+}

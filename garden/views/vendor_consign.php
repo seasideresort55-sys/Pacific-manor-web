@@ -4,7 +4,7 @@
 <?php if (!empty($error)): ?><p class="error"><?= h($error) ?></p><?php endif; ?>
 <?php foreach ($products as $p): ?>
   <article class="card" style="margin-bottom:14px">
-    <div class="photo" style="aspect-ratio:16/9;<?= !empty($p['photo']) ? "background-image:url('/" . h(ltrim($p['photo'], '/')) . "')" : '' ?>">
+    <div class="photo" style="aspect-ratio:16/9;<?= !empty($p['photo']) ? "background-image:url('" . h(media_url($p['photo'])) . "')" : '' ?>">
       <?php if (empty($p['photo'])) { include __DIR__ . '/icon.php'; } ?>
     </div>
     <div class="pad">
@@ -15,9 +15,9 @@
       <?php if (!empty($p['description'])): ?><p><?= nl2br(h($p['description'])) ?></p><?php endif; ?>
       <?php if (!empty($p['mine_id'])): ?>
         <button class="btn big block" type="button" disabled>已在賣</button>
-        <p class="meta"><a href="/product/<?= (int) $p['mine_id'] ?>">看商品頁</a></p>
+        <p class="meta"><a href="<?= h(url('/product/' . (int) $p['mine_id'])) ?>">看商品頁</a></p>
       <?php else: ?>
-        <form method="post" action="/vendor/consign">
+        <form method="post" action="<?= h(url('/vendor/consign')) ?>">
           <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
           <input type="hidden" name="origin_product_id" value="<?= (int) $p['id'] ?>">
           <button class="btn big block" type="submit">我要代賣</button>

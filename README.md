@@ -1,22 +1,12 @@
 # 太平洋莊園
 
-園藝商城 v14 檢視包在 `dist/`。沒有部署。
+園藝商城 v14.1 在 `dist/`。沒有部署。
 
-- `dist/garden-v14.zip`：程式與檢視資料庫。不含 `tests/`、`bin/setup.php`。
+- `dist/garden-v14.1.zip`：程式。解開會得到 `garden/`，放到 `public_html/garden`。不含 `tests/`、`bin/setup.php`。
 - `dist/SHA256SUMS`
-- `dist/FILL-RATE.md`
-- `dist/DEPLOY.md`
+- `dist/DEPLOY.md`：cPanel 上傳與解壓、私人設定、v13 先探查再轉換。
 - `dist/ROLLBACK.md`
-- `dist/VERIFY.md`
-- `dist/screenshots/admin-library.png`
-- `dist/screenshots/vendor-pick-desktop.png`
-- `dist/screenshots/vendor-pick-mobile.png`
-- `dist/screenshots/product.png`
-- `dist/screenshots/filtered-list.png`
-- `dist/screenshots/cart-shipping.png`
-- `dist/screenshots/product-filled.png`
-- `dist/screenshots/consign-list-mobile.png`
-- `dist/screenshots/consign-product.png`
-- `dist/screenshots/consign-report.png`
+- `dist/VERIFY.md`：不含密碼。
+- `dist/FILL-RATE.md`
 
-購物車截圖含運費 NT$200、標成不計入免運的商品，以及還差多少才免運。店對店代賣的三張圖是：手機上的可代賣商品、商品頁「河岸苗園種植・山風花圃販售」、山風花圃的銷售分潤（本店 NT$30、原店 NT$70、平台 NT$0）。帳號只寫在 `dist/VERIFY.md`。
+前台 https://seasideresort.com.tw/garden/ ，單店 https://seasideresort.com.tw/garden/store/太平洋莊園 ，廠商後台 https://seasideresort.com.tw/garden/vendor 。正式資料庫是 `/home/irihvsuu/garden_private/garden.sqlite`，不要用 zip 裡的檢視庫覆蓋。

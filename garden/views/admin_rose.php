@@ -1,7 +1,7 @@
 <?php $prices = offer_prices($offer, $offer); ?>
 <h1><?= h($offer['name_zh']) ?></h1>
 <p class="lede"><?= h($offer['name_orig']) ?> · <?= h(category_name((string) $offer['class_main'])) ?> · 苗型 <?= h($offer['seedling']) ?></p>
-<form method="post" action="/admin/rose/<?= (int) $offer['offer_id'] ?>" class="card pad">
+<form method="post" action="<?= h(url('/admin/rose/' . (int) $offer['offer_id'])) ?>" class="card pad">
   <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
   <label class="f"><input type="checkbox" name="listed" value="1" <?= (int) $offer['listed'] === 1 ? 'checked' : '' ?>> 開放給店家選苗</label>
   <div class="filters">

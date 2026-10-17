@@ -71,16 +71,16 @@ $block2 = vendor_may_take(['listed' => 1], ['offer_state' => '有貨', 'platform
 check($block2 !== null, '沒庫存不能上架');
 
 $views = garden_root() . '/views';
-$pub = garden_root() . '/public';
 $blob = '';
-foreach ([$views, $pub, garden_root() . '/src'] as $dir) {
+foreach ([$views, garden_root() . '/src', garden_root() . '/assets'] as $dir) {
     foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir)) as $f) {
         if ($f->isFile() && preg_match('/\.(php|css|js)$/', $f->getFilename())) {
             $blob .= file_get_contents($f->getPathname());
         }
     }
 }
-check(!preg_match('/測試|展示/u', $blob), '介面文案沒有測試或展示');
+$blob .= file_get_contents(garden_root() . '/index.php');
+check(!preg_match('/測試|展示|示範/u', $blob), '介面文案沒有測試、展示或示範');
 
 $defaultStock = (int) $pdo->query("SELECT value FROM settings WHERE key = 'consign_stock_default'")->fetchColumn();
 check($defaultStock === 5, '代賣庫存預設 5', 'value=' . $defaultStock);
@@ -95,50 +95,104 @@ check(str_contains($note, '未公布棵數') && str_contains($note, '平台庫�
 
 $split = consign_split(100);
 check($split['origin'] === 70 && $split['seller'] === 30 && $split['platform'] === 0, '代賣售價 100 拆成原店 70、代賣店 30、平台 0');
-$openN = (int) $pdo->query("SELECT COUNT(*) FROM products WHERE sku IN ('SHOP-3-01','SHOP-3-02') AND consign_open = 1 AND origin_product_id IS NULL")->fetchColumn();
-check($openN === 2, '河岸開放左手香與檸檬香茅代賣');
-$mirror = $pdo->query("SELECT m.id, m.name, m.price_twd, m.stock, m.description, m.status, m.stock_gate, m.listing_kind, o.stock AS origin_stock, o.name AS origin_name, o.price_twd AS origin_price, o.description AS origin_desc FROM products m JOIN products o ON o.id = m.origin_product_id WHERE m.sku LIKE 'CONSIGN-2-%' AND o.sku = 'SHOP-3-02'")->fetch();
-check($mirror && $mirror['name'] === $mirror['origin_name'] && (int) $mirror['price_twd'] === (int) $mirror['origin_price'] && $mirror['description'] === $mirror['origin_desc'], '代賣商品繼承原店名稱售價說明');
-check($mirror && (int) $mirror['stock'] === (int) $mirror['origin_stock'] && (int) $mirror['stock'] === 18, '左手香共用庫存，賣出 2 棵後兩邊都是 18', 'stock=' . (int) ($mirror['stock'] ?? -1));
-check($mirror && $mirror['status'] === '上架' && $mirror['stock_gate'] === 'released' && $mirror['listing_kind'] === 'consign', '代賣立刻上架、不用審核');
-$line = $pdo->query("SELECT * FROM order_lines WHERE seller_vendor_id = 2 AND origin_vendor_id = 3 AND name = '左手香'")->fetch();
-check($line && (int) $line['qty'] === 2 && (int) $line['line_twd'] === 100 && (int) $line['origin_share_twd'] === 70 && (int) $line['seller_share_twd'] === 30 && (int) $line['platform_share_twd'] === 0, '帳上記到平台 0、原店 70、代賣店 30');
-$order = $line ? $pdo->query('SELECT vendor_id, shipping_twd FROM orders WHERE id = ' . (int) $line['order_id'])->fetch() : null;
-check($order && (int) $order['vendor_id'] === 3 && (int) $order['shipping_twd'] === 180, '代賣出貨與運費歸原店');
-$pdo->beginTransaction();
-$pdo->prepare("UPDATE products SET name = '左手香改名', price_twd = 80, description = '原店新說明' WHERE sku = 'SHOP-3-02'")->execute();
-$originId = (int) $pdo->query("SELECT id FROM products WHERE sku = 'SHOP-3-02'")->fetchColumn();
+check(public_value('待確認') === '待補' && public_value('未填') === '待補', '待確認與未填在前台看成待補');
+check(preorder_spec() === '3.5 吋扦插苗', '新苗預購規格是 3.5 吋扦插苗');
+check(!in_array('待確認', filter_values('color_group'), true) && !in_array('未填', filter_values('fragrance'), true), '篩選沒有待確認或未填');
+check(str_starts_with(url('/roses'), '/garden/'), '前台網址在 /garden 底下', url('/roses'));
+$quoteHome = shipping_quote(['shipping_fee_twd' => 200, 'free_shipping_min_twd' => 2000], [['line_total' => 500, 'excluded' => false, 'name' => '甲']]);
+check($quoteHome['charge'] === 200 && $quoteHome['need'] === 1500, '太平洋莊園運費 200，差 1500 才免運');
+$originRow = $pdo->query("SELECT id, name, price_twd, consign_open FROM products WHERE sku = 'SHOP-3-02'")->fetch();
+$originId = (int) $originRow['id'];
+$pdo->prepare('UPDATE products SET consign_open = 1 WHERE id = ?')->execute([$originId]);
+$took = vendor_consign_take(2, $originId);
+$mirror = $pdo->query('SELECT m.name, m.price_twd, m.stock, m.description, m.status, m.stock_gate, o.stock AS origin_stock, o.name AS origin_name, o.price_twd AS origin_price FROM products m JOIN products o ON o.id = m.origin_product_id WHERE m.vendor_id = 2 AND m.origin_product_id = ' . $originId)->fetch();
+check($took['ok'] && $mirror && $mirror['status'] === '上架' && $mirror['stock_gate'] === 'released' && $mirror['name'] === $mirror['origin_name'] && (int) $mirror['price_twd'] === (int) $mirror['origin_price'] && (int) $mirror['stock'] === (int) $mirror['origin_stock'], '代賣立刻上架並繼承原店');
+$pdo->prepare("UPDATE products SET name = '左手香改名', price_twd = 80 WHERE id = ?")->execute([$originId]);
 sync_consign_mirrors($pdo, $originId);
-$copied = $pdo->prepare('SELECT name, price_twd, description, stock FROM products WHERE origin_product_id = ?');
-$copied->execute([$originId]);
-$copiedRow = $copied->fetch();
-check($copiedRow && $copiedRow['name'] === '左手香改名' && (int) $copiedRow['price_twd'] === 80 && $copiedRow['description'] === '原店新說明', '原店一改，代賣店跟著改');
-$pdo->rollBack();
+$copied = $pdo->query('SELECT name, price_twd FROM products WHERE origin_product_id = ' . $originId)->fetch();
+check($copied && $copied['name'] === '左手香改名' && (int) $copied['price_twd'] === 80, '原店一改，代賣店跟著改');
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }
 $_SESSION['cart'] = [];
-$originLeft = (int) $pdo->query("SELECT id, stock FROM products WHERE sku = 'SHOP-3-02'")->fetch()['stock'];
-$mirrorId = (int) $mirror['id'];
-$originPid = (int) $pdo->query("SELECT id FROM products WHERE sku = 'SHOP-3-02'")->fetchColumn();
-$addAll = cart_add($originPid, $originLeft);
+$originLeft = (int) $pdo->query('SELECT stock FROM products WHERE id = ' . $originId)->fetchColumn();
+$mirrorId = (int) $took['product_id'];
+$addAll = cart_add($originId, $originLeft);
 $over = cart_add($mirrorId, 1);
 check($addAll === null && $over !== null, '同一份庫存不能從兩家一起超賣');
 $_SESSION['cart'] = [$mirrorId => $originLeft + 5];
-$before = (int) $pdo->query("SELECT stock FROM products WHERE sku = 'SHOP-3-02'")->fetchColumn();
+$before = (int) $pdo->query('SELECT stock FROM products WHERE id = ' . $originId)->fetchColumn();
 $threw = false;
 try {
-    place_orders();
+    place_orders(['name' => '甲', 'phone' => '1', 'address' => '址']);
 } catch (Throwable $e) {
     $threw = true;
 }
-$after = (int) $pdo->query("SELECT stock FROM products WHERE sku = 'SHOP-3-02'")->fetchColumn();
+$after = (int) $pdo->query('SELECT stock FROM products WHERE id = ' . $originId)->fetchColumn();
 check($threw && $after === $before, '結帳超賣會整筆退回，庫存不變');
 $_SESSION['cart'] = [];
+$pdo->prepare('DELETE FROM products WHERE origin_product_id = ?')->execute([$originId]);
+$pdo->prepare('UPDATE products SET name = ?, price_twd = ?, consign_open = 0 WHERE id = ?')->execute([$originRow['name'], (int) $originRow['price_twd'], $originId]);
+check((int) $pdo->query('SELECT COUNT(*) FROM orders')->fetchColumn() === 0, '資料庫沒有範例訂單');
 $chiffon = (string) $pdo->query("SELECT photo FROM products WHERE sku = 'ROSE-1-1357'")->fetchColumn();
 check($chiffon === '', '薄紗沒有別人的照片', 'photo=' . $chiffon);
 $shopDirty = (int) $pdo->query("SELECT COUNT(*) FROM products WHERE sku LIKE 'SHOP-%' AND (photo != '' OR specs_json != '{}')")->fetchColumn();
 check($shopDirty === 0, '店家自有商品沒有被寫成玫瑰規格', 'hits=' . $shopDirty);
+$preDirty = (int) $pdo->query("SELECT COUNT(*) FROM products WHERE status = '新苗預購' AND (specs_json != '{}' OR photo != '')")->fetchColumn();
+check($preDirty === 0, '新苗預購沒有別株玫瑰的規格或照片', 'hits=' . $preDirty);
+$tmp = sys_get_temp_dir() . '/garden-v13-' . getmypid() . '.sqlite';
+@unlink($tmp);
+$fix = new PDO('sqlite:' . $tmp);
+$fix->exec('CREATE TABLE vendors (id INTEGER PRIMARY KEY, name TEXT, login TEXT, password_hash TEXT, created_at TEXT, extra TEXT)');
+$fix->exec("INSERT INTO vendors VALUES (1, '舊店', 'old', 'hash', '2020-01-01', '多出來')");
+$fix->exec('CREATE TABLE plant_master (id INTEGER PRIMARY KEY, note TEXT)');
+$fix->exec("INSERT INTO plant_master VALUES (1, '苗')");
+unset($fix);
+$beforeHash = hash_file('sha256', $tmp);
+$dry = [];
+exec('php ' . escapeshellarg(garden_root() . '/migrate/v13_convert.php') . ' --dry-run --db=' . escapeshellarg($tmp), $dry, $dryCode);
+$dryText = implode("\n", $dry);
+check($dryCode === 2 && str_contains($dryText, 'UNMAPPED vendors.extra') && str_contains($dryText, 'TABLE plant_master') && hash_file('sha256', $tmp) === $beforeHash, 'v13 dry-run 只列出欄位，不改檔案');
+$applyOut = [];
+exec('php ' . escapeshellarg(garden_root() . '/migrate/v13_convert.php') . ' --apply --db=' . escapeshellarg($tmp), $applyOut, $applyCode);
+check($applyCode === 2 && hash_file('sha256', $tmp) === $beforeHash, '對不到欄位就停下，不備份也不改');
+$mapFile = sys_get_temp_dir() . '/garden-v13-map-' . getmypid() . '.php';
+file_put_contents($mapFile, <<<'PHP'
+<?php
+return [
+  'vendors' => [
+    'id' => ['to' => 'vendors.legacy_id'],
+    'name' => ['to' => 'vendors.name'],
+    'login' => ['to' => 'vendors.login'],
+    'password_hash' => ['to' => 'vendors.password_hash'],
+    'created_at' => ['to' => 'vendors.created_at'],
+    'extra' => ['skip' => '來源多出來的欄位，先標明不使用'],
+  ],
+  'plant_master' => [
+    'id' => ['skip' => '尚未決定要落到哪一張 v14 表'],
+    'note' => ['skip' => '尚未決定要落到哪一張 v14 表'],
+  ],
+];
+PHP);
+$apply2 = [];
+exec('php ' . escapeshellarg(garden_root() . '/migrate/v13_convert.php') . ' --apply --db=' . escapeshellarg($tmp) . ' --map=' . escapeshellarg($mapFile), $apply2, $apply2Code);
+$checkDb = new PDO('sqlite:' . $tmp);
+$checkDb->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+$legacy = (int) $checkDb->query('SELECT COUNT(*) FROM legacy_vendors')->fetchColumn();
+$copiedVendor = $checkDb->query('SELECT name, legacy_id FROM vendors WHERE legacy_id = 1')->fetch();
+exec('php ' . escapeshellarg(garden_root() . '/migrate/v13_convert.php') . ' --apply --db=' . escapeshellarg($tmp) . ' --map=' . escapeshellarg($mapFile), $apply3, $apply3Code);
+$again = (int) $checkDb->query('SELECT COUNT(*) FROM vendors WHERE legacy_id = 1')->fetchColumn();
+check($apply2Code === 0 && $legacy === 1 && $copiedVendor && $copiedVendor['name'] === '舊店' && $apply3Code === 0 && $again === 1, '對應齊了才改名 legacy_ 並可重跑');
+@unlink($tmp);
+@unlink($mapFile);
+foreach (glob($tmp . '.bak-*') ?: [] as $bak) {
+    @unlink($bak);
+}
+$customer = '';
+foreach (['home.php', 'shop.php', 'card.php', 'product.php', 'cart.php', 'checkout.php', 'done.php', 'rules.php', 'about.php', 'contact.php', 'rose.php', 'layout.php'] as $view) {
+    $customer .= file_get_contents(garden_root() . '/views/' . $view);
+}
+check(!preg_match('/抽成|再細一點|選一種植物|待確認|未填/u', $customer), '客人頁面沒有抽成或內部用語');
 
 if ($fail > 0) {
     fwrite(STDOUT, "FAILED $fail\n");

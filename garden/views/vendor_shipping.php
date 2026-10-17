@@ -1,7 +1,7 @@
 <h1>運費</h1>
 <p class="lede">自己填。平台不會先幫你填運費或免運門檻。也可以指定哪些商品、哪個分類不計入免運。</p>
 <?php if (!empty($saved)): ?><p class="note">已儲存。</p><?php endif; ?>
-<form method="post" action="/vendor/shipping" class="card pad">
+<form method="post" action="<?= h(url('/vendor/shipping')) ?>" class="card pad">
   <input type="hidden" name="_csrf" value="<?= h(csrf_token()) ?>">
   <label class="f">運費（元）
     <input type="number" name="shipping_fee_twd" min="0" placeholder="例如 200" value="<?= h((string) ($vendor['shipping_fee_twd'] ?? '')) ?>">
