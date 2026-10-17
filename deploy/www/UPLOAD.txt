@@ -1,0 +1,29 @@
+FTPS upload list (cPanel public_html)
+
+This VM cannot publish to seasideresort.com.tw.
+
+REQUIRED
+  local:  deploy/www/index.html
+  remote: public_html/index.html
+
+OPTIONAL overlay (if you cannot overwrite the whole homepage)
+  deploy/www/pm_cta_target.js  → public_html/pm_cta_target.js
+  deploy/www/pm_funnel_cta.js  → public_html/pm_funnel_cta.js
+  Add before </body>:
+    <script src="pm_cta_target.js"></script>
+    <script src="pm_funnel_cta.js"></script>
+  Overlay only rewrites leftover old URLs; it does not restyle plan cards.
+  Prefer the full index.html overwrite so pricing / hidden form / footer also go live.
+
+DO NOT upload
+  - funnel.html (already live)
+  - /booking/pm_front/index.html (old short-stay scheme page)
+  - QloApps /booking/ hotel PHP
+  - match-v3.1.html or anything under public_html/match/ or /800plus/match
+    (archived; see deploy/www/archive/match/README.txt)
+
+After upload, hard-refresh https://seasideresort.com.tw/ :
+  - Primary buttons read 了解是否適合長住／月租會員 and open funnel.html
+  - No short / one-month experience product cards
+  - 人生海景清單 shows 首月 18000、次月起 59800
+  - Footer 工作人員 → /booking/pm_roomboard/admin/
