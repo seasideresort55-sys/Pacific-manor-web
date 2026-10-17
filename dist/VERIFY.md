@@ -2,7 +2,7 @@
 
 `php garden/tests/verify.php` 結果是 `ALL PASSED`。
 
-這份說明不附登入密碼。檢視庫 `garden/data/garden.sqlite` 的店家與管理員雜湊已換成隨機值，先前公開過的密碼已無法通過 `password_verify`。正式站用 `/home/irihvsuu/garden_private/garden.sqlite`，不要拿檢視庫蓋過去。
+這份說明不附登入密碼。檢視庫 `garden/data/garden.sqlite` 的店家與管理員雜湊已換成隨機值，先前公開過的密碼已無法通過 `password_verify`。正式站用 `/home/irihvsuu/garden_private/garden.sqlite`，不要拿檢視庫蓋過去。`dist/garden-v14.1.zip` 不含 `garden/data/`。
 
 檢視庫沒有訂單。`bin/setup.php` 不再寫入範例訂單，也不再把密碼明文留在程式裡。它不在 zip 內。
 

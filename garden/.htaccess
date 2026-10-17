@@ -2,5 +2,7 @@ DirectoryIndex index.php
 RewriteEngine On
 RewriteBase /garden/
 RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^_deploy_[A-Za-z0-9]+\.php$ - [R=404,L]
+RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ index.php [L]

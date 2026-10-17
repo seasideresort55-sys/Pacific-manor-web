@@ -31,8 +31,14 @@ cp /home/irihvsuu/garden_private/garden.sqlite.bak-YYYYmmddHHMMSS \
 
 `php migrate/v14.php` 也會先複製當時 `db()` 指到的 sqlite，檔名同樣是 `.bak-YYYYmmddHHMMSS`。它不刪列。若在正式庫上跑過，回復方式與上面相同：用該次備份蓋回。
 
-不要把 zip 裡的 `garden/data/garden.sqlite` 蓋上正式庫。那是檢視用的玫瑰庫。
+zip 不含 `garden/data/`，也沒有檢視庫。不要另找 `garden/data/garden.sqlite` 蓋上正式庫。
 
-## 程式檔
+## 程式檔與部署備份
 
-若已經把 zip 解進 `public_html/garden`，而要回到解壓前的網站，把解壓前自己留的 `public_html/garden` 目錄蓋回去。這次包裝沒有在遠端留下自動備份。
+一次性腳本在改任何檔之前，會把當時的 `public_html/garden` 與 `garden_private` 複製到：
+
+```text
+/home/irihvsuu/garden_backup_YYYYmmddHHMMSS/
+```
+
+裡面有 `garden/` 與 `garden_private/`。時間戳是亞洲台北時間。這個目錄不在 `public_html`。要回到該次部署前，把這兩個目錄蓋回原位。轉換程式另外會在正式庫旁邊留 `garden.sqlite.bak-YYYYmmddHHMMSS`（UTC）。目錄備份裡的 sqlite 是轉換前的整份。

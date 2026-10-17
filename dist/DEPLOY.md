@@ -31,9 +31,11 @@ return [
 
 程式會讀這個檔。環境變數 `GARDEN_CONFIG` 可以改路徑。`GARDEN_DB` 可以改資料庫路徑。
 
-zip 裡的 `garden/data/garden.sqlite` 是玫瑰庫檢視檔，不是 live v13。不要用它覆蓋 `/home/irihvsuu/garden_private/garden.sqlite`。不要執行 `GARDEN_RESET=1`。`bin/setup.php` 不在 zip 裡。
+zip 不含 `garden/data/`，沒有檢視庫 `garden.sqlite`，也沒有玫瑰庫的 json、csv。檢視庫仍在版本庫的 `garden/data/garden.sqlite`，不要把它覆蓋 `/home/irihvsuu/garden_private/garden.sqlite`。不要執行 `GARDEN_RESET=1`。`bin/setup.php` 與 `tests/` 不在 zip 裡。
 
 ## cPanel API
+
+正式部署用「用 3f-upload 上傳」那一節。這裡的 cPanel 指令不會備份，也不會跑 v13 轉換。
 
 帳號 `irihvsuu`。下面的 `HOST` 與密碼用主機自己的 cPanel 登入。上傳用 UAPI，解壓仍是 API 2（cPanel 沒有對應的 UAPI 解壓）。
 
@@ -112,13 +114,28 @@ v13 前台 `assets/app.js` 的實品照片是 `media.php?name=<32位雜湊>.webp
 
 ## 用 3f-upload 上傳
 
-步驟檔是 `dist/3f-upload.batch`。在放著 zip 的目錄執行：
+這台讀不到 `/home/box/bin/3f-upload`。步驟檔只使用它支援的指令：`upload`、`delete`、`copy`、`http`、`list`、`domains`、`sslredirect`。引數用空格分開，沒有 `key=value`，也沒有 `extract`。
+
+步驟檔是 `dist/3f-upload.batch`。在版本庫根目錄執行：
 
 ```bash
 3f-upload --batch dist/3f-upload.batch
 ```
 
-這支只上傳 zip 並解到 `public_html`，得到 `public_html/garden/`。不要解進已經存在的 `garden/` 裡面。不要覆蓋 `garden_private/garden.sqlite`，也不要刪 `garden/data`。
+四行依序是：
+
+1. `upload dist/garden-v14.1.zip garden-v14.1.zip`  
+   zip 放到家目錄 `/home/irihvsuu/garden-v14.1.zip`，不放進 `public_html`。
+2. `upload garden/_deploy_b258d97fc24c0fc1.php public_html/garden/_deploy_b258d97fc24c0fc1.php`  
+   一次性網頁腳本。token 寫在腳本與步驟檔的網址裡，對不上就回 403，不改檔、不刪自己。
+3. `http` 打開帶 token 的網址。腳本依序做完才印筆數。任一步失敗就停下，不刪 zip、不刪自己：
+   - 把 `public_html/garden` 與 `/home/irihvsuu/garden_private` 整份複製到 `/home/irihvsuu/garden_backup_YYYYmmddHHMMSS/`。時間戳是亞洲台北時間。這個目錄不在公開網站裡。
+   - 解壓家目錄的 zip。最外層是 `garden/`，寫進 `public_html/garden/`。`garden/data/` 一律跳過，伺服器上原有的照片與 data 維持不動。
+   - 執行 `php migrate/v13_convert.php --apply --db=/home/irihvsuu/garden_private/garden.sqlite`。
+   - 只印 `COUNT` 與 `VENDOR` 筆數，然後刪掉 zip 和腳本自己。
+4. 再 `http` 同一個網址、不帶 token。腳本已刪。`.htaccess` 讓這個網址回 404，不會進到商城首頁。
+
+zip 不含 `_deploy_*.php`，解壓不會把腳本再放回來。不要另解進已經存在的 `garden/` 裡面，也不要刪 `garden/data`。
 
 ## 河岸苗園、山風花圃
 
