@@ -218,10 +218,10 @@ CREATE TABLE IF NOT EXISTS vendors (
   id INTEGER PRIMARY KEY,
   name TEXT NOT NULL,
   login TEXT NOT NULL UNIQUE,
-  password_hash TEXT NOT NULL,
+  password_hash TEXT NOT NULL DEFAULT '',
   shipping_fee_twd INTEGER,
   free_shipping_min_twd INTEGER,
-  created_at TEXT NOT NULL
+  created_at TEXT NOT NULL DEFAULT ''
 );
 CREATE TABLE IF NOT EXISTS products (
   id INTEGER PRIMARY KEY,
@@ -233,7 +233,7 @@ CREATE TABLE IF NOT EXISTS products (
   stock INTEGER NOT NULL DEFAULT 0,
   status TEXT NOT NULL,
   category_code TEXT NOT NULL DEFAULT '',
-  listing_kind TEXT NOT NULL,
+  listing_kind TEXT NOT NULL DEFAULT 'shop',
   rose_offer_id INTEGER,
   stock_gate TEXT NOT NULL DEFAULT 'released',
   vendor_edited INTEGER NOT NULL DEFAULT 0,
@@ -287,7 +287,7 @@ CREATE TABLE IF NOT EXISTS rose_varieties (
   multiplier_a REAL,
   retail_divisor REAL,
   sources_json TEXT NOT NULL DEFAULT '{}',
-  updated_at TEXT NOT NULL
+  updated_at TEXT NOT NULL DEFAULT ''
 );
 CREATE TABLE IF NOT EXISTS rose_offers (
   id INTEGER PRIMARY KEY,
@@ -391,6 +391,172 @@ SQL);
     garden_add_column($pdo, 'orders', 'pay_status', 'pay_status TEXT NOT NULL DEFAULT \'\'');
     garden_add_column($pdo, 'orders', 'legacy_id', 'legacy_id INTEGER');
     garden_add_column($pdo, 'rose_varieties', 'legacy_id', 'legacy_id INTEGER');
+    $extra = [
+        'vendors' => [
+            'region' => "region TEXT NOT NULL DEFAULT ''",
+            'phone' => "phone TEXT NOT NULL DEFAULT ''",
+            'description' => "description TEXT NOT NULL DEFAULT ''",
+            'is_demo' => 'is_demo INTEGER NOT NULL DEFAULT 0',
+            'shop_status' => "shop_status TEXT NOT NULL DEFAULT ''",
+            'approval_status' => "approval_status TEXT NOT NULL DEFAULT ''",
+            'is_operator' => 'is_operator INTEGER NOT NULL DEFAULT 0',
+            'enabled' => 'enabled INTEGER NOT NULL DEFAULT 1',
+            'services' => "services TEXT NOT NULL DEFAULT ''",
+            'default_service' => "default_service TEXT NOT NULL DEFAULT ''",
+            'cod' => 'cod INTEGER NOT NULL DEFAULT 0',
+            'fees_json' => "fees_json TEXT NOT NULL DEFAULT ''",
+            'fee_tiers' => "fee_tiers TEXT NOT NULL DEFAULT ''",
+            'extra_item_fee' => 'extra_item_fee INTEGER NOT NULL DEFAULT 0',
+            'pickup_address' => "pickup_address TEXT NOT NULL DEFAULT ''",
+            'delivery_regions' => "delivery_regions TEXT NOT NULL DEFAULT ''",
+            'bank_branch' => "bank_branch TEXT NOT NULL DEFAULT ''",
+            'sender_name' => "sender_name TEXT NOT NULL DEFAULT ''",
+            'sender_phone' => "sender_phone TEXT NOT NULL DEFAULT ''",
+            'sender_address' => "sender_address TEXT NOT NULL DEFAULT ''",
+            'notify_email' => "notify_email TEXT NOT NULL DEFAULT ''",
+            'line_user_id' => "line_user_id TEXT NOT NULL DEFAULT ''",
+            'role' => "role TEXT NOT NULL DEFAULT ''",
+        ],
+        'products' => [
+            'legacy_status' => "legacy_status TEXT NOT NULL DEFAULT ''",
+            'original_price' => 'original_price INTEGER',
+            'plant_id' => 'plant_id INTEGER',
+            'height_cm' => 'height_cm REAL',
+            'pot_diameter' => 'pot_diameter REAL',
+            'pot_height' => 'pot_height REAL',
+            'package_length' => 'package_length REAL',
+            'package_width' => 'package_width REAL',
+            'package_height' => 'package_height REAL',
+            'package_weight' => 'package_weight REAL',
+            'shipping_class' => "shipping_class TEXT NOT NULL DEFAULT ''",
+            'photos' => "photos TEXT NOT NULL DEFAULT '[]'",
+            'services' => "services TEXT NOT NULL DEFAULT ''",
+            'updated_at' => "updated_at TEXT NOT NULL DEFAULT ''",
+            'hidden' => 'hidden INTEGER NOT NULL DEFAULT 0',
+            'rose_legacy_id' => 'rose_legacy_id INTEGER',
+            'cost_price' => 'cost_price INTEGER',
+            'price_unset' => 'price_unset INTEGER NOT NULL DEFAULT 0',
+            'stock_unset' => 'stock_unset INTEGER NOT NULL DEFAULT 0',
+        ],
+        'rose_varieties' => [
+            'brand' => "brand TEXT NOT NULL DEFAULT ''",
+            'subcategory' => "subcategory TEXT NOT NULL DEFAULT ''",
+            'traits' => "traits TEXT NOT NULL DEFAULT ''",
+            'plant_id' => 'plant_id INTEGER',
+            'licensed_page' => "licensed_page TEXT NOT NULL DEFAULT ''",
+            'licensed_image_url' => "licensed_image_url TEXT NOT NULL DEFAULT ''",
+            'licensed_author' => "licensed_author TEXT NOT NULL DEFAULT ''",
+            'licensed_license' => "licensed_license TEXT NOT NULL DEFAULT ''",
+            'licensed_needs_review' => 'licensed_needs_review INTEGER NOT NULL DEFAULT 0',
+            'licensed_file' => "licensed_file TEXT NOT NULL DEFAULT ''",
+        ],
+        'orders' => [
+            'number' => "number TEXT NOT NULL DEFAULT ''",
+            'parent_legacy_id' => 'parent_legacy_id INTEGER',
+            'service' => "service TEXT NOT NULL DEFAULT ''",
+            'quote_deadline' => 'quote_deadline INTEGER',
+            'quote_date' => "quote_date TEXT NOT NULL DEFAULT ''",
+            'quote_notes' => "quote_notes TEXT NOT NULL DEFAULT ''",
+            'updated_at' => "updated_at TEXT NOT NULL DEFAULT ''",
+            'payment_deadline_unix' => 'payment_deadline_unix INTEGER',
+            'cancel_reason' => "cancel_reason TEXT NOT NULL DEFAULT ''",
+            'cancel_kind' => "cancel_kind TEXT NOT NULL DEFAULT ''",
+            'transfer_at' => "transfer_at TEXT NOT NULL DEFAULT ''",
+            'transfer_reported_at' => "transfer_reported_at TEXT NOT NULL DEFAULT ''",
+            'stock_released' => 'stock_released INTEGER NOT NULL DEFAULT 0',
+            'deadline_reminded' => 'deadline_reminded INTEGER NOT NULL DEFAULT 0',
+            'legacy_status' => "legacy_status TEXT NOT NULL DEFAULT ''",
+        ],
+        'order_lines' => [
+            'legacy_id' => 'legacy_id INTEGER',
+            'plant_id' => 'plant_id INTEGER',
+            'height_cm' => 'height_cm REAL',
+            'pot_diameter' => 'pot_diameter REAL',
+            'shipping_class' => "shipping_class TEXT NOT NULL DEFAULT ''",
+        ],
+    ];
+    foreach ($extra as $table => $cols) {
+        foreach ($cols as $definition) {
+            $name = strtok($definition, ' ');
+            garden_add_column($pdo, $table, $name, $definition);
+        }
+    }
+    $pdo->exec(<<<'SQL'
+CREATE TABLE IF NOT EXISTS users (
+  id INTEGER PRIMARY KEY,
+  legacy_id INTEGER,
+  username TEXT NOT NULL,
+  password_hash TEXT NOT NULL,
+  role TEXT NOT NULL,
+  vendor_id INTEGER
+);
+CREATE TABLE IF NOT EXISTS plant_master (
+  plant_id INTEGER PRIMARY KEY,
+  legacy_id INTEGER,
+  name TEXT NOT NULL,
+  aliases TEXT NOT NULL DEFAULT '',
+  english_name TEXT NOT NULL DEFAULT '',
+  scientific_name TEXT NOT NULL DEFAULT '',
+  category TEXT NOT NULL,
+  subcategory TEXT NOT NULL DEFAULT '',
+  sunlight TEXT NOT NULL DEFAULT '',
+  watering TEXT NOT NULL DEFAULT '',
+  environment TEXT NOT NULL DEFAULT '',
+  care TEXT NOT NULL DEFAULT '',
+  mature_size TEXT NOT NULL DEFAULT '',
+  flowering INTEGER,
+  flower_color TEXT NOT NULL DEFAULT '',
+  flower_season TEXT NOT NULL DEFAULT '',
+  pot_suitable INTEGER,
+  garden_suitable INTEGER,
+  shipping_class TEXT NOT NULL,
+  slug TEXT NOT NULL,
+  tags TEXT NOT NULL DEFAULT '',
+  reference_image TEXT NOT NULL DEFAULT '',
+  data_status TEXT NOT NULL DEFAULT '',
+  popularity_rank INTEGER NOT NULL DEFAULT 0
+);
+CREATE TABLE IF NOT EXISTS rose_reference (
+  id INTEGER PRIMARY KEY,
+  legacy_id INTEGER,
+  variety_id INTEGER NOT NULL,
+  shop_name TEXT NOT NULL,
+  page_url TEXT NOT NULL DEFAULT '',
+  image_url TEXT NOT NULL DEFAULT '',
+  local_file TEXT NOT NULL DEFAULT '',
+  price_note TEXT NOT NULL DEFAULT ''
+);
+CREATE TABLE IF NOT EXISTS media_asset (
+  name TEXT PRIMARY KEY,
+  legacy_id TEXT,
+  vendor_id INTEGER NOT NULL,
+  created_at TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS parent_order (
+  id INTEGER PRIMARY KEY,
+  legacy_id INTEGER,
+  number TEXT NOT NULL,
+  access_hash TEXT NOT NULL,
+  request_key TEXT NOT NULL,
+  recipient TEXT NOT NULL,
+  phone TEXT NOT NULL,
+  address TEXT NOT NULL,
+  store_chain TEXT NOT NULL DEFAULT '',
+  store_id TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS shipment (
+  id INTEGER PRIMARY KEY,
+  legacy_id INTEGER,
+  vendor_order_id INTEGER NOT NULL,
+  carrier TEXT NOT NULL,
+  tracking_number TEXT NOT NULL,
+  mode TEXT NOT NULL,
+  status TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  delivered_at TEXT
+);
+SQL);
 }
 
 function garden_add_column(PDO $pdo, string $table, string $column, string $definition): void
@@ -760,8 +926,9 @@ JOIN vendors v ON v.id = p.vendor_id
 LEFT JOIN products op ON op.id = p.origin_product_id
 LEFT JOIN vendors ov ON ov.id = op.vendor_id
 LEFT JOIN rose_offers ro ON ro.id = p.rose_offer_id
-LEFT JOIN rose_varieties rv ON rv.id = ro.variety_id
+LEFT JOIN rose_varieties rv ON rv.id = ro.variety_id OR (ro.id IS NULL AND rv.legacy_id = p.rose_legacy_id)
 WHERE p.status IN ('上架', '新苗預購') AND p.stock_gate = 'released' AND p.stock > 0
+  AND COALESCE(v.enabled, 1) = 1 AND COALESCE(p.hidden, 0) = 0
 SQL;
     $args = [];
     if (($filters['class'] ?? '') !== '') {
@@ -802,7 +969,8 @@ function product_by_id(int $id): ?array
 SELECT p.id, p.vendor_id, p.sku, p.name, p.description, p.price_twd, p.stock, p.status,
        p.category_code, p.listing_kind, p.rose_offer_id, p.stock_gate, p.vendor_edited,
        p.photo, p.specs_json, p.ship_month, p.created_at, p.consign_open, p.origin_product_id,
-       v.name AS vendor_name, ov.name AS origin_vendor_name,
+       p.rose_legacy_id, p.hidden, p.legacy_status,
+       v.name AS vendor_name, v.enabled AS vendor_enabled, ov.name AS origin_vendor_name,
        ro.seedling AS offer_seedling, ro.variety_id, ro.platform_stock, ro.offer_state, ro.photo AS offer_photo,
        rv.name_zh, rv.name_orig, rv.aliases, rv.reg_name, rv.class_main, rv.class_intl, rv.ogr_class,
        rv.series, rv.breeder, rv.breeder_country, rv.year, rv.color_group, rv.color_desc, rv.fragrance,
@@ -815,7 +983,7 @@ JOIN vendors v ON v.id = p.vendor_id
 LEFT JOIN products op ON op.id = p.origin_product_id
 LEFT JOIN vendors ov ON ov.id = op.vendor_id
 LEFT JOIN rose_offers ro ON ro.id = p.rose_offer_id
-LEFT JOIN rose_varieties rv ON rv.id = ro.variety_id
+LEFT JOIN rose_varieties rv ON rv.id = ro.variety_id OR (ro.id IS NULL AND rv.legacy_id = p.rose_legacy_id)
 WHERE p.id = ?
 SQL);
     $stmt->execute([$id]);
@@ -1053,7 +1221,7 @@ function featured_roses(int $limit = 8): array
 
 function vendor_by_name(string $name): ?array
 {
-    $stmt = db()->prepare('SELECT * FROM vendors WHERE name = ?');
+    $stmt = db()->prepare('SELECT * FROM vendors WHERE name = ? AND COALESCE(enabled, 1) = 1');
     $stmt->execute([$name]);
     $row = $stmt->fetch();
     return $row ?: null;

@@ -117,7 +117,7 @@ if ($path === '/roses') {
 
 if (preg_match('#^/product/(\d+)$#', $path, $m)) {
     $product = product_by_id((int) $m[1]);
-    $publicStatus = is_array($product) && in_array($product['status'], ['上架', '新苗預購'], true);
+    $publicStatus = is_array($product) && in_array($product['status'], ['上架', '新苗預購'], true) && (int) ($product['vendor_enabled'] ?? 1) === 1 && (int) ($product['hidden'] ?? 0) === 0;
     if (!$product || (!$publicStatus && ($current = current_user()) && ($current['role'] ?? '') !== 'admin' && (int) ($current['vendor_id'] ?? 0) !== (int) $product['vendor_id'])) {
         if (!$product || !$publicStatus) {
             http_response_code(404);
@@ -404,13 +404,16 @@ if ($path === '/vendor/pick' && $method === 'POST') {
 }
 if ($path === '/vendor/products' && $method === 'GET') {
     $u = require_vendor();
+    $count = db()->prepare('SELECT COUNT(*) FROM products WHERE vendor_id = ?');
+    $count->execute([(int) $u['vendor_id']]);
+    $total = (int) $count->fetchColumn();
     $stmt = db()->prepare('SELECT * FROM products WHERE vendor_id = ? ORDER BY id DESC LIMIT 40');
     $stmt->execute([(int) $u['vendor_id']]);
     $products = $stmt->fetchAll();
     foreach ($products as &$p) {
         $p['excluded'] = is_excluded((int) $u['vendor_id'], $p);
     }
-    render('vendor_products', ['title' => '我的商品', 'products' => $products]);
+    render('vendor_products', ['title' => '我的商品', 'products' => $products, 'total' => $total]);
     exit;
 }
 if ($path === '/vendor/products' && $method === 'POST') {

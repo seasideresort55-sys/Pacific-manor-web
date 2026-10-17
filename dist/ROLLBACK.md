@@ -25,6 +25,8 @@ cp /home/irihvsuu/garden_private/garden.sqlite.bak-YYYYmmddHHMMSS \
 
 `--dry-run`，以及欄位還沒對齊時的 `--apply`，都不會產生備份，也不會改檔。那種情況不需要回復。
 
+對應齊之後的第二次 `--apply` 不會再插一筆。若第一次已經成功、只是想確認可重跑，不要用備份蓋回去，否則會回到轉換前。要回到轉換前，才用第一次輸出的那個 `backup` 檔。
+
 ## v14 玫瑰庫遷移
 
 `php migrate/v14.php` 也會先複製當時 `db()` 指到的 sqlite，檔名同樣是 `.bak-YYYYmmddHHMMSS`。它不刪列。若在正式庫上跑過，回復方式與上面相同：用該次備份蓋回。

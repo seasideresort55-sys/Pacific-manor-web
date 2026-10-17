@@ -1,5 +1,5 @@
 <h1>我的商品</h1>
-<p class="lede">自己的商品可以改名稱、說明、售價，也可以開放給其他店代賣。代賣來的商品跟著原店，這裡不能改。從玫瑰庫選來的苗，要等平台放行才會出現在前台。</p>
+<p class="lede">共 <?= (int) ($total ?? count($products)) ?> 筆。下面列出最新 40 筆。自己的商品可以改名稱、說明、售價，也可以開放給其他店代賣。代賣來的商品跟著原店，這裡不能改。從玫瑰庫選來的苗，要等平台放行才會出現在前台。</p>
 <?php foreach ($products as $p): ?>
   <?php $mirror = !empty($p['origin_product_id']); ?>
   <?php if ($mirror): ?>

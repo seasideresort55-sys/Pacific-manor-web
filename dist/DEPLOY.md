@@ -7,7 +7,8 @@
 ## 網址
 
 - 全站前台：https://seasideresort.com.tw/garden/
-- 太平洋莊園單店：https://seasideresort.com.tw/garden/store/太平洋莊園
+- 檢視庫單店：https://seasideresort.com.tw/garden/store/太平洋莊園
+- 轉換後的 live 店名是「東海岸太平洋莊園」：https://seasideresort.com.tw/garden/store/東海岸太平洋莊園
 - 廠商後台：https://seasideresort.com.tw/garden/vendor
 
 金流固定是 MOCK。程式會忽略設定檔裡的其他金流。
@@ -68,16 +69,16 @@ cpapi2 --user=irihvsuu Fileman mkdir \
 
 ## 先探查 live v13，再轉換
 
-`migrate/v13_map.php` 現在是空的。對不到的欄位會列出來並停下，不會猜。
+`migrate/v13_map.php` 已依這次的去識別複本寫齊。那份複本 dry-run 是 `unmapped=0`。`--apply` 跑過一次，再跑一次是 `copied 0`，店家、商品、登入筆數不變。
 
-在主機上先跑 dry-run，把整段輸出留起來。這一步只讀，不備份、不改檔：
+正式庫若和這份複本的欄位不同，dry-run 仍會把對不到的欄位印出來並停下，不會猜。先跑這一步，它只讀，不備份、不改檔：
 
 ```bash
 cd /home/irihvsuu/public_html/garden
 php migrate/v13_convert.php --dry-run --db=/home/irihvsuu/garden_private/garden.sqlite
 ```
 
-輸出有每一張表、每一個欄位，以及 `UNMAPPED 表.欄`。把這份結果對完、寫進 `v13_map.php` 之後，才跑：
+看到 `DRY-RUN MAP COMPLETE` 才跑：
 
 ```bash
 php migrate/v13_convert.php --apply --db=/home/irihvsuu/garden_private/garden.sqlite
@@ -86,10 +87,14 @@ php migrate/v13_convert.php --apply --db=/home/irihvsuu/garden_private/garden.sq
 `--apply` 在還有未對應欄位時，會先停下，不備份、不改檔。對應齊了才會：
 
 1. 複製 `garden.sqlite.bak-YYYYmmddHHMMSS` 在原檔旁邊。
-2. 把對應表改名成 `legacy_*`。
-3. 依 `legacy_id` 抄進 v14 表。已存在的 `legacy_id` 略過，所以可以重跑。
+2. 把 v13 表改名成 `legacy_*`。
+3. 依 `legacy_id` 抄進 v14 表。已有的 `legacy_id` 改既有列、不插第二筆，所以可以重跑。
 4. 轉換裡沒有 DELETE。
 5. 只有店名剛好是「太平洋莊園」時，才把運費設成 200、滿 2000 免運。「東海岸太平洋莊園」不會被這一步改掉。
+6. `is_demo = 1` 的店設 `enabled = 0`，前台不列出。列還在。
+7. 商品 `draft` 變成「草稿」。名稱或說明含「新苗預購」的 `sale` 變成「新苗預購」。其餘 `sale` 才變成「上架」。這份複本的 47 筆 `sale` 全部含「新苗預購」，沒有一筆被改成「上架」。
+
+價格、`fees`、`fee_tiers` 整數原樣搬，沒有除以 100，也沒有挑一家貨運寫進 `shipping_fee_twd`。下面「還沒有代填的欄位」要先確認再改正式庫的運費。
 
 ## 河岸苗園、山風花圃
 
@@ -110,3 +115,16 @@ php -S 127.0.0.1:8081 garden/index.php
 ```
 
 打開 http://127.0.0.1:8081/garden/ 。這份檢視庫的登入雜湊已換成隨機值，密碼沒有留下。
+
+## 還沒有代填的欄位
+
+這些沒有寫死。正式庫轉換前請確認：
+
+- 金額單位。商品售價、`fees`、`fee_tiers` 都是 100 的倍數（例如 HCT 18000、一筆預購 36000）。沒有除以 100。結帳用的單一運費 `shipping_fee_twd` 留空，因為來源是三組貨運（HCT、KERRY_TJ、CVS），沒有指定用哪一組。`free_shipping_min` 來源是 0，已原樣寫進 `free_shipping_min_twd`。
+- 照片檔。`products.photos` 是雜湊檔名的 webp。這包沒有那些檔，商品 `photo` 留空，頁面顯示圖示。
+- `rose_variety.brand` 留在 `brand`，沒有抄進育種者。
+- `audit_log`、`login_attempts`、`notification_log`、`schema_migrations` 只改名 `legacy_*`，沒有做前台。
+- 預購說明寫「約 3 個月」，沒有把它填成預計出貨月份。畫面上是「預計出貨 待補」。
+- `payment_days`：店 1 是 1，其餘是 3。3 是欄位預設，已照存檔值抄入，沒有當成未填。
+- 四季有花玫瑰園的 `shop_status` 是 hidden。只把 `is_demo = 1` 的三家（0 商品）停用。這家 41 筆是草稿，前台目前看不到，店本身仍是啟用。
+- 訂單四張表是 0 筆，欄位有對上。`order_lines` 另有原店、代賣店、分成等必填欄，這次沒有列可寫。以後若有訂單，要先補這幾欄的對應，不能猜分成。

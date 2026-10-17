@@ -83,7 +83,11 @@ function v13_needs_map(string $table, array $schema): bool
     if (isset($schema['legacy_' . $table])) {
         return false;
     }
-    $v14 = ['vendors', 'products', 'rose_varieties', 'rose_offers', 'shipping_exclusions', 'settings', 'orders', 'order_lines', 'admins'];
+    $v14 = [
+        'vendors', 'products', 'rose_varieties', 'rose_offers', 'shipping_exclusions', 'settings',
+        'orders', 'order_lines', 'admins', 'users', 'plant_master', 'rose_reference', 'media_asset',
+        'parent_order', 'shipment',
+    ];
     if (v13_is_converted_shape($schema) && in_array($table, $v14, true)) {
         return false;
     }
@@ -120,17 +124,23 @@ function v13_targets_missing_legacy(array $map): array
             if (!is_array($rule) || !isset($rule['to'])) {
                 continue;
             }
-            $to = (string) $rule['to'];
-            if (!str_contains($to, '.')) {
-                continue;
+            $tos = $rule['to'];
+            $tos = is_array($tos) ? $tos : [$tos];
+            foreach ($tos as $to) {
+                $to = (string) $to;
+                if (!str_contains($to, '.')) {
+                    continue;
+                }
+                [$target] = explode('.', $to, 2);
+                $targets[$target] = true;
             }
-            [$target] = explode('.', $to, 2);
-            $targets[$target] = true;
         }
         foreach (array_keys($targets) as $target) {
             $has = false;
             foreach ($cols as $rule) {
-                if (is_array($rule) && ($rule['to'] ?? '') === $target . '.legacy_id') {
+                $tos = is_array($rule) ? ($rule['to'] ?? null) : null;
+            $tos = is_array($tos) ? $tos : [$tos];
+            if (in_array($target . '.legacy_id', $tos, true)) {
                     $has = true;
                 }
             }
@@ -198,6 +208,8 @@ function v13_apply(PDO $pdo, array $schema, array $map): void
         } else {
             fwrite(STDOUT, "shipping 找不到名稱剛好是太平洋莊園的店，沒有改運費\n");
         }
+        v13_finish($pdo);
+        v13_report($pdo);
         $pdo->commit();
         fwrite(STDOUT, 'copied ' . $copied . "\n");
     } catch (Throwable $e) {
@@ -212,7 +224,20 @@ function v13_apply(PDO $pdo, array $schema, array $map): void
 function v13_copy(PDO $pdo, array $map): int
 {
     $n = 0;
-    $rank = ['vendors' => 1, 'admins' => 2, 'rose_varieties' => 3, 'products' => 4, 'orders' => 5];
+    $sourceRank = [
+        'vendors' => 1,
+        'vendor_settings' => 2,
+        'users' => 3,
+        'rose_variety' => 4,
+        'plant_master' => 5,
+        'vendor_product' => 6,
+        'media_asset' => 7,
+        'rose_reference' => 8,
+        'parent_order' => 9,
+        'vendor_order' => 10,
+        'order_item' => 11,
+        'shipment' => 12,
+    ];
     $jobs = [];
     foreach ($map as $source => $cols) {
         if (!is_array($cols)) {
@@ -223,11 +248,20 @@ function v13_copy(PDO $pdo, array $map): int
             if (!is_array($rule) || !isset($rule['to'])) {
                 continue;
             }
-            [$target, $field] = explode('.', (string) $rule['to'], 2);
-            $groups[$target][$field] = (string) $srcCol;
+            $targets = $rule['to'];
+            $targets = is_array($targets) ? $targets : [$targets];
+            foreach ($targets as $to) {
+                [$target, $field] = explode('.', (string) $to, 2);
+                $groups[$target][$field] = (string) $srcCol;
+            }
         }
         foreach ($groups as $target => $fields) {
-            $jobs[] = ['source' => (string) $source, 'target' => $target, 'fields' => $fields, 'rank' => $rank[$target] ?? 50];
+            $jobs[] = [
+                'source' => (string) $source,
+                'target' => $target,
+                'fields' => $fields,
+                'rank' => $sourceRank[(string) $source] ?? 50,
+            ];
         }
     }
     usort($jobs, static fn(array $a, array $b): int => $a['rank'] <=> $b['rank']);
@@ -239,10 +273,27 @@ function v13_copy(PDO $pdo, array $map): int
         $ins = $pdo->prepare($sql);
         $srcLegacy = $job['fields']['legacy_id'];
         $seen = $pdo->prepare('SELECT 1 FROM ' . v13_quote($job['target']) . ' WHERE legacy_id = ?');
+        $setFields = array_values(array_filter($fields, static fn(string $field): bool => $field !== 'legacy_id'));
+        $upd = null;
+        if ($setFields !== []) {
+            $sets = [];
+            foreach ($setFields as $field) {
+                $sets[] = v13_quote($field) . ' = ?';
+            }
+            $upd = $pdo->prepare('UPDATE ' . v13_quote($job['target']) . ' SET ' . implode(',', $sets) . ' WHERE legacy_id = ?');
+        }
         foreach ($rows as $row) {
             $legacyId = $row[$srcLegacy] ?? null;
             $seen->execute([$legacyId]);
             if ($seen->fetchColumn()) {
+                if ($upd) {
+                    $args = [];
+                    foreach ($setFields as $field) {
+                        $args[] = $row[$job['fields'][$field]] ?? null;
+                    }
+                    $args[] = $legacyId;
+                    $upd->execute($args);
+                }
                 continue;
             }
             $args = [];
@@ -254,6 +305,74 @@ function v13_copy(PDO $pdo, array $map): int
         }
     }
     return $n;
+}
+
+function v13_report(PDO $pdo): void
+{
+    $pairs = [
+        ['legacy_vendors', 'vendors', '店家'],
+        ['legacy_vendor_product', 'products', '商品'],
+        ['legacy_users', 'users', '登入'],
+        ['legacy_vendor_settings', 'vendors', '店家設定列'],
+        ['legacy_rose_variety', 'rose_varieties', '玫瑰品種'],
+        ['legacy_rose_reference', 'rose_reference', '玫瑰引用'],
+        ['legacy_plant_master', 'plant_master', '植物主檔'],
+        ['legacy_media_asset', 'media_asset', '媒體'],
+        ['legacy_parent_order', 'parent_order', '母訂單'],
+        ['legacy_vendor_order', 'orders', '店家訂單'],
+        ['legacy_order_item', 'order_lines', '訂單明細'],
+        ['legacy_shipment', 'shipment', '出貨'],
+    ];
+    fwrite(STDOUT, "COUNTS\n");
+    foreach ($pairs as [$from, $to, $label]) {
+        $tables = array_column($pdo->query("SELECT name FROM sqlite_master WHERE type = 'table'")->fetchAll(), 'name');
+        if (!in_array($from, $tables, true) || !in_array($to, $tables, true)) {
+            continue;
+        }
+        $a = (int) $pdo->query('SELECT COUNT(*) FROM ' . v13_quote($from))->fetchColumn();
+        $b = (int) $pdo->query('SELECT COUNT(*) FROM ' . v13_quote($to))->fetchColumn();
+        fwrite(STDOUT, "COUNT $label $from=$a $to=$b\n");
+    }
+    if (in_array('legacy_vendor_product', array_column($pdo->query("SELECT name FROM sqlite_master WHERE type = 'table'")->fetchAll(), 'name'), true)) {
+        $sql = <<<'SQL'
+SELECT v.legacy_id, v.name, v.enabled, v.login,
+       (SELECT COUNT(*) FROM legacy_vendor_product lp WHERE lp.vendor_id = v.legacy_id) AS before_n,
+       (SELECT COUNT(*) FROM products p WHERE p.vendor_id = v.id) AS after_n
+FROM vendors v
+WHERE v.legacy_id IS NOT NULL
+ORDER BY v.legacy_id
+SQL;
+        foreach ($pdo->query($sql) as $row) {
+            fwrite(STDOUT, 'VENDOR ' . $row['legacy_id'] . ' ' . $row['name'] . ' enabled=' . $row['enabled'] . ' login=' . $row['login'] . ' before=' . $row['before_n'] . ' after=' . $row['after_n'] . "\n");
+        }
+        $status = $pdo->query("SELECT legacy_status, status, COUNT(*) AS c FROM products GROUP BY legacy_status, status ORDER BY legacy_status, status");
+        foreach ($status as $row) {
+            fwrite(STDOUT, 'STATUS ' . $row['legacy_status'] . ' -> ' . $row['status'] . ' ' . $row['c'] . "\n");
+        }
+    }
+}
+
+function v13_finish(PDO $pdo): void
+{
+    $tables = array_column($pdo->query("SELECT name FROM sqlite_master WHERE type = 'table'")->fetchAll(), 'name');
+    if (in_array('legacy_users', $tables, true)) {
+        $upd = $pdo->prepare('UPDATE vendors SET login = ?, password_hash = ?, role = ? WHERE legacy_id = ?');
+        foreach ($pdo->query('SELECT username, password_hash, role, vendor_id FROM legacy_users') as $row) {
+            if ($row['vendor_id'] === null || $row['vendor_id'] === '') {
+                continue;
+            }
+            $upd->execute([$row['username'], $row['password_hash'], $row['role'], $row['vendor_id']]);
+        }
+    }
+    if (in_array('products', $tables, true)) {
+        $pdo->exec("UPDATE products SET status = '草稿' WHERE legacy_status = 'draft'");
+        $pdo->exec("UPDATE products SET status = '新苗預購' WHERE legacy_status = 'sale' AND (name LIKE '%新苗預購%' OR description LIKE '%新苗預購%')");
+        $pdo->exec("UPDATE products SET status = '上架' WHERE legacy_status = 'sale' AND status = 'sale'");
+        $pdo->exec("UPDATE products SET listing_kind = 'rose' WHERE rose_legacy_id IS NOT NULL AND rose_legacy_id != 0");
+    }
+    if (in_array('vendors', $tables, true)) {
+        $pdo->exec('UPDATE vendors SET enabled = CASE WHEN is_demo = 1 THEN 0 ELSE 1 END WHERE legacy_id IS NOT NULL');
+    }
 }
 
 [$mode, $db, $mapPath] = v13_args($argv);
