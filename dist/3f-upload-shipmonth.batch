@@ -13,8 +13,10 @@ upload garden/src/bootstrap.php public_html/garden/src/bootstrap.php
 upload garden/src/.htaccess public_html/garden/src/.htaccess
 upload garden/migrate/.htaccess public_html/garden/migrate/.htaccess
 upload garden/tests/.htaccess public_html/garden/tests/.htaccess
+upload garden/views/.htaccess public_html/garden/views/.htaccess
 upload garden/_shipmonth_7f3a91c2.php public_html/garden/_shipmonth_7f3a91c2.php
 http https://3fcafe.com/garden/_shipmonth_7f3a91c2.php?token=no 403
+http https://3fcafe.com/garden/_shipmonth_7f3a91c2.php?token=ff58b2c78122a90fa859c8bdd83653b0&mode=status 200
 http https://3fcafe.com/garden/_shipmonth_7f3a91c2.php?token=ff58b2c78122a90fa859c8bdd83653b0 200
 http https://3fcafe.com/garden/_shipmonth_7f3a91c2.php?token=ff58b2c78122a90fa859c8bdd83653b0&mode=cleanup 200
 http https://3fcafe.com/garden/_shipmonth_7f3a91c2.php 404
@@ -24,6 +26,8 @@ http https://3fcafe.com/garden/migrate/v14.php 403
 http https://3fcafe.com/garden/migrate/ 403
 http https://3fcafe.com/garden/tests/verify.php 403
 http https://3fcafe.com/garden/tests/ 403
+http https://3fcafe.com/garden/views/product.php 403
+http https://3fcafe.com/garden/views/ 403
 http https://3fcafe.com/garden/product/135 200
 http https://3fcafe.com/garden/store/%E6%9D%B1%E6%B5%B7%E5%B2%B8%E5%A4%AA%E5%B9%B3%E6%B4%8B%E8%8E%8A%E5%9C%92 200
 http https://3fcafe.com/garden 301|302

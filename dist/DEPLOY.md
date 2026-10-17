@@ -166,7 +166,7 @@ php -S 127.0.0.1:8081 garden/index.php
 3f-upload --batch dist/3f-upload-shipmonth.batch
 ```
 
-只用 `upload`、`copy`、`http`。先把要蓋掉的舊檔 `copy` 到家目錄的 `garden_backup_20261017_shipmonth/`，再 `upload`。一次性腳本先把 `/home/irihvsuu/garden_private/garden.sqlite` 備份到 `/home/irihvsuu/garden_backup_shipmonth_YYYYmmddHHMMSS/garden.sqlite`（亞洲台北時間），再把東海岸太平洋莊園、狀態是新苗預購的預計出貨改成 `2027年1月`，印出 `preorders` 筆數。`mode=cleanup` 只刪掉腳本自己。檢視庫的月份仍是空的，不拿檢視庫蓋正式庫。
+只用 `upload`、`copy`、`http`。先把要蓋掉的舊檔 `copy` 到家目錄的 `garden_backup_20261017_shipmonth/`，再 `upload`。一次性腳本先把 `/home/irihvsuu/garden_private/garden.sqlite` 備份到 `/home/irihvsuu/garden_backup_shipmonth_YYYYmmddHHMMSS/garden.sqlite`（亞洲台北時間）。每次查詢後 `closeCursor()`，再 `VACUUM INTO`。只把還不是 `2027年1月` 的新苗預購改掉，所以可以再跑。`mode=status` 只印筆數。`mode=cleanup` 只刪掉腳本自己。`views` 與 `src` 一樣拒絕直接讀取。檢視庫的月份仍是空的，不拿檢視庫蓋正式庫。
 
 ## 沿用 v13、沒有另編的項目
 
