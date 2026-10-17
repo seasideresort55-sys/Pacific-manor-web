@@ -158,6 +158,16 @@ php -S 127.0.0.1:8081 garden/index.php
 
 打開 http://127.0.0.1:8081/garden/ 。這份檢視庫的登入雜湊已換成隨機值，密碼沒有留下。
 
+## 2026-10-17 小修
+
+這次沒有在這台執行上傳。步驟檔是 `dist/3f-upload-shipmonth.batch`，在版本庫根目錄執行：
+
+```bash
+3f-upload --batch dist/3f-upload-shipmonth.batch
+```
+
+只用 `upload`、`copy`、`http`。先把要蓋掉的舊檔 `copy` 到家目錄的 `garden_backup_20261017_shipmonth/`，再 `upload`。一次性腳本先把 `/home/irihvsuu/garden_private/garden.sqlite` 備份到 `/home/irihvsuu/garden_backup_shipmonth_YYYYmmddHHMMSS/garden.sqlite`（亞洲台北時間），再把東海岸太平洋莊園、狀態是新苗預購的預計出貨改成 `2027年1月`，印出 `preorders` 筆數。`mode=cleanup` 只刪掉腳本自己。檢視庫的月份仍是空的，不拿檢視庫蓋正式庫。
+
 ## 沿用 v13、沒有另編的項目
 
 - 金額單位跟 v13 前台：資料庫是分，顯示除以 100。大遊行 36000 分 → NT$360。

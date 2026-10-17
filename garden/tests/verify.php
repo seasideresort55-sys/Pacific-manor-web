@@ -97,6 +97,23 @@ $split = consign_split(100);
 check($split['origin'] === 70 && $split['seller'] === 30 && $split['platform'] === 0, '代賣售價 100 拆成原店 70、代賣店 30、平台 0');
 check(public_value('待確認') === '待補' && public_value('未填') === '待補', '待確認與未填在前台看成待補');
 check(preorder_spec() === '3.5 吋扦插苗', '新苗預購規格是 3.5 吋扦插苗');
+check(ship_month_text(['status' => '新苗預購', 'ship_month' => '2027年1月']) === '預計出貨 2027年1月', '預計出貨月份跟著後台');
+check(public_category_label('') === '' && public_category_label('待補') === '' && public_category_label('CL') === '小型藤本', '沒有分類就不顯示待補');
+$blankSpecs = [];
+foreach (['heat_tw', 'class_main', 'ogr_class', 'color_group', 'color_desc', 'fragrance', 'scent_type', 'bloom_habit', 'bloom_months', 'flower_dia_cm', 'flower_size', 'petals', 'doubleness', 'form', 'inflorescence', 'height_cm', 'width_cm', 'breeder', 'breeder_country', 'year', 'reg_name', 'disease_bs', 'disease_pm', 'seedling_types', 'heat_flag'] as $key) {
+    $blankSpecs[$key] = PENDING;
+}
+$blankSpecs['class_main'] = 'CL';
+$blankSpecs['color_group'] = '粉';
+$blankSpecs['heat_flag'] = '1';
+$visibleSpecs = visible_public_specs($blankSpecs, ['seedling' => '']);
+check(($visibleSpecs['株型'] ?? '') === '小型藤本' && ($visibleSpecs['花色'] ?? '') === '粉' && ($visibleSpecs['耐熱'] ?? '') === '標示耐熱（未分級）', '有資料的品種列留著');
+check(!in_array(PENDING, array_values($visibleSpecs), true) && !isset($visibleSpecs['育種者']) && !isset($visibleSpecs['花徑']) && !isset($visibleSpecs['花色描述']), '沒資料的品種列整行不顯示');
+$shownIds = array_map(static fn(array $row): int => (int) $row['id'], vendor_editable_products(1));
+$preIds = array_map(static fn(array $row): int => (int) $row['id'], $pre);
+check(count(array_diff($preIds, $shownIds)) === 0, '後台列得出全部新苗預購');
+$htaccess = (string) file_get_contents(garden_root() . '/.htaccess');
+check(str_contains($htaccess, '^(src|migrate|tests)(/|$)') && str_contains($htaccess, '[F,L]'), 'htaccess 擋住 src、migrate、tests');
 check(!in_array('待確認', filter_values('color_group'), true) && !in_array('未填', filter_values('fragrance'), true), '篩選沒有待確認或未填');
 check(str_starts_with(url('/roses'), '/garden/'), '前台網址在 /garden 底下', url('/roses'));
 $quoteHome = shipping_quote(['shipping_fee_twd' => 200, 'free_shipping_min_twd' => 2000], [['line_total' => 500, 'excluded' => false, 'name' => '甲']]);

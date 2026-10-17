@@ -407,9 +407,7 @@ if ($path === '/vendor/products' && $method === 'GET') {
     $count = db()->prepare('SELECT COUNT(*) FROM products WHERE vendor_id = ?');
     $count->execute([(int) $u['vendor_id']]);
     $total = (int) $count->fetchColumn();
-    $stmt = db()->prepare('SELECT * FROM products WHERE vendor_id = ? ORDER BY id DESC LIMIT 40');
-    $stmt->execute([(int) $u['vendor_id']]);
-    $products = $stmt->fetchAll();
+    $products = vendor_editable_products((int) $u['vendor_id']);
     foreach ($products as &$p) {
         $p['excluded'] = is_excluded((int) $u['vendor_id'], $p);
     }

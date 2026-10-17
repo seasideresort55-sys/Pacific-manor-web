@@ -1,5 +1,5 @@
 <h1>我的商品</h1>
-<p class="lede">共 <?= (int) ($total ?? count($products)) ?> 筆。下面列出最新 40 筆。自己的商品可以改名稱、說明、售價，也可以開放給其他店代賣。代賣來的商品跟著原店，這裡不能改。從玫瑰庫選來的苗，要等平台放行才會出現在前台。</p>
+<p class="lede">共 <?= (int) ($total ?? count($products)) ?> 筆。新苗預購全部列在這裡，預計出貨月份可以改。其餘只列最新 40 筆。自己的商品可以改名稱、說明、售價，也可以開放給其他店代賣。代賣來的商品跟著原店，這裡不能改。從玫瑰庫選來的苗，要等平台放行才會出現在前台。</p>
 <?php foreach ($products as $p): ?>
   <?php $mirror = !empty($p['origin_product_id']); ?>
   <?php if ($mirror): ?>
@@ -24,7 +24,7 @@
       </div>
       <p class="meta">庫存 <?= (int) $p['stock'] ?> 棵</p>
       <?php if (($p['status'] ?? '') === '新苗預購'): ?>
-        <label class="f">預計出貨月份<input type="text" name="ship_month" value="<?= h((string) ($p['ship_month'] ?? '')) ?>" placeholder="還沒有就留空"></label>
+        <label class="f">預計出貨月份<input type="text" name="ship_month" value="<?= h((string) ($p['ship_month'] ?? '')) ?>" placeholder="例如 2027年1月"></label>
       <?php endif; ?>
       <label class="f"><input type="checkbox" name="consign_open" value="1" <?= !empty($p['consign_open']) ? 'checked' : '' ?>> 開放給其他店代賣</label>
       <label class="f"><input type="checkbox" name="exclude_ship" value="1" <?= !empty($p['excluded']) ? 'checked' : '' ?>> 這項不計入免運</label>

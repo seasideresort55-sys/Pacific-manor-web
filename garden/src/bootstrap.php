@@ -205,6 +205,15 @@ function category_name(string $code): string
     return $code === '' ? PENDING : $code;
 }
 
+function public_category_label(string $code): string
+{
+    if (is_blank_value($code)) {
+        return '';
+    }
+    $name = category_name($code);
+    return is_blank_value($name) ? '' : $name;
+}
+
 function category_blurb(string $code): string
 {
     foreach (categories() as $cat) {
@@ -922,6 +931,34 @@ function public_specs(array $variety, array $offer): array
         '黑斑病' => $variety['disease_bs'],
         '白粉病' => $variety['disease_pm'],
     ];
+}
+
+function visible_public_specs(array $variety, array $offer): array
+{
+    $out = [];
+    foreach (public_specs($variety, $offer) as $label => $value) {
+        $value = trim((string) $value);
+        if (is_blank_value($value)) {
+            continue;
+        }
+        $out[$label] = $value;
+    }
+    return $out;
+}
+
+function vendor_editable_products(int $vendorId): array
+{
+    $stmt = db()->prepare(<<<'SQL'
+SELECT * FROM products
+WHERE vendor_id = ?
+  AND (
+    status = '新苗預購'
+    OR id IN (SELECT id FROM products WHERE vendor_id = ? ORDER BY id DESC LIMIT 40)
+  )
+ORDER BY CASE WHEN status = '新苗預購' THEN 0 ELSE 1 END, id DESC
+SQL);
+    $stmt->execute([$vendorId, $vendorId]);
+    return $stmt->fetchAll();
 }
 
 function catalog(array $filters): array

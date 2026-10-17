@@ -1,20 +1,23 @@
 <?php
 $specs = [];
 if (!empty($product['rose_offer_id'])) {
-    $specs = public_specs($product, ['seedling' => $product['offer_seedling'] ?? PENDING]);
+    $specs = visible_public_specs($product, ['seedling' => (string) ($product['offer_seedling'] ?? '')]);
 }
-$photo = $product['photo'] ?? '';
+$photo = trim((string) ($product['photo'] ?? ''));
+$categoryLabel = public_category_label((string) ($product['category_code'] ?? ''));
 ?>
 <div class="layout-2">
-  <div class="card">
-    <div class="photo product-photo" style="<?= $photo ? "background-image:url('" . h(media_url($photo)) . "')" : '' ?>">
-      <?php if (!$photo) { include __DIR__ . '/icon.php'; } ?>
-    </div>
+  <div class="card product-shot">
+    <?php if ($photo !== ''): ?>
+      <img src="<?= h(media_url($photo)) ?>" alt="<?= h(public_product_name($product)) ?>">
+    <?php else: ?>
+      <div class="photo"><?php include __DIR__ . '/icon.php'; ?></div>
+    <?php endif; ?>
   </div>
   <div>
     <h1><?= h(public_product_name($product)) ?></h1>
     <p class="lede"><?= h(product_credit($product)) ?></p>
-    <p class="meta"><?= h(category_name((string) $product['category_code'])) ?></p>
+    <?php if ($categoryLabel !== ''): ?><p class="meta"><?= h($categoryLabel) ?></p><?php endif; ?>
     <?php $blurb = category_blurb((string) ($product['class_main'] ?? '')); ?>
     <?php if ($blurb): ?><p class="note"><?= h($blurb) ?></p><?php endif; ?>
     <?php if (is_preorder($product)): ?>
@@ -50,10 +53,10 @@ $photo = $product['photo'] ?? '';
 <?php if ($specs): ?>
   <h2>品種資料</h2>
   <table class="specs">
-    <?php foreach ($specs as $label => $value): if ($label === '花色描述' && ($value === PENDING || $value === '')) continue; ?>
+    <?php foreach ($specs as $label => $value): ?>
       <tr>
         <th><?= h($label) ?></th>
-        <td><?= h((string) ($value === '' ? PENDING : $value)) ?></td>
+        <td><?= h((string) $value) ?></td>
       </tr>
     <?php endforeach; ?>
   </table>
