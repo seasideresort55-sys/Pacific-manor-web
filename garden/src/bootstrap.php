@@ -928,7 +928,7 @@ LEFT JOIN vendors ov ON ov.id = op.vendor_id
 LEFT JOIN rose_offers ro ON ro.id = p.rose_offer_id
 LEFT JOIN rose_varieties rv ON rv.id = ro.variety_id OR (ro.id IS NULL AND rv.legacy_id = p.rose_legacy_id)
 WHERE p.status IN ('上架', '新苗預購') AND p.stock_gate = 'released' AND p.stock > 0
-  AND COALESCE(v.enabled, 1) = 1 AND COALESCE(p.hidden, 0) = 0
+  AND COALESCE(v.enabled, 1) = 1 AND COALESCE(v.shop_status, '') != 'hidden' AND COALESCE(p.hidden, 0) = 0
 SQL;
     $args = [];
     if (($filters['class'] ?? '') !== '') {
@@ -970,7 +970,7 @@ SELECT p.id, p.vendor_id, p.sku, p.name, p.description, p.price_twd, p.stock, p.
        p.category_code, p.listing_kind, p.rose_offer_id, p.stock_gate, p.vendor_edited,
        p.photo, p.specs_json, p.ship_month, p.created_at, p.consign_open, p.origin_product_id,
        p.rose_legacy_id, p.hidden, p.legacy_status,
-       v.name AS vendor_name, v.enabled AS vendor_enabled, ov.name AS origin_vendor_name,
+       v.name AS vendor_name, v.enabled AS vendor_enabled, v.shop_status AS vendor_shop_status, ov.name AS origin_vendor_name,
        ro.seedling AS offer_seedling, ro.variety_id, ro.platform_stock, ro.offer_state, ro.photo AS offer_photo,
        rv.name_zh, rv.name_orig, rv.aliases, rv.reg_name, rv.class_main, rv.class_intl, rv.ogr_class,
        rv.series, rv.breeder, rv.breeder_country, rv.year, rv.color_group, rv.color_desc, rv.fragrance,
@@ -1022,7 +1022,7 @@ function shared_stock_left(array $product, int $exceptProductId): int
 function cart_add(int $productId, int $qty): ?string
 {
     $p = product_by_id($productId);
-    if (!$p || !in_array($p['status'], ['上架', '新苗預購'], true) || $p['stock_gate'] !== 'released') {
+    if (!$p || !in_array($p['status'], ['上架', '新苗預購'], true) || $p['stock_gate'] !== 'released' || (int) ($p['vendor_enabled'] ?? 1) !== 1 || ($p['vendor_shop_status'] ?? '') === 'hidden' || (int) ($p['hidden'] ?? 0) === 1) {
         return '這株目前不能購買。';
     }
     $qty = max(1, $qty);
@@ -1221,7 +1221,7 @@ function featured_roses(int $limit = 8): array
 
 function vendor_by_name(string $name): ?array
 {
-    $stmt = db()->prepare('SELECT * FROM vendors WHERE name = ? AND COALESCE(enabled, 1) = 1');
+    $stmt = db()->prepare("SELECT * FROM vendors WHERE name = ? AND COALESCE(enabled, 1) = 1 AND COALESCE(shop_status, '') != 'hidden'");
     $stmt->execute([$name]);
     $row = $stmt->fetch();
     return $row ?: null;

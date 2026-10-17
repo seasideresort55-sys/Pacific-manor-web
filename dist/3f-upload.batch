@@ -1,0 +1,8 @@
+# 3f-upload --batch dist/3f-upload.batch
+# 帳號 irihvsuu。zip 與這個步驟檔放在同一層的上一層時，檔名用 dist/garden-v14.1.zip。
+# 不要覆蓋 /home/irihvsuu/garden_private/garden.sqlite。
+# 不要刪 public_html/garden/data（v13 的 webp 在 data/media）。
+# 解壓目的地是 public_html，不要解進已經存在的 garden/ 裡面。
+
+upload dir=public_html file=dist/garden-v14.1.zip overwrite=1
+extract source=public_html/garden-v14.1.zip dest=public_html

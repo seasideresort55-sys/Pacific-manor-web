@@ -4,7 +4,8 @@
 
 - `dist/garden-v14.1.zip`：程式。解開會得到 `garden/`，放到 `public_html/garden`。不含 `tests/`、`bin/setup.php`。
 - `dist/SHA256SUMS`
-- `dist/DEPLOY.md`：cPanel 上傳與解壓、私人設定、v13 對應與還沒有代填的欄位。
+- `dist/DEPLOY.md`：cPanel 上傳與解壓、私人設定、v13 對應。
+- `dist/3f-upload.batch`：`3f-upload --batch dist/3f-upload.batch`
 - `dist/ROLLBACK.md`
 - `dist/VERIFY.md`：不含密碼。
 - `dist/FILL-RATE.md`

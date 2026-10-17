@@ -117,7 +117,7 @@ if ($path === '/roses') {
 
 if (preg_match('#^/product/(\d+)$#', $path, $m)) {
     $product = product_by_id((int) $m[1]);
-    $publicStatus = is_array($product) && in_array($product['status'], ['上架', '新苗預購'], true) && (int) ($product['vendor_enabled'] ?? 1) === 1 && (int) ($product['hidden'] ?? 0) === 0;
+    $publicStatus = is_array($product) && in_array($product['status'], ['上架', '新苗預購'], true) && (int) ($product['vendor_enabled'] ?? 1) === 1 && ($product['vendor_shop_status'] ?? '') !== 'hidden' && (int) ($product['hidden'] ?? 0) === 0;
     if (!$product || (!$publicStatus && ($current = current_user()) && ($current['role'] ?? '') !== 'admin' && (int) ($current['vendor_id'] ?? 0) !== (int) $product['vendor_id'])) {
         if (!$product || !$publicStatus) {
             http_response_code(404);

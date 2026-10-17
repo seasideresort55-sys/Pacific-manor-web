@@ -200,7 +200,7 @@ function v13_apply(PDO $pdo, array $schema, array $map): void
         }
         ensure_schema($pdo);
         $copied = v13_copy($pdo, $map);
-        $named = $pdo->query("SELECT id FROM vendors WHERE name = '太平洋莊園'")->fetch();
+        $named = $pdo->query("SELECT id FROM vendors WHERE name = '太平洋莊園' AND legacy_id IS NULL")->fetch();
         if ($named) {
             $pdo->prepare('UPDATE vendors SET shipping_fee_twd = 200, free_shipping_min_twd = 2000 WHERE id = ?')
                 ->execute([(int) $named['id']]);
@@ -349,7 +349,82 @@ SQL;
         foreach ($status as $row) {
             fwrite(STDOUT, 'STATUS ' . $row['legacy_status'] . ' -> ' . $row['status'] . ' ' . $row['c'] . "\n");
         }
+        $sample = $pdo->query("SELECT price_twd, photo FROM products WHERE legacy_id = 135")->fetch();
+        $vendor = $pdo->query("SELECT shipping_fee_twd, free_shipping_min_twd, pay_days, default_service, shop_status, enabled FROM vendors WHERE legacy_id = 1")->fetch();
+        if ($sample) {
+            fwrite(STDOUT, 'PRICE 大遊行 v13_cents=36000 v13_display=NT$360 converted=' . (int) $sample['price_twd'] . ' photo=' . $sample['photo'] . "\n");
+        }
+        if ($vendor) {
+            fwrite(STDOUT, 'SHIP vendor1 service=' . $vendor['default_service'] . ' shipping_fee_twd=' . $vendor['shipping_fee_twd'] . ' free=' . $vendor['free_shipping_min_twd'] . ' pay_days=' . $vendor['pay_days'] . "\n");
+        }
+        $hidden = $pdo->query("SELECT name, shop_status, enabled FROM vendors WHERE legacy_id = 8")->fetch();
+        if ($hidden) {
+            fwrite(STDOUT, 'SHOP8 ' . $hidden['name'] . ' shop_status=' . $hidden['shop_status'] . ' enabled=' . $hidden['enabled'] . "\n");
+        }
     }
+}
+
+function v13_cents_to_nt(mixed $cents): ?int
+{
+    if ($cents === null || $cents === '') {
+        return null;
+    }
+    return intdiv((int) $cents, 100);
+}
+
+function v13_divide_money_json(string $json): string
+{
+    $data = json_decode($json, true);
+    if (!is_array($data)) {
+        return $json;
+    }
+    $out = [];
+    foreach ($data as $key => $value) {
+        if (is_array($value)) {
+            $inner = [];
+            foreach ($value as $cls => $cents) {
+                $inner[$cls] = v13_cents_to_nt($cents);
+            }
+            $out[$key] = $inner;
+        } elseif (is_numeric($value)) {
+            $out[$key] = v13_cents_to_nt($value);
+        } else {
+            $out[$key] = $value;
+        }
+    }
+    $encoded = json_encode($out, JSON_UNESCAPED_UNICODE);
+    return $encoded === false ? $json : $encoded;
+}
+
+function v13_checkout_fee_cents(string $defaultService, string $feesJson, string $tiersJson): ?int
+{
+    $service = trim($defaultService) !== '' ? trim($defaultService) : 'HCT';
+    $fees = json_decode($feesJson, true);
+    $tiers = json_decode($tiersJson, true);
+    if (!is_array($fees)) {
+        $fees = [];
+    }
+    if (!is_array($tiers)) {
+        $tiers = [];
+    }
+    $tier = $tiers[$service] ?? null;
+    if (is_array($tier) && $tier !== []) {
+        $vals = [];
+        foreach ($tier as $cents) {
+            if ($cents === null || $cents === '') {
+                continue;
+            }
+            $vals[] = (int) $cents;
+        }
+        $uniq = array_values(array_unique($vals));
+        if (count($uniq) === 1) {
+            return $uniq[0];
+        }
+    }
+    if (array_key_exists($service, $fees) && $fees[$service] !== null && $fees[$service] !== '') {
+        return (int) $fees[$service];
+    }
+    return null;
 }
 
 function v13_finish(PDO $pdo): void
@@ -372,6 +447,43 @@ function v13_finish(PDO $pdo): void
     }
     if (in_array('vendors', $tables, true)) {
         $pdo->exec('UPDATE vendors SET enabled = CASE WHEN is_demo = 1 THEN 0 ELSE 1 END WHERE legacy_id IS NOT NULL');
+    }
+    if (in_array('legacy_vendor_product', $tables, true)) {
+        $pdo->exec('UPDATE products SET price_twd = (SELECT price / 100 FROM legacy_vendor_product lp WHERE lp.id = products.legacy_id) WHERE legacy_id IS NOT NULL');
+        $pdo->exec('UPDATE products SET original_price = (SELECT CASE WHEN lp.original_price IS NULL THEN NULL ELSE lp.original_price / 100 END FROM legacy_vendor_product lp WHERE lp.id = products.legacy_id) WHERE legacy_id IS NOT NULL');
+        $pdo->exec('UPDATE products SET cost_price = (SELECT CASE WHEN lp.cost_price IS NULL THEN NULL ELSE lp.cost_price / 100 END FROM legacy_vendor_product lp WHERE lp.id = products.legacy_id) WHERE legacy_id IS NOT NULL');
+        $photo = $pdo->prepare('UPDATE products SET photo = ? WHERE id = ?');
+        $photoRows = $pdo->query("SELECT id, photos FROM products WHERE legacy_id IS NOT NULL")->fetchAll();
+        foreach ($photoRows as $row) {
+            $list = json_decode((string) $row['photos'], true);
+            $name = is_array($list) && isset($list[0]) ? (string) $list[0] : '';
+            if (preg_match('/^[a-f0-9]{32}\\.webp$/', $name) === 1) {
+                $photo->execute(['media.php?name=' . $name, (int) $row['id']]);
+            }
+        }
+    }
+    if (in_array('legacy_vendor_settings', $tables, true)) {
+        $upd = $pdo->prepare('UPDATE vendors SET fees_json = ?, fee_tiers = ?, extra_item_fee = ?, free_shipping_min_twd = ?, shipping_fee_twd = ? WHERE legacy_id = ?');
+        foreach ($pdo->query('SELECT vendor_id, default_service, fees, fee_tiers, extra_item_fee, free_shipping_min FROM legacy_vendor_settings') as $row) {
+            $cents = v13_checkout_fee_cents((string) $row['default_service'], (string) $row['fees'], (string) $row['fee_tiers']);
+            $upd->execute([
+                v13_divide_money_json((string) $row['fees']),
+                v13_divide_money_json((string) $row['fee_tiers']),
+                v13_cents_to_nt($row['extra_item_fee']) ?? 0,
+                v13_cents_to_nt($row['free_shipping_min']) ?? 0,
+                $cents === null ? null : v13_cents_to_nt($cents),
+                $row['vendor_id'],
+            ]);
+        }
+    }
+    if (in_array('legacy_vendor_order', $tables, true)) {
+        $pdo->exec('UPDATE orders SET eligible_twd = (SELECT subtotal / 100 FROM legacy_vendor_order o WHERE o.id = orders.legacy_id), shipping_twd = (SELECT shipping_fee / 100 FROM legacy_vendor_order o WHERE o.id = orders.legacy_id), total_twd = (SELECT total / 100 FROM legacy_vendor_order o WHERE o.id = orders.legacy_id) WHERE legacy_id IS NOT NULL');
+    }
+    if (in_array('legacy_order_item', $tables, true)) {
+        $pdo->exec('UPDATE order_lines SET price_twd = (SELECT price / 100 FROM legacy_order_item i WHERE i.id = order_lines.legacy_id) WHERE legacy_id IS NOT NULL');
+    }
+    if (in_array('legacy_rose_variety', $tables, true)) {
+        $pdo->exec("UPDATE rose_varieties SET breeder = brand WHERE legacy_id IS NOT NULL AND brand != '' AND brand NOT IN ('待補', '待確認', '未填') AND (breeder IS NULL OR breeder = '' OR breeder IN ('待補', '待確認', '未填'))");
     }
 }
 

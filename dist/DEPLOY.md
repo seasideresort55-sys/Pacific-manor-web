@@ -93,8 +93,32 @@ php migrate/v13_convert.php --apply --db=/home/irihvsuu/garden_private/garden.sq
 5. 只有店名剛好是「太平洋莊園」時，才把運費設成 200、滿 2000 免運。「東海岸太平洋莊園」不會被這一步改掉。
 6. `is_demo = 1` 的店設 `enabled = 0`，前台不列出。列還在。
 7. 商品 `draft` 變成「草稿」。名稱或說明含「新苗預購」的 `sale` 變成「新苗預購」。其餘 `sale` 才變成「上架」。這份複本的 47 筆 `sale` 全部含「新苗預購」，沒有一筆被改成「上架」。
+8. 售價、運費、`fees`、`fee_tiers`、免運門檻依 v13 前台除以 100。v13 的 `nt()` 是 `金額 / 100`。大遊行資料庫 36000，前台是 NT$360，轉換後 `price_twd` 是 360。
+9. 結帳運費用 `default_service`。這份複本每家都是 HCT。同一物流的尺寸檔若是同一個數字，就用那個數字；否則用 `fees` 裡該物流的數字。東海岸太平洋莊園 HCT 的 S/M/L 都是 45000 分，所以 `shipping_fee_twd` 是 450。
+10. 育種者是空白或「待補」時，寫入 `brand`。`shop_status=hidden` 的店前台不列出，列還在。`payment_days` 照原值。預計出貨月份留空。`legacy_*` 只留著，不做前台。
 
-價格、`fees`、`fee_tiers` 整數原樣搬，沒有除以 100，也沒有挑一家貨運寫進 `shipping_fee_twd`。下面「還沒有代填的欄位」要先確認再改正式庫的運費。
+## 照片
+
+v13 前台 `assets/app.js` 的實品照片是 `media.php?name=<32位雜湊>.webp`（縮圖加 `thumb=1`），相對 `/garden/`。植物對照圖是 `assets/plants/plant-001.webp` 與 `assets/plants/thumbs/plant-001.webp`。
+
+雜湊檔不在可直接打開的網址。正式站 `garden/data/` 整層拒絕直接讀，由 `media.php` 讀出檔案。轉換把商品 `photo` 設成同一個 `media.php?name=...`。v14 的 `garden/media.php` 依序讀：
+
+1. `garden/data/media/<檔名>.webp`
+2. `garden/data/uploads/<檔名>.webp`
+3. 資料庫同一層的 `media/<檔名>.webp`（正式庫在 `garden_private/garden.sqlite` 時，就是 `garden_private/media/`）
+4. 家目錄下的 `garden_private/media/<檔名>.webp`
+
+解壓不要刪掉既有的 `garden/data`。zip 裡沒有這個目錄，一般解壓不會清掉已經在那裡的 webp。照片檔不用另外搬。
+
+## 用 3f-upload 上傳
+
+步驟檔是 `dist/3f-upload.batch`。在放著 zip 的目錄執行：
+
+```bash
+3f-upload --batch dist/3f-upload.batch
+```
+
+這支只上傳 zip 並解到 `public_html`，得到 `public_html/garden/`。不要解進已經存在的 `garden/` 裡面。不要覆蓋 `garden_private/garden.sqlite`，也不要刪 `garden/data`。
 
 ## 河岸苗園、山風花圃
 
@@ -116,15 +140,12 @@ php -S 127.0.0.1:8081 garden/index.php
 
 打開 http://127.0.0.1:8081/garden/ 。這份檢視庫的登入雜湊已換成隨機值，密碼沒有留下。
 
-## 還沒有代填的欄位
+## 沿用 v13、沒有另編的項目
 
-這些沒有寫死。正式庫轉換前請確認：
-
-- 金額單位。商品售價、`fees`、`fee_tiers` 都是 100 的倍數（例如 HCT 18000、一筆預購 36000）。沒有除以 100。結帳用的單一運費 `shipping_fee_twd` 留空，因為來源是三組貨運（HCT、KERRY_TJ、CVS），沒有指定用哪一組。`free_shipping_min` 來源是 0，已原樣寫進 `free_shipping_min_twd`。
-- 照片檔。`products.photos` 是雜湊檔名的 webp。這包沒有那些檔，商品 `photo` 留空，頁面顯示圖示。
-- `rose_variety.brand` 留在 `brand`，沒有抄進育種者。
-- `audit_log`、`login_attempts`、`notification_log`、`schema_migrations` 只改名 `legacy_*`，沒有做前台。
-- 預購說明寫「約 3 個月」，沒有把它填成預計出貨月份。畫面上是「預計出貨 待補」。
-- `payment_days`：店 1 是 1，其餘是 3。3 是欄位預設，已照存檔值抄入，沒有當成未填。
-- 四季有花玫瑰園的 `shop_status` 是 hidden。只把 `is_demo = 1` 的三家（0 商品）停用。這家 41 筆是草稿，前台目前看不到，店本身仍是啟用。
-- 訂單四張表是 0 筆，欄位有對上。`order_lines` 另有原店、代賣店、分成等必填欄，這次沒有列可寫。以後若有訂單，要先補這幾欄的對應，不能猜分成。
+- 金額單位跟 v13 前台：資料庫是分，顯示除以 100。大遊行 36000 分 → NT$360。
+- 東海岸太平洋莊園預設物流是 HCT。尺寸檔 S/M/L 都是 45000 分，結帳運費 NT$450，寫進 `shipping_fee_twd`。
+- `payment_days` 照原值。店 1 是 1，其餘是 3。
+- 預計出貨月份留空，畫面是「預計出貨 待補」。
+- `legacy_*` 只保留，沒有前台頁。
+- 四季有花玫瑰園保留 `shop_status=hidden`，前台店名對不到，店沒有刪。
+- 訂單四張表是 0 筆。`order_lines` 的原店、代賣店、分成在這次沒有列可寫。以後若有訂單，要先補這幾欄，不能猜分成。
